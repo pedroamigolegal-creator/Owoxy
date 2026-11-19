@@ -2,8 +2,8 @@
 // Chaves do Supabase (Project Settings > API). A "anon key" é pública por design, pode ficar no GitHub.
 // Deixe vazio para usar o modo demo (contas só no navegador).
 export const SUPABASE = {
-  url: '',      // ex.: 'https://abcdxyz.supabase.co'
-  anonKey: '',  // ex.: 'eyJhbGciOi...'
+  url: 'https://jhucuqybjgrecymgqngd.supabase.co',
+  anonKey: 'sb_publishable_NxRVqxatf2NHyquSsD8yqA_m7Pn5EzQ',
 };
 
 export const CONFIG = {
