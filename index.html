@@ -1,1 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Owoxy - Sign Up</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="signup-page">
+    <div class="mosaic" id="mosaic" aria-hidden="true"></div>
+    <div class="signup-top"><a class="btn-white" href="login.html">Log In</a></div>
 
+    <div class="signup-stack">
+      <div class="logo"><i></i>OWOXY</div>
+      <div class="signup-card">
+        <h1>SIGN UP AND START HAVING FUN!</h1>
+        <form id="signup-form" novalidate autocomplete="off">
+          <span class="label">Birthday</span>
+          <div class="bday">
+            <select id="month" name="month" aria-label="Month"></select>
+            <select id="day" name="day" aria-label="Day"></select>
+            <select id="year" name="year" aria-label="Year"></select>
+          </div>
+          <div class="field-error" id="err-birthday"></div>
+
+          <label for="username">Username</label>
+          <input id="username" name="username" placeholder="Don't use your real name" maxlength="20" autocomplete="off">
+          <div class="field-error" id="err-username"></div>
+
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" placeholder="At least 8 characters" autocomplete="new-password">
+          <div class="field-error" id="err-password"></div>
+
+          <span class="label">Gender (optional)</span>
+          <div class="gender">
+            <button type="button" data-g="female" aria-label="Female" data-i="female"></button>
+            <button type="button" data-g="male" aria-label="Male" data-i="male"></button>
+          </div>
+
+          <p class="legal">By clicking Sign Up, you are agreeing to the <a href="#" data-soon>Terms of Use</a> and you are acknowledging the <a href="#" data-soon>Privacy Policy</a>.</p>
+          <button class="submit" id="submit" type="submit">Sign Up</button>
+        </form>
+      </div>
+      <p class="signup-note">Owoxy is an independent project and is not affiliated with Roblox Corporation.</p>
+    </div>
+  </main>
+  <script type="module" src="js/common.js"></script>
+  <script type="module" src="js/signup.js"></script>
+</body>
+</html>

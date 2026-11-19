@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Owoxy - Log In</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="logo" href="index.html"><i></i>OWOXY</a>
+    <nav>
+      <a href="#" data-soon>Discover</a>
+      <a href="#" data-soon>Marketplace</a>
+      <a href="#" data-soon>Create</a>
+      <a href="#" data-soon>Owos</a>
+    </nav>
+    <div class="search"><input placeholder="Search" aria-label="Search" disabled></div>
+    <div class="right"><a class="btn-green" href="index.html">Sign Up</a></div>
+  </header>
+
+  <main class="login-wrap">
+    <section class="login-card">
+      <h1>Login to Owoxy</h1>
+      <form id="login-form" novalidate>
+        <input name="username" placeholder="Username" autocomplete="username" autofocus>
+        <input name="password" type="password" placeholder="Password" autocomplete="current-password">
+        <div class="login-error" id="login-error" role="alert"></div>
+        <button class="outline-btn" id="submit" type="submit">Log In</button>
+      </form>
+      <a class="link" href="#" data-soon>Forgot Password or Username?</a>
+      <hr>
+      <button class="outline-btn" data-soon type="button" style="width:calc(100% - 12px)">Email Me a One-Time Code</button>
+      <button class="outline-btn" data-soon type="button" style="width:calc(100% - 12px)">Use Another Device</button>
+      <p class="small">Don't have an account? <a href="index.html">Sign Up</a></p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <nav>
+      <a href="#" data-soon>About Us</a><a href="#" data-soon>Jobs</a><a href="#" data-soon>Blog</a>
+      <a href="#" data-soon>Parents</a><a href="#" data-soon>Gift Cards</a><a href="#" data-soon>Help</a>
+      <a href="#" data-soon>Terms</a><a href="#" data-soon>Accessibility</a><a href="#" data-soon><b>Privacy</b></a>
+    </nav>
+    <p>©2026 Owoxy. Owoxy is an independent project and is not affiliated with, endorsed by or sponsored by Roblox Corporation.</p>
+  </footer>
+
+  <script type="module" src="js/common.js"></script>
+  <script type="module" src="js/login.js"></script>
+</body>
+</html>
