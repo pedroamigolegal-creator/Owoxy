@@ -18,8 +18,19 @@ python3 -m http.server 8000
 ## Publicar na Vercel
 Site estático, sem build. Importe o repositório na Vercel e deixe "Framework Preset: Other" (sem build command, sem output directory).
 
-## Estado atual: modo demo
-As contas ficam salvas no `localStorage` do navegador (`js/auth.js`). Serve para testar visual e fluxo, **não** para produção: cada pessoa só vê as contas criadas no próprio navegador. O próximo passo é trocar `js/auth.js` por Supabase (mesmas funções) para ter contas reais.
+## Contas: Supabase (ou modo demo)
+`js/auth.js` escolhe sozinho:
+- **Sem chaves** em `js/config.js` → modo demo (contas só no `localStorage` do navegador; serve para testar).
+- **Com chaves** → contas reais no Supabase.
+
+### Ligar o Supabase
+1. Crie um projeto grátis em https://supabase.com.
+2. Em **SQL Editor**, cole e rode o conteúdo de `supabase/schema.sql`.
+3. Em **Authentication → Providers → Email**, **desligue "Confirm email"** (o login é por nome de usuário, usamos um e-mail interno fictício).
+4. Em **Project Settings → API**, copie a **Project URL** e a **anon public key** e cole em `SUPABASE` no `js/config.js`. A anon key é pública por design, pode ir pro GitHub. **Nunca** coloque a `service_role` key no site.
+5. Faça commit/push; a Vercel publica sozinha.
+
+Segurança: senhas ficam só no Supabase Auth; aniversário e saldo são privados; o navegador não consegue alterar saldo (só o servidor, em passos futuros).
 
 ## Configurações
 `js/config.js`: nome da moeda, saldo inicial, idade mínima e modelo de avatar padrão.

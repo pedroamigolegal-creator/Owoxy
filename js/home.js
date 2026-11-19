@@ -3,7 +3,7 @@ import { mountAvatar } from './avatar.js';
 import { formatCompact, toast } from './common.js';
 import { CONFIG } from './config.js';
 
-const user = requireUser();
+const user = await requireUser();
 if (user) {
   document.getElementById('username').textContent = user.username;
   document.getElementById('side-user').textContent = user.username;
@@ -37,7 +37,7 @@ const gear = document.getElementById('gear');
 const menu = document.getElementById('gear-menu');
 gear.addEventListener('click', (e) => { e.stopPropagation(); menu.classList.toggle('open'); });
 document.addEventListener('click', () => menu.classList.remove('open'));
-document.getElementById('logout').addEventListener('click', () => { logOut(); location.href = 'login.html'; });
+document.getElementById('logout').addEventListener('click', async () => { await logOut(); location.href = 'login.html'; });
 
 // Busca (ainda não implementada)
 document.getElementById('search').addEventListener('keydown', (e) => { if (e.key === 'Enter') toast('Search is coming soon!'); });

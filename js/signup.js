@@ -1,6 +1,6 @@
 import { signUp, redirectIfLoggedIn } from './auth.js';
 
-redirectIfLoggedIn();
+await redirectIfLoggedIn();
 
 // Fundo em mosaico (cartões coloridos gerados, sem usar imagens de terceiros)
 const mosaic = document.getElementById('mosaic');

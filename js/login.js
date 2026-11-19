@@ -1,6 +1,6 @@
 import { logIn, redirectIfLoggedIn } from './auth.js';
 
-redirectIfLoggedIn();
+await redirectIfLoggedIn();
 
 const form = document.getElementById('login-form');
 const error = document.getElementById('login-error');
