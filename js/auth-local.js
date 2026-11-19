@@ -86,6 +86,14 @@ export async function logIn(username, password) {
 
 export function logOut() { localStorage.removeItem(SESSION); }
 
+export function saveAvatar(colors) {
+  const users = readUsers();
+  const key = localStorage.getItem(SESSION);
+  if (!users[key]) return;
+  users[key].avatar = { ...users[key].avatar, colors };
+  writeUsers(users);
+}
+
 const publicUser = ({ passwordHash, salt, ...rest }) => rest;
 
 export function currentUser() {

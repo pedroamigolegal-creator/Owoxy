@@ -12,4 +12,6 @@ export const CONFIG = {
   startingBalance: 0,     // saldo inicial de quem cria conta
   minAge: 13,             // idade mínima para criar conta
   defaultAvatar: 'assets/noob/scene.gltf',
+  // cores originais do noob (pele = cabeça e braços)
+  defaultColors: { skin: '#f5cd30', torso: '#0d69ac', legs: '#a4bd47' },
 };

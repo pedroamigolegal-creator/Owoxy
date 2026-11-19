@@ -50,6 +50,11 @@ export async function logIn(username, password) {
 
 export async function logOut() { await sb.auth.signOut(); }
 
+export async function saveAvatar(colors) {
+  const { error } = await sb.rpc('save_avatar', { colors });
+  if (error) throw error;
+}
+
 export async function currentUser() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) return null;
@@ -62,7 +67,8 @@ export async function currentUser() {
     gender: p.gender,
     birthday: p.birthday,
     balance: Number(p.balance),
-    avatar: { model: p.avatar_model },
+    avatar: { model: p.avatar_model, colors: p.avatar_colors || null },
+    verified: Boolean(p.verified),
     friends: [], // amigos entram no próximo passo
     createdAt: p.created_at,
   };

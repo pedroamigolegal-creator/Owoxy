@@ -28,7 +28,10 @@ Site estático, sem build. Importe o repositório na Vercel e deixe "Framework P
 2. Em **SQL Editor**, cole e rode o conteúdo de `supabase/schema.sql`.
 3. Em **Authentication → Providers → Email**, **desligue "Confirm email"** (o login é por nome de usuário, usamos um e-mail interno fictício).
 4. Em **Project Settings → API**, copie a **Project URL** e a **anon public key** e cole em `SUPABASE` no `js/config.js`. A anon key é pública por design, pode ir pro GitHub. **Nunca** coloque a `service_role` key no site.
-5. Faça commit/push; a Vercel publica sozinha.
+5. Rode também `supabase/002_avatar_verified.sql` (cores do avatar e selo de verificado).
+6. Faça commit/push; a Vercel publica sozinha.
+
+Selo de verificado (só você dá, pelo SQL Editor): `update public.profiles set verified = true where lower(username) = 'owoxy';`
 
 Segurança: senhas ficam só no Supabase Auth; aniversário e saldo são privados; o navegador não consegue alterar saldo (só o servidor, em passos futuros).
 

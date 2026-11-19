@@ -24,6 +24,14 @@ export function icon(name) {
   return `<svg class="ico-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[name] || ''}</svg>`;
 }
 
+// Selo de verificado do Owoxy (desenho próprio: estrela azul de 8 pontas com check branco).
+export function verifiedBadge() {
+  return '<svg class="verified" viewBox="0 0 24 24" role="img" aria-label="Verified"><title>Verified</title>'
+    + '<rect x="3.5" y="3.5" width="17" height="17" rx="4" fill="#1a7cff"/>'
+    + '<rect x="3.5" y="3.5" width="17" height="17" rx="4" fill="#1a7cff" transform="rotate(45 12 12)"/>'
+    + '<path d="M7.8 12.4l2.9 2.9 5.6-5.9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
 export function toast(message) {
   let el = document.getElementById('toast');
   if (!el) { el = document.createElement('div'); el.id = 'toast'; document.body.appendChild(el); }

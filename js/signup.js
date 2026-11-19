@@ -2,15 +2,6 @@ import { signUp, redirectIfLoggedIn } from './auth.js';
 
 await redirectIfLoggedIn();
 
-// Fundo em mosaico (cartões coloridos gerados, sem usar imagens de terceiros)
-const mosaic = document.getElementById('mosaic');
-for (let i = 0; i < 60; i++) {
-  const tile = document.createElement('div');
-  const hue = (i * 47 + Math.floor(Math.random() * 40)) % 360;
-  tile.style.background = `linear-gradient(${Math.floor(Math.random() * 360)}deg, hsl(${hue} 70% 55%), hsl(${(hue + 50) % 360} 65% 30%))`;
-  mosaic.appendChild(tile);
-}
-
 // Selects de aniversário
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const fill = (id, label, values) => {

@@ -1,18 +1,17 @@
-import { requireUser, logOut } from './auth.js';
+import { requireUser } from './auth.js';
 import { mountAvatar } from './avatar.js';
-import { formatCompact, toast } from './common.js';
-import { CONFIG } from './config.js';
+import { verifiedBadge } from './common.js';
+import { initShell } from './shell.js';
 
 const user = await requireUser();
 if (user) {
+  initShell(user);
   document.getElementById('username').textContent = user.username;
-  document.getElementById('side-user').textContent = user.username;
-  document.getElementById('balance').textContent = formatCompact(user.balance);
-  document.getElementById('balance-wrap').title = `${user.balance} ${CONFIG.currencyName}`;
+  if (user.verified) document.getElementById('badge').innerHTML = verifiedBadge();
 
   // Foto de perfil = cabeça do noob 3D
   const canvas = document.getElementById('avatar-canvas');
-  mountAvatar(canvas, { view: 'head', modelUrl: user.avatar?.model }).catch((err) => {
+  mountAvatar(canvas, { view: 'head', modelUrl: user.avatar?.model, colors: user.avatar?.colors }).catch((err) => {
     console.error('Não foi possível carregar o avatar 3D:', err);
     const fallback = document.createElement('div');
     fallback.className = 'avatar-fallback';
@@ -31,13 +30,3 @@ if (user) {
       `<div class="friend"><div class="friend-pic">${f.username[0].toUpperCase()}</div><span>${f.username}</span></div>`).join('');
   }
 }
-
-// Menu da engrenagem
-const gear = document.getElementById('gear');
-const menu = document.getElementById('gear-menu');
-gear.addEventListener('click', (e) => { e.stopPropagation(); menu.classList.toggle('open'); });
-document.addEventListener('click', () => menu.classList.remove('open'));
-document.getElementById('logout').addEventListener('click', async () => { await logOut(); location.href = 'login.html'; });
-
-// Busca (ainda não implementada)
-document.getElementById('search').addEventListener('keydown', (e) => { if (e.key === 'Enter') toast('Search is coming soon!'); });

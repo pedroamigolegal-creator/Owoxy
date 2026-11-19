@@ -6,6 +6,7 @@ const impl = usingSupabase ? await import('./auth-supabase.js') : await import('
 
 export const { validateUsername, validatePassword, validateBirthday, signUp, logIn } = impl;
 export const logOut = async () => impl.logOut();
+export const saveAvatar = async (colors) => impl.saveAvatar(colors);
 export const currentUser = async () => impl.currentUser();
 
 export async function requireUser() {
