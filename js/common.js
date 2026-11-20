@@ -1,3 +1,4 @@
+import { CONFIG } from './config.js';
 // Utilidades compartilhadas: ícones, avisos "em breve" e logo.
 const ICONS = {
   home: '<path d="M3 11l9-8 9 8v10h-6v-6H9v6H3z"/>',
@@ -47,11 +48,33 @@ export function formatCompact(n) {
   return String(n);
 }
 
-// Hidrata ícones (<i data-i="home">) e links que ainda não existem (data-soon).
+// Boneco pequeno (SVG) com as cores do avatar: usado em listas (amigos, busca, mensagens).
+export function miniNoob(colors) {
+  const c = { ...CONFIG.defaultColors, ...(colors || {}) };
+  return `<svg class="mini-noob" viewBox="0 0 24 30" aria-hidden="true">
+    <rect x="8" y="1" width="8" height="8" rx="2" fill="${c.skin}"/>
+    <rect x="1.5" y="10.5" width="5" height="10" rx="1.2" fill="${c.skin}"/><rect x="17.5" y="10.5" width="5" height="10" rx="1.2" fill="${c.skin}"/>
+    <rect x="7" y="10.5" width="10" height="10" rx="1.2" fill="${c.torso}"/>
+    <rect x="7" y="21" width="4.8" height="8" rx="1.2" fill="${c.legs}"/><rect x="12.2" y="21" width="4.8" height="8" rx="1.2" fill="${c.legs}"/>
+    <rect x="10" y="3.5" width="1.2" height="1.6" fill="#222"/><rect x="12.8" y="3.5" width="1.2" height="1.6" fill="#222"/>
+  </svg>`;
+}
+
+export const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// Hidrata ícones (<i data-i="home">) e links que ainda não existem (data-soon). Pode ser chamada várias vezes.
 export function hydrate() {
-  document.querySelectorAll('[data-i]').forEach((el) => { el.innerHTML = icon(el.dataset.i); });
-  document.querySelectorAll('[data-soon]').forEach((el) => {
+  document.querySelectorAll('[data-i]:not([data-h])').forEach((el) => { el.dataset.h = '1'; el.innerHTML = icon(el.dataset.i); });
+  document.querySelectorAll('[data-soon]:not([data-s])').forEach((el) => {
+    el.dataset.s = '1';
     el.addEventListener('click', (e) => { e.preventDefault(); toast('Coming soon to Owoxy!'); });
   });
 }
 document.addEventListener('DOMContentLoaded', hydrate);
+
+// Cartão de usuário para listas (amigos, busca, pedidos): boneco colorido + nome + selo.
+export function userTile(u) {
+  return `<a class="friend" href="profile.html?u=${encodeURIComponent(u.username)}">
+    <div class="friend-pic">${miniNoob(u.avatar_colors)}</div>
+    <span class="friend-name">${esc(u.username)}${u.verified ? verifiedBadge() : ''}</span></a>`;
+}

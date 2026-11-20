@@ -76,8 +76,14 @@ export async function mountAvatar(canvas, { view = 'head', modelUrl = CONFIG.def
   const gltf = await new GLTFLoader().loadAsync(modelUrl || CONFIG.defaultAvatar);
   const pivot = new THREE.Group();
   pivot.add(gltf.scene);
-  pivot.rotation.y = FACE_ROTATION_Y;
   scene.add(pivot);
+
+  // O modelo original não está centrado na origem; sem isto ele "orbita" em vez de girar no próprio eixo.
+  pivot.updateMatrixWorld(true);
+  const raw = new THREE.Box3().setFromObject(gltf.scene).getCenter(new THREE.Vector3());
+  gltf.scene.position.x -= raw.x;
+  gltf.scene.position.z -= raw.z;
+  pivot.rotation.y = FACE_ROTATION_Y;
 
   let recolor = null;
   gltf.scene.traverse((o) => {
@@ -106,6 +112,7 @@ export async function mountAvatar(canvas, { view = 'head', modelUrl = CONFIG.def
 
   const render = () => renderer.render(scene, camera);
   let spinning = view === 'full' && spin;
+  let flat = false; // visão "2D": parado, de frente
   if (view === 'full') {
     const loop = () => {
       if (spinning) pivot.rotation.y += 0.01;
@@ -113,13 +120,25 @@ export async function mountAvatar(canvas, { view = 'head', modelUrl = CONFIG.def
       requestAnimationFrame(loop);
     };
     loop();
+
+    // Arrastar com o mouse/dedo gira o boneco (e para o giro automático)
+    let dragX = null;
+    canvas.style.touchAction = 'pan-y';
+    canvas.style.cursor = 'grab';
+    canvas.addEventListener('pointerdown', (e) => { if (flat) return; dragX = e.clientX; spinning = false; canvas.setPointerCapture(e.pointerId); canvas.style.cursor = 'grabbing'; });
+    canvas.addEventListener('pointermove', (e) => { if (dragX === null) return; pivot.rotation.y += (e.clientX - dragX) * 0.012; dragX = e.clientX; });
+    const end = () => { dragX = null; canvas.style.cursor = 'grab'; };
+    canvas.addEventListener('pointerup', end);
+    canvas.addEventListener('pointercancel', end);
   } else {
     render();
   }
 
+  // on = giro automático (visão "3D"); off = parado de frente (visão "2D")
   const setSpin = (on) => {
     spinning = on;
-    if (!on) pivot.rotation.y = FACE_ROTATION_Y; // volta de frente (visão "2D")
+    flat = !on;
+    if (!on) pivot.rotation.y = FACE_ROTATION_Y;
     if (view !== 'full') render();
   };
 

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Owoxy - Profile</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="topbar-slot"></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar-slot"></aside>
+    <main class="main" id="main">
+      <p class="muted" id="loading">Loading...</p>
+      <div id="profile" hidden>
+        <section class="card profile-card">
+          <div class="avatar-circle sm"><canvas id="head" width="120" height="120"></canvas></div>
+          <div class="who">
+            <h1><span id="p-name"></span><span id="p-badge"></span></h1>
+            <p class="stats"><b id="p-friends">0</b> Friends</p>
+          </div>
+          <div class="actions" id="actions"></div>
+        </section>
+
+        <div class="tabs2" id="tabs2">
+          <button class="on" data-tab="about">About</button>
+          <button data-tab="creations">Creations</button>
+        </div>
+
+        <div id="tab-about">
+          <section class="card">
+            <div class="row-between"><h2>About</h2><button class="link-btn" id="edit-about" hidden>Edit</button></div>
+            <p id="about" class="about"></p>
+            <div id="about-edit" hidden>
+              <textarea id="about-text" maxlength="1000" rows="4" placeholder="Tell people about yourself"></textarea>
+              <div class="row-end"><button class="btn-gray" id="about-cancel" type="button">Cancel</button><button class="btn-green" id="about-save" type="button">Save</button></div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Currently Wearing</h2>
+            <div class="wearing">
+              <div class="wear-view"><canvas id="full" width="260" height="320"></canvas><button class="toggle-2d" id="toggle-2d" type="button">2D</button></div>
+              <div class="wear-grid" id="wear-grid"></div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="friends-title"><h2>Friends (<span id="friends-count">0</span>)</h2><a href="friends.html" id="see-all">See All &rsaquo;</a></div>
+            <div class="friends-row" id="friends-row"></div>
+          </section>
+        </div>
+
+        <div id="tab-creations" hidden>
+          <section class="card"><p class="muted">No creations yet. Creating games is coming to Owoxy later.</p></section>
+        </div>
+      </div>
+
+      <dialog id="msg-dialog">
+        <form method="dialog" id="msg-form">
+          <h3 id="msg-title">New message</h3>
+          <input id="msg-subject" maxlength="100" placeholder="Subject (optional)">
+          <textarea id="msg-body" maxlength="1000" rows="5" placeholder="Write your message" required></textarea>
+          <div class="row-end"><button class="btn-gray" value="cancel" formnovalidate>Cancel</button><button class="btn-green" id="msg-send" value="send">Send</button></div>
+        </form>
+      </dialog>
+    </main>
+  </div>
+  <script type="module" src="js/common.js"></script>
+  <script type="module" src="js/profile.js"></script>
+</body>
+</html>

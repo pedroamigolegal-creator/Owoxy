@@ -18,22 +18,17 @@ python3 -m http.server 8000
 ## Publicar na Vercel
 Site estático, sem build. Importe o repositório na Vercel e deixe "Framework Preset: Other" (sem build command, sem output directory).
 
-## Contas: Supabase (ou modo demo)
-`js/auth.js` escolhe sozinho:
-- **Sem chaves** em `js/config.js` → modo demo (contas só no `localStorage` do navegador; serve para testar).
-- **Com chaves** → contas reais no Supabase.
+## Contas e banco de dados: Supabase
+O site usa o Supabase (login, perfis, amizades, mensagens). No **SQL Editor** do Supabase rode, nesta ordem, uma vez cada:
+1. `supabase/schema.sql`
+2. `supabase/002_avatar_verified.sql` (cores do avatar e selo de verificado)
+3. `supabase/003_social.sql` (perfil "About", amizades, busca, mensagens e mensagem de boas-vindas)
 
-### Ligar o Supabase
-1. Crie um projeto grátis em https://supabase.com.
-2. Em **SQL Editor**, cole e rode o conteúdo de `supabase/schema.sql`.
-3. Em **Authentication → Providers → Email**, **desligue "Confirm email"** (o login é por nome de usuário, usamos um e-mail interno fictício).
-4. Em **Project Settings → API**, copie a **Project URL** e a **anon public key** e cole em `SUPABASE` no `js/config.js`. A anon key é pública por design, pode ir pro GitHub. **Nunca** coloque a `service_role` key no site.
-5. Rode também `supabase/002_avatar_verified.sql` (cores do avatar e selo de verificado).
-6. Faça commit/push; a Vercel publica sozinha.
+Também: em **Authentication → Providers → Email**, deixe **"Confirm email" desligado** (o login é por nome de usuário; usamos um e-mail interno fictício). As chaves ficam em `js/config.js` (a chave "publishable" é pública por design; **nunca** coloque a `service_role` no site).
 
 Selo de verificado (só você dá, pelo SQL Editor): `update public.profiles set verified = true where lower(username) = 'owoxy';`
 
-Segurança: senhas ficam só no Supabase Auth; aniversário e saldo são privados; o navegador não consegue alterar saldo (só o servidor, em passos futuros).
+Segurança: senhas ficam só no Supabase Auth; aniversário e saldo são privados; o navegador não escreve direto nas tabelas, só chama funções validadas no servidor.
 
 ## Configurações
 `js/config.js`: nome da moeda, saldo inicial, idade mínima e modelo de avatar padrão.

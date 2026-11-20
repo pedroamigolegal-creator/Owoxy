@@ -5,7 +5,7 @@ import { CONFIG } from './config.js';
 import { initShell } from './shell.js';
 
 const user = await requireUser();
-if (user) initShell(user);
+if (user) initShell(user, 'avatar');
 
 // Cores disponíveis (nomes próprios do Owoxy)
 const PALETTE = [

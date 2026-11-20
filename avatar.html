@@ -15,47 +15,10 @@
   </script>
 </head>
 <body>
-  <header class="topbar">
-    <a class="logo" href="home.html"><i></i>OWOXY</a>
-    <nav>
-      <a href="home.html">Home</a>
-      <a href="#" data-soon>Games</a>
-      <a href="#" data-soon>Avatar Shop</a>
-      <a href="#" data-soon>Create</a>
-    </nav>
-    <div class="search"><input id="search" placeholder="Search" aria-label="Search"></div>
-    <div class="right">
-      <button class="icon-btn" data-soon data-i="list" aria-label="Menu"></button>
-      <button class="icon-btn" data-soon data-i="chat" aria-label="Messages"></button>
-      <span class="balance" id="balance-wrap"><span data-i="coin"></span><span id="balance">0</span></span>
-      <div class="gear-wrap">
-        <button class="icon-btn" id="gear" data-i="gear" aria-label="Settings"></button>
-        <div class="gear-menu" id="gear-menu">
-          <button data-soon>Settings</button>
-          <button id="logout">Log Out</button>
-        </div>
-      </div>
-    </div>
-  </header>
-
+  <div id="topbar-slot"></div>
   <div class="layout">
-    <aside class="sidebar">
-      <div class="user" id="side-user"></div>
-      <a href="home.html"><span data-i="home"></span>Home</a>
-      <a href="#" data-soon><span data-i="profile"></span>Profile</a>
-      <a class="active" href="avatar.html"><span data-i="avatar"></span>Avatar</a>
-      <a href="#" data-soon><span data-i="inventory"></span>Inventory</a>
-      <a href="#" data-soon><span data-i="groups"></span>Groups</a>
-      <a href="#" data-soon><span data-i="premium"></span>Premium</a>
-      <a href="#" data-soon><span data-i="money"></span>Money</a>
-      <a href="#" data-soon><span data-i="feed"></span>My Feed</a>
-      <a href="#" data-soon><span data-i="blog"></span>Blog</a>
-      <a href="#" data-soon><span data-i="store"></span>Official Store</a>
-      <a href="#" data-soon><span data-i="gift"></span>Gift Cards</a>
-      <div class="section-title">Events</div>
-    </aside>
-
-    <main class="main wide">
+    <aside class="sidebar" id="sidebar-slot"></aside>
+    <main class="main wide" id="main">
       <div class="editor-head">
         <h1>Avatar Editor</h1>
         <div class="get-more"><span>Explore the catalog to find more clothes!</span><button class="btn-white" id="get-more" type="button">Get More</button></div>
@@ -82,7 +45,6 @@
       </div>
     </main>
   </div>
-
   <script type="module" src="js/common.js"></script>
   <script type="module" src="js/avatar-page.js"></script>
 </body>

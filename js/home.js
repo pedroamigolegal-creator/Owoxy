@@ -1,11 +1,12 @@
 import { requireUser } from './auth.js';
 import { mountAvatar } from './avatar.js';
-import { verifiedBadge } from './common.js';
+import { verifiedBadge, userTile } from './common.js';
 import { initShell } from './shell.js';
+import { listFriends } from './social.js';
 
 const user = await requireUser();
 if (user) {
-  initShell(user);
+  initShell(user, 'home');
   document.getElementById('username').textContent = user.username;
   if (user.verified) document.getElementById('badge').innerHTML = verifiedBadge();
 
@@ -20,13 +21,15 @@ if (user) {
   });
 
   // Amigos
-  const friends = user.friends || [];
-  document.getElementById('friends-count').textContent = friends.length;
   const row = document.getElementById('friends-row');
-  if (!friends.length) {
-    row.innerHTML = '<p class="muted pad">No friends yet. Search for people to add them!</p>';
-  } else {
-    row.innerHTML = friends.map((f) =>
-      `<div class="friend"><div class="friend-pic">${f.username[0].toUpperCase()}</div><span>${f.username}</span></div>`).join('');
+  try {
+    const friends = await listFriends(user.id);
+    document.getElementById('friends-count').textContent = friends.length;
+    row.innerHTML = friends.length
+      ? friends.map(userTile).join('')
+      : '<p class="muted pad">No friends yet. Use the search bar to find people and add them!</p>';
+  } catch (err) {
+    console.error(err);
+    row.innerHTML = '<p class="muted pad">Could not load friends. Did you run supabase/003_social.sql?</p>';
   }
 }

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Owoxy - Friends</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="topbar-slot"></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar-slot"></aside>
+    <main class="main" id="main">
+      <h1 class="page-title" id="title">Friends</h1>
+      <section id="requests-wrap" hidden>
+        <h2 class="sub-title">Friend Requests (<span id="req-count">0</span>)</h2>
+        <div class="results" id="requests"></div>
+      </section>
+      <h2 class="sub-title">Friends (<span id="f-count">0</span>)</h2>
+      <div class="results" id="friends"></div>
+    </main>
+  </div>
+  <script type="module" src="js/common.js"></script>
+  <script type="module" src="js/friends.js"></script>
+</body>
+</html>
