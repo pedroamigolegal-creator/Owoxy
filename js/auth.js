@@ -67,6 +67,8 @@ export async function currentUser() {
     avatar: { model: p.avatar_model, colors: p.avatar_colors || null },
     verified: Boolean(p.verified),
     isAdmin: Boolean(p.is_admin),
+    premiumUntil: p.premium_until || null,
+    premium: Boolean(p.premium_until && new Date(p.premium_until) > new Date()),
     createdAt: p.created_at,
   };
 }

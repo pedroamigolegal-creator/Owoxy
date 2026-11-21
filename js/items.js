@@ -6,10 +6,15 @@ const first = (d) => (Array.isArray(d) ? d[0] || null : d);
 
 export const publicUrl = (path) => `${SUPABASE.url}/storage/v1/object/public/items/${path}`;
 
-export const catalog = (kind = null, q = '', limit = 48, offset = 0) => rpc('catalog_list', { p_kind: kind, p_q: q, p_limit: limit, p_offset: offset });
+export const catalog = (kind = null, q = '', limit = 48, offset = 0, showOffsale = false) => rpc('catalog_list', { p_kind: kind, p_q: q, p_limit: limit, p_offset: offset, p_show_offsale: showOffsale });
 export const getItem = async (id) => first(await rpc('get_item', { p_id: id }));
-export const createItem = ({ kind, accessoryType = null, name, price = null, imagePath = null, meshPath = null, triangles = null }) =>
-  rpc('create_item', { p_kind: kind, p_accessory_type: accessoryType, p_name: name, p_price: price, p_image_path: imagePath, p_mesh_path: meshPath, p_triangles: triangles });
+export const createItem = ({ kind, accessoryType = null, name, price = null, imagePath = null, meshPath = null, triangles = null,
+  offset = [0, 0, 0], limited = null, stock = null, until = null }) =>
+  rpc('create_item', {
+    p_kind: kind, p_accessory_type: accessoryType, p_name: name, p_price: price, p_image_path: imagePath, p_mesh_path: meshPath,
+    p_triangles: triangles, p_off_x: offset[0], p_off_y: offset[1], p_off_z: offset[2],
+    p_limited: limited, p_stock: stock, p_until: until,   // limited / stock / until: só a conta Owoxy
+  });
 export const setItemPrice = (id, price) => rpc('set_item_price', { p_id: id, p_price: price });
 export const buyItem = (id) => rpc('buy_item', { p_id: id });
 export const myInventory = (kind = null) => rpc('my_inventory', { p_kind: kind });
@@ -18,6 +23,32 @@ export const equipItem = (id) => rpc('equip_item', { p_id: id });
 export const unequipItem = (id) => rpc('unequip_item', { p_id: id });
 export const deleteItem = (id) => rpc('delete_item', { p_id: id });
 export const claimDaily = () => rpc('claim_daily');
+export const listResale = (id, price) => rpc('list_resale', { p_id: id, p_price: price });
+export const cancelResale = (id) => rpc('cancel_resale', { p_id: id });
+export const itemResales = (id) => rpc('item_resales', { p_id: id });
+export const buyResale = (id, sellerId) => rpc('buy_resale', { p_id: id, p_seller: sellerId });
+export const setAvailability = (id, until) => rpc('set_item_availability', { p_id: id, p_until: until });
+export const setPremium = (username, days) => rpc('admin_set_premium', { p_username: username, p_days: days });
+
+export const LIMITED_LABEL = { limited: 'Limited', unique: 'Limited U' };
+export const RESALE_FEE = 0.3;   // 30% de taxa na revenda (o vendedor recebe 70%)
+
+// Estado da venda oficial: 'open' | 'offsale' | 'ended' | 'soldout'
+export function saleState(i) {
+  if (i.price == null) return 'offsale';
+  if (i.available_until && new Date(i.available_until) <= new Date()) return 'ended';
+  if (i.limited_kind === 'unique' && i.sold >= (i.stock || 0)) return 'soldout';
+  return i.open_now === false ? 'offsale' : 'open';
+}
+
+// "2d 3h 5m" / "4m 10s" até uma data
+export function timeLeft(until) {
+  let s = Math.max(0, Math.floor((new Date(until) - Date.now()) / 1000));
+  const d = Math.floor(s / 86400); s -= d * 86400;
+  const h = Math.floor(s / 3600); s -= h * 3600;
+  const m = Math.floor(s / 60); s -= m * 60;
+  return d ? `${d}d ${h}h ${m}m` : h ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`;
+}
 const avatarLookRaw = (userId) => rpc('avatar_look', { p_user: userId });
 
 // Preço como aparece no site: sem preço = Offsale, 0 = Free
@@ -33,7 +64,12 @@ export function lookOfItem(item) {
   return { accessories: [accessoryOf(item)] };
 }
 
-const accessoryOf = (a) => ({ type: a.accessory_type || a.type, meshUrl: publicUrl(a.mesh_path), texUrl: a.image_path ? publicUrl(a.image_path) : null });
+const accessoryOf = (a) => ({
+  type: a.accessory_type || a.type,
+  meshUrl: publicUrl(a.mesh_path),
+  texUrl: a.image_path ? publicUrl(a.image_path) : null,
+  offset: [a.offset_x || 0, a.offset_y || 0, a.offset_z || 0],   // posição corrigida
+});
 
 // Look montado a partir dos itens que a pessoa está vestindo (lista do inventário com equipped = true)
 export function lookOfEquipped(colors, items) {
@@ -77,6 +113,15 @@ export function friendlyError(err) {
   if (m.includes('not enough owos')) return "You don't have enough Owos. Claim your daily Owos on the Home page!";
   if (m.includes('already owned')) return 'You already own this item.';
   if (m.includes('offsale')) return 'This item is not for sale.';
+  if (m.includes('sold out')) return 'This item is sold out.';
+  if (m.includes('sale ended')) return 'The sale of this item has ended.';
+  if (m.includes('listing gone')) return 'This listing is no longer available.';
+  if (m.includes('cannot buy your own')) return 'You cannot buy your own listing.';
+  if (m.includes('not resellable')) return 'Only Limited items can be resold.';
+  if (m.includes('invalid end date')) return 'The end date must be in the future.';
+  if (m.includes('invalid stock')) return 'Stock must be a whole number from 1 to 100,000.';
+  if (m.includes('invalid days')) return 'Days must be from 0 to 3650.';
+  if (m.includes('no such user')) return 'No user with that name.';
   if (m.includes('item not found')) return 'This item is no longer available.';
   if (m.includes('daily upload limit')) return 'You reached the daily upload limit. Try again tomorrow.';
   if (m.includes('too many triangles')) return 'The model has too many triangles (max 4000).';

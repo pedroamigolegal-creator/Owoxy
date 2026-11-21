@@ -54,7 +54,7 @@ export function parseOBJ(text) {
  * Confere o acessório. info = parseOBJ(...). tex = { width, height, bytes } da textura PNG (ou null).
  * Devolve { errors: [...], warnings: [...], checks: [{ ok, text }] } para mostrar na tela.
  */
-export function validateAccessory(info, { fileBytes = 0, tex = null } = {}) {
+export function validateAccessory(info, { fileBytes = 0, tex = null, autoPosition = false } = {}) {
   const R = CREATE_RULES.ugc;
   const checks = [];
   const add = (ok, text, warn = false) => checks.push({ ok, text, warn });
@@ -67,8 +67,10 @@ export function validateAccessory(info, { fileBytes = 0, tex = null } = {}) {
   add(biggest <= R.maxSize && biggest >= R.minSize, `Largest side is ${biggest.toFixed(2)} studs (between ${R.minSize} and ${R.maxSize})`);
 
   // a origem do modelo é o ponto de encaixe: tem que estar perto do acessório
+  // (com o auto-posicionamento ligado, o Owoxy corrige isso sozinho)
   const d = Math.hypot(...info.center.map((c, k) => Math.max(0, Math.abs(c) - info.size[k] / 2)));
-  add(d <= R.maxOriginDistance, `Attachment point (0,0,0) is ${d.toFixed(2)} studs from the mesh (max ${R.maxOriginDistance})`);
+  if (autoPosition) add(true, d > R.maxOriginDistance ? `Attachment point was ${d.toFixed(2)} studs away: it will be auto-positioned` : 'Attachment point is close to the mesh', d > R.maxOriginDistance);
+  else add(d <= R.maxOriginDistance, `Attachment point (0,0,0) is ${d.toFixed(2)} studs from the mesh (max ${R.maxOriginDistance})`);
 
   if (tex) {
     add(tex.width <= R.maxTextureSize && tex.height <= R.maxTextureSize, `Texture is ${tex.width} x ${tex.height} (max ${R.maxTextureSize} x ${R.maxTextureSize})`);
@@ -83,4 +85,21 @@ export function validateAccessory(info, { fileBytes = 0, tex = null } = {}) {
     warnings: checks.filter((c) => c.warn).map((c) => c.text),
     checks,
   };
+}
+
+/**
+ * Auto-posicionamento: calcula o deslocamento [x, y, z] (em studs, no espaço do modelo; frente = -Z, cima = +Y)
+ * para o acessório ficar no lugar certo do boneco, não importa onde o criador deixou a origem do modelo.
+ *  - hat / hair: centrado em cima da cabeça, com a base do modelo no topo da cabeça
+ *  - face: centrado no rosto, com a parte de trás do modelo encostada no rosto e o resto para a frente
+ *  - back: centrado nas costas, com o lado de dentro do modelo encostado nas costas
+ */
+export function autoFit(info, type) {
+  const c = info.center;
+  const clamp = (n) => Math.max(-50, Math.min(50, Math.round(n * 100) / 100));
+  let off;
+  if (type === 'face') off = [-c[0], -c[1], -info.max[2]];
+  else if (type === 'back') off = [-c[0], -c[1], -info.min[2]];
+  else off = [-c[0], -info.min[1], -c[2]];   // hat, hair
+  return off.map((n) => clamp(n + 0));
 }

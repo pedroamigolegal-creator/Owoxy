@@ -6,7 +6,7 @@ import { itemCard, loadThumbs } from './cards.js';
 import { CREATE_RULES } from './config.js';
 import { CLOTHING_MAP } from './clothing-map.js';
 import { createItem, friendlyError, myCreations, setItemPrice, uploadFile } from './items.js';
-import { parseOBJ, validateAccessory } from './obj.js';
+import { autoFit, parseOBJ, validateAccessory } from './obj.js';
 import { initShell } from './shell.js';
 import { analyzeClothing } from './template.js';
 
@@ -50,7 +50,25 @@ if (user) {
   }).catch((err) => { console.error(err); $('preview-note').textContent = '3D preview is not available in this browser.'; });
 
   // ---- estado do formulário ----
-  const state = { file: null, ok: false, triangles: null, meshFile: null, texFile: null };
+  const state = { file: null, ok: false, triangles: null, meshFile: null, texFile: null, info: null, auto: [0, 0, 0], meshUrl: null, texUrl: null };
+
+  // opções só da conta Owoxy
+  $('admin-sale').hidden = !user.isAdmin;
+  $('sale-type').addEventListener('change', () => { $('stock-wrap').hidden = $('sale-type').value !== 'unique'; });
+
+  // posição final do acessório = auto-posição + ajuste dos controles (Forward/Back: positivo = para a frente = -Z)
+  const adjust = () => [Number($('pos-x').value), Number($('pos-y').value), -Number($('pos-z').value)];
+  const currentOffset = () => state.auto.map((n, k) => Math.round((n + adjust()[k]) * 100) / 100);
+  const showOutputs = () => { $('out-x').textContent = $('pos-x').value; $('out-y').textContent = $('pos-y').value; $('out-z').textContent = $('pos-z').value; };
+  const previewAccessory = () => api?.setLook({ accessories: [{ type: typeSel.value, meshUrl: state.meshUrl, texUrl: state.texUrl, offset: currentOffset() }] });
+  for (const k of ['x', 'y', 'z']) $(`pos-${k}`).addEventListener('input', () => { showOutputs(); if (state.ok) previewAccessory(); });
+  const autoPosition = () => {
+    state.auto = autoFit(state.info, typeSel.value);
+    for (const k of ['x', 'y', 'z']) $(`pos-${k}`).value = 0;
+    showOutputs();
+    previewAccessory();
+  };
+  $('pos-reset').addEventListener('click', () => { if (state.info) autoPosition(); });
 
   function showChecks(checks) {
     $('checks').innerHTML = checks.map((c) => `<li class="${c.ok ? 'ok' : c.warn ? 'warn' : 'bad'}">${c.ok ? '✓' : c.warn ? '!' : '✕'} ${c.text}</li>`).join('');
@@ -108,7 +126,7 @@ if (user) {
   async function checkUGC() {
     state.ok = false;
     const mesh = state.meshFile;
-    if (!mesh) { showChecks([]); refreshButton(); return; }
+    if (!mesh) { showChecks([]); $('pos-box').hidden = true; refreshButton(); return; }
     try {
       let tex = null;
       if (state.texFile) {
@@ -117,13 +135,16 @@ if (user) {
         tex = { width: img.naturalWidth, height: img.naturalHeight, bytes: state.texFile.size };
       }
       const info = parseOBJ(await mesh.text());
-      const res = validateAccessory(info, { fileBytes: mesh.size, tex });
+      const res = validateAccessory(info, { fileBytes: mesh.size, tex, autoPosition: true });
       showChecks(res.checks);
       state.ok = res.errors.length === 0;
       state.triangles = info.triangles;
-      if (state.ok && api) {
-        await api.setLook({ accessories: [{ type: typeSel.value, meshUrl: blobUrl(mesh), texUrl: state.texFile ? blobUrl(state.texFile) : null }] });
-        $('preview-note').textContent = 'Preview: your accessory on the noob.';
+      state.info = info;
+      $('pos-box').hidden = !state.ok;
+      if (state.ok) {
+        state.meshUrl = blobUrl(mesh);
+        state.texUrl = state.texFile ? blobUrl(state.texFile) : null;
+        if (api) { autoPosition(); $('preview-note').textContent = 'Preview: your accessory on the noob, positioned automatically.'; }
       }
     } catch (err) {
       console.error(err);
@@ -145,6 +166,11 @@ if (user) {
       price = Number(priceRaw);
       if (!Number.isInteger(price) || price < 0 || price > 1000000) { toast('Price must be a whole number from 0 to 1,000,000 (or blank for Offsale).'); return; }
     }
+    if (user.isAdmin && $('sale-type').value === 'unique') {
+      const n = Number($('i-stock').value);
+      if (!Number.isInteger(n) || n < 1 || n > 100000) { toast('Stock must be a whole number from 1 to 100,000.'); return; }
+    }
+    if (user.isAdmin && $('i-until').value && new Date($('i-until').value) <= new Date()) { toast('The end date must be in the future.'); return; }
     $('upload-btn').disabled = true;
     $('upload-btn').textContent = 'Uploading...';
     try {
@@ -152,14 +178,21 @@ if (user) {
       if (isUGC) {
         const meshPath = await uploadFile(user.id, state.meshFile, 'obj', 'text/plain');
         const imagePath = state.texFile ? await uploadFile(user.id, state.texFile, 'png', 'image/png') : null;
-        args = { kind: 'accessory', accessoryType: typeSel.value, name: $('i-name').value.trim(), price, imagePath, meshPath, triangles: state.triangles };
+        args = { kind: 'accessory', accessoryType: typeSel.value, name: $('i-name').value.trim(), price, imagePath, meshPath, triangles: state.triangles, offset: currentOffset() };
       } else {
         const imagePath = await uploadFile(user.id, state.file, 'png', 'image/png');
         args = { kind: t, name: $('i-name').value.trim(), price, imagePath };
       }
+      if (user.isAdmin) {
+        const limited = $('sale-type').value || null;
+        if (limited) args.limited = limited;
+        if (limited === 'unique') args.stock = Number($('i-stock').value);
+        if ($('i-until').value) args.until = new Date($('i-until').value).toISOString();
+      }
       await createItem(args);
       toast('Uploaded! It is in your Inventory and in the Catalog.');
       $('upload-form').reset();
+      $('stock-wrap').hidden = true; $('pos-box').hidden = true; state.info = null;
       state.ok = false; state.file = null; state.meshFile = null; state.texFile = null;
       showChecks([]);
       if (api) api.setLook({});

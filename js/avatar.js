@@ -7,9 +7,8 @@ import { CLOTHING_MAP } from './clothing-map.js';
 
 // O rosto do modelo aponta para -X; girar 90° em Y deixa ele virado para a câmera (+Z).
 const FACE_ROTATION_Y = Math.PI / 2;
-// Foto de perfil ("headshot"): o boneco fica virado ~30° (de lado), como na foto de perfil do Roblox.
-// Para virar para o outro lado, troque o sinal.
-const HEAD_TURN = -0.5;
+// Foto de perfil ("headshot"): 0 = de frente. Valores positivos/negativos viram o boneco para um dos lados.
+const HEAD_TURN = 0;
 
 // Cores originais da textura do noob; é por elas que achamos cada parte para recolorir.
 const TEXTURE_KEYS = { skin: [245, 205, 48], torso: [13, 105, 172], legs: [164, 189, 71] };
@@ -190,6 +189,7 @@ export async function createStage(canvas, { view = 'full', modelUrl = CONFIG.def
         if (o.isMesh) o.material = new THREE.MeshStandardMaterial({ map, color: map ? 0xffffff : 0xcccccc, roughness: 0.7, metalness: 0, side: THREE.DoubleSide });
       });
       const holder = new THREE.Group();
+      obj.position.set(...(a.offset || [0, 0, 0]));            // posição corrigida do acessório (no espaço do próprio modelo)
       holder.add(obj);
       holder.rotation.y = Math.PI / 2;                       // frente do acessório (-Z) -> frente do modelo (-X)
       holder.position.set(...(ATTACH[a.type] || ATTACH.hat));

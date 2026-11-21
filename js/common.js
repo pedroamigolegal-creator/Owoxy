@@ -101,3 +101,25 @@ export function userTile(u) {
 export function hydrateHeads(root = document) {
   import('./heads.js').then((m) => m.hydrateHeads(root)).catch((err) => console.error(err));
 }
+
+// Janela com um campo (ex.: preço de revenda). Devolve o texto digitado ou null se cancelar.
+export function promptDialog({ title = '', message = '', placeholder = '', confirmText = 'OK', cancelText = 'Cancel', type = 'text', value = '' } = {}) {
+  return new Promise((resolve) => {
+    const dlg = document.createElement('dialog');
+    dlg.className = 'confirm';
+    dlg.innerHTML = '<h3></h3><p class="confirm-msg"></p><input class="prompt-input" autocomplete="off"><div class="row-end"><button type="button" class="btn-gray" data-v="0"></button><button type="button" class="btn-green" data-v="1"></button></div>';
+    dlg.querySelector('h3').textContent = title;
+    dlg.querySelector('.confirm-msg').textContent = message;
+    const input = dlg.querySelector('input');
+    input.type = type; input.placeholder = placeholder; input.value = value;
+    dlg.querySelector('[data-v="0"]').textContent = cancelText;
+    dlg.querySelector('[data-v="1"]').textContent = confirmText;
+    let answer = null;
+    dlg.addEventListener('click', (e) => { const b = e.target.closest('button[data-v]'); if (b) { answer = b.dataset.v === '1' ? input.value.trim() : null; dlg.close(); } });
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { answer = input.value.trim(); dlg.close(); } });
+    dlg.addEventListener('close', () => { dlg.remove(); resolve(answer); });
+    document.body.appendChild(dlg);
+    dlg.showModal();
+    input.focus();
+  });
+}

@@ -30,14 +30,23 @@
           <div class="item-info">
             <h1 id="i-name"></h1>
             <p class="item-by">By <a id="i-by" href="#"></a><span id="i-badge"></span></p>
+            <p id="i-limited" class="ltd-line" hidden></p>
             <div class="price-row" id="i-price"></div>
+            <p class="muted" id="i-avail"></p>
             <div class="item-actions" id="i-actions"></div>
             <p class="muted" id="i-note"></p>
             <div class="admin-box" id="admin-box" hidden>
-              <b>Owoxy admin</b>
-              <button class="btn-red" id="i-delete" type="button">Delete from catalog</button>
+              <h4>Owoxy admin</h4>
+              <label class="lbl" for="av-until">Available until (leave empty for no limit)</label>
+              <div class="row-gap"><input id="av-until" type="datetime-local"><button class="btn-gray sm" id="av-save" type="button">Save</button><button class="btn-gray sm" id="av-clear" type="button">No limit</button></div>
+              <p><button class="btn-red" id="i-delete" type="button">Delete from catalog</button></p>
             </div>
           </div>
+        </section>
+        <section class="card" id="resell-card" hidden>
+          <h2>Resellers</h2>
+          <p class="muted small">Limited items can be resold by their owners. The seller receives 70% (30% fee).</p>
+          <div id="resellers"></div>
         </section>
       </div>
     </main>

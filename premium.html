@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Owoxy - Premium</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="topbar-slot"></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar-slot"></aside>
+    <main class="main" id="main">
+      <h1 class="page-title">Owoxy Premium</h1>
+      <section class="card premium-card">
+        <div class="premium-top">
+          <span class="premium-logo" data-i="premium"></span>
+          <div>
+            <h2 id="p-status">Loading...</h2>
+            <p class="muted" id="p-until"></p>
+          </div>
+        </div>
+        <ul class="perks">
+          <li><b>100 Owos every day</b> instead of 25. Claim them once every 24 hours.</li>
+        </ul>
+        <p><button class="btn-green big" id="p-claim" type="button">Claim daily Owos</button></p>
+        <p class="muted small" id="p-note"></p>
+      </section>
+      <section class="card" id="p-admin" hidden>
+        <h2>Owoxy admin: give Premium</h2>
+        <p class="muted small">Adds days to the user's Premium. Use 0 days to remove it.</p>
+        <div class="row-gap">
+          <input id="pa-user" placeholder="Username" maxlength="20" autocomplete="off">
+          <input id="pa-days" type="number" min="0" max="3650" step="1" value="30" aria-label="Days">
+          <button class="btn-green" id="pa-go" type="button">Apply</button>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="js/common.js"></script>
+  <script type="module" src="js/premium.js"></script>
+</body>
+</html>

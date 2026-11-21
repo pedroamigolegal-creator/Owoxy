@@ -12,12 +12,7 @@ const NAV = [
   ['avatar', 'Avatar', 'avatar.html', 'avatar'],
   ['inventory', 'Inventory', 'inventory.html', 'inventory'],
   ['groups', 'Groups', null, 'groups'],
-  ['premium', 'Premium', null, 'premium'],
-  ['money', 'Money', null, 'money'],
-  ['feed', 'My Feed', null, 'feed'],
-  ['blog', 'Blog', null, 'blog'],
-  ['store', 'Official Store', null, 'store'],
-  ['gifts', 'Gift Cards', null, 'gift'],
+  ['premium', 'Premium', 'premium.html', 'premium'],
 ];
 
 export function initShell(user, active, { query = '' } = {}) {

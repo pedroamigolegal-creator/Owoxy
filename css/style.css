@@ -315,3 +315,29 @@ dialog.confirm .row-end { justify-content: center; }
 .friend-pic { position: relative; }
 .friend-pic img[data-head] { display: none; width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
 .friend-pic img[data-head].ready { display: block; }
+
+/* ===== Limiteds, Offsale, Premium, posição UGC ===== */
+.ltd-badge { position: absolute; left: 6px; bottom: 6px; background: #f5cd30; color: #111; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 10px; }
+.ltd-badge.unique { background: #ff8fc8; }
+.ltd-line { margin: 0 0 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.ltd-line .ltd-badge { position: static; font-size: 13px; padding: 3px 10px; }
+.price.best { flex-direction: column; align-items: flex-start; gap: 0; font-size: 12px; color: var(--muted); }
+.price.best .price { color: #fff; font-size: 14px; margin: 0; }
+.off-toggle { display: flex; margin: 4px 14px 8px; border: 1px solid #5a5d60; border-radius: 6px; overflow: hidden; }
+.off-toggle button { flex: 1; background: none; border: 0; color: var(--muted); padding: 6px 4px; font-size: 13px; font-weight: 600; }
+.off-toggle button.on { background: #fff; color: #111; }
+.row-gap { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.admin-box input, .admin-box select { background: #191a1c; color: #fff; border: 1px solid #484b4e; border-radius: 4px; padding: 7px 9px; font: inherit; font-size: 14px; max-width: 100%; }
+.admin-box .lbl { margin-top: 8px; }
+.create .admin-box { margin: 16px 0 6px; }
+.resell { width: 100%; border-collapse: collapse; }
+.resell td { padding: 8px 6px; border-bottom: 1px solid #3c3f42; }
+.resell .verified { width: 14px; height: 14px; margin-left: 3px; vertical-align: -2px; }
+.slider { display: grid; grid-template-columns: 110px 1fr 44px; gap: 8px; align-items: center; font-size: 13px; margin: 4px 0; }
+.create .slider input { padding: 0; }
+.prompt-input { width: 100%; background: #191a1c; color: #fff; border: 1px solid #484b4e; border-radius: 4px; padding: 8px; font: inherit; margin-bottom: 14px; }
+.premium-card .premium-top { display: flex; gap: 16px; align-items: center; margin-bottom: 8px; }
+.premium-logo svg { width: 56px; height: 56px; color: #f5cd30; }
+.premium-card h2 { margin: 0; }
+.perks { padding-left: 20px; line-height: 1.7; }
+.sell-link { display: block; text-align: center; margin-top: 4px; }

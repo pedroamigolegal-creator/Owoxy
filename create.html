@@ -51,6 +51,14 @@
                   <input id="file-mesh" type="file" accept=".obj">
                   <label class="lbl" for="file-tex">3. Texture (optional PNG, up to 1024 x 1024)</label>
                   <input id="file-tex" type="file" accept="image/png">
+                  <div id="pos-box" hidden>
+                    <label class="lbl">Position</label>
+                    <p class="muted small">Owoxy fixes the position for you: hats and hair go on top of the head, faces on the face, backs on the back. If it still looks off, adjust it here.</p>
+                    <label class="slider">Left / Right <input id="pos-x" type="range" min="-2" max="2" step="0.05" value="0"><output id="out-x">0</output></label>
+                    <label class="slider">Up / Down <input id="pos-y" type="range" min="-2" max="2" step="0.05" value="0"><output id="out-y">0</output></label>
+                    <label class="slider">Forward / Back <input id="pos-z" type="range" min="-2" max="2" step="0.05" value="0"><output id="out-z">0</output></label>
+                    <button class="btn-gray sm" id="pos-reset" type="button">Auto-position again</button>
+                  </div>
                 </div>
                 <ul class="checks" id="checks"></ul>
                 <label class="lbl" for="i-name" id="lbl-name">3. Name</label>
@@ -58,6 +66,14 @@
                 <label class="lbl" for="i-price" id="lbl-price">4. Price (Owos)</label>
                 <input id="i-price" type="number" min="0" max="1000000" step="1" placeholder="Leave blank for Offsale. 0 = Free">
                 <p class="muted small">Blank = <b>Offsale</b> (not for sale). 0 = <b>Free</b>. You get the item in your inventory automatically.</p>
+                <div class="admin-box" id="admin-sale" hidden>
+                  <h4>Owoxy admin: sale options</h4>
+                  <label class="lbl" for="sale-type">Type</label>
+                  <select id="sale-type"><option value="">Normal item</option><option value="limited">Limited (can be resold)</option><option value="unique">Limited Unique (limited stock, numbered copies, can be resold)</option></select>
+                  <div id="stock-wrap" hidden><label class="lbl" for="i-stock">Stock (number of copies)</label><input id="i-stock" type="number" min="1" max="100000" step="1" placeholder="e.g. 100"></div>
+                  <label class="lbl" for="i-until">Available until (optional: date and time)</label>
+                  <input id="i-until" type="datetime-local">
+                </div>
                 <div class="row-end"><button class="btn-green" id="upload-btn" type="submit" disabled>Upload</button></div>
               </form>
               <div class="upload-preview">

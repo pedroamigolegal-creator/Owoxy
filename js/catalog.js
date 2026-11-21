@@ -12,6 +12,21 @@ if (user) {
   const q = (params.get('q') || '').trim();
   const PAGE = 24;
   let offset = 0;
+  // Offsale começa escondido; a pessoa escolhe e o navegador lembra
+  let showOffsale = false;
+  try { showOffsale = localStorage.getItem('owoxy.showOffsale') === '1'; } catch { /* sem armazenamento */ }
+  const toggle = document.getElementById('off-toggle');
+  const paintToggle = () => toggle.querySelectorAll('button').forEach((b) => b.classList.toggle('on', (b.dataset.v === '1') === showOffsale));
+  paintToggle();
+  toggle.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-v]');
+    if (!b) return;
+    showOffsale = b.dataset.v === '1';
+    try { localStorage.setItem('owoxy.showOffsale', showOffsale ? '1' : '0'); } catch { /* ok */ }
+    paintToggle();
+    offset = 0;
+    load();
+  });
 
   document.getElementById('cat-q').value = q;
   document.querySelectorAll('#filters a').forEach((a) => a.classList.toggle('on', (a.dataset.k || '') === kind));
@@ -30,10 +45,10 @@ if (user) {
 
   async function load() {
     try {
-      const items = await catalog(kind || null, q, PAGE, offset);
+      const items = await catalog(kind || null, q, PAGE, offset, showOffsale);
       if (offset === 0) grid.innerHTML = '';
       if (!items.length && offset === 0) {
-        grid.innerHTML = `<p class="muted">${q ? `No items found for "${q}".` : 'Nothing here yet. Be the first to create something on the Create page!'}</p>`;
+        grid.innerHTML = `<p class="muted">${q ? `No items found for "${q}".` : 'Nothing on sale here.'}${showOffsale ? '' : ' Offsale items are hidden (see "Offsale items" on the left).'}</p>`;
       }
       const html = document.createElement('div');
       html.innerHTML = items.map((i) => itemCard(i, { tag: i.owned ? '<span class="owned-badge">Owned</span>' : '' })).join('');

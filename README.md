@@ -48,3 +48,13 @@ Owoxy não é afiliado à Roblox Corporation.
 - **Create**: Shirts / Pants (molde PNG 585x559, analisado antes do upload) e UGC (.obj ≤ 4000 triângulos, textura opcional ≤ 1024x1024).
 - Preço em branco = **Offsale**, 0 = **Free**. O item criado vai direto para o inventário do criador.
 - Comprar abre uma confirmação (Buy / Cancel). Itens comprados vão para o Inventory e podem ser vestidos no Avatar (aba Clothing).
+
+## Premium, Limiteds, posição do UGC e Offsale (supabase/005_limiteds_premium.sql)
+
+Rode `supabase/005_limiteds_premium.sql` no SQL Editor **depois** do 004 (pode rodar de novo sem problema).
+
+- **Premium**: 100 Owos por dia (sem Premium: 25). A conta Owoxy dá Premium na página Premium (usuário + dias; 0 tira).
+- **UGC**: o Owoxy posiciona o acessório sozinho (chapéu/cabelo em cima da cabeça, rosto no rosto, costas nas costas) e há controles para ajustar.
+- **Limited / Limited Unique** (só a conta Owoxy, no Create): Limited pode ser revendido; Limited Unique tem estoque e cópias numeradas (#1, #2...). Revenda na página do item (vendedor recebe 70%, taxa de 30%).
+- **Prazo de venda** (só Owoxy): "Available until" no Create ou na página do item.
+- **Catalog**: itens Offsale ficam escondidos; o botão "Offsale items: Show / Don't show" muda isso (o navegador lembra).

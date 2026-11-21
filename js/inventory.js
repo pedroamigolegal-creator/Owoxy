@@ -16,7 +16,7 @@ if (user) {
       grid.innerHTML = items.length
         ? items.map((i) => itemCard(i, {
           tag: i.equipped ? '<span class="owned-badge on">Wearing</span>' : '',
-          extra: `<button class="btn-gray sm wear" data-id="${i.id}" data-on="${i.equipped ? 1 : 0}">${i.equipped ? 'Remove' : 'Wear'}</button>`,
+          extra: `<button class="btn-gray sm wear" data-id="${i.id}" data-on="${i.equipped ? 1 : 0}">${i.equipped ? 'Remove' : 'Wear'}</button>${i.limited_kind ? `<a class="btn-gray sm sell-link" href="item.html?id=${i.id}">Sell</a>` : ''}`,
         })).join('')
         : '<p class="muted">Nothing here yet. Buy something in the Catalog or create your own on the Create page.</p>';
       loadThumbs(grid, items);

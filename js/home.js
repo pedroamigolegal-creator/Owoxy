@@ -24,6 +24,7 @@ if (user) {
 
   // Owos diários
   const daily = document.getElementById('daily');
+  if (daily) daily.textContent = user.premium ? 'Claim 100 daily Owos (Premium)' : 'Claim 25 daily Owos';
   if (daily) daily.addEventListener('click', async () => {
     daily.disabled = true;
     try {
