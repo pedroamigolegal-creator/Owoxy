@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Owoxy - Settings</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="topbar-slot"></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar-slot"></aside>
+    <main class="main wide" id="main">
+      <h1 class="page-title">Settings</h1>
+      <div class="settings">
+        <nav class="create-nav" id="set-nav" aria-label="Settings">
+          <a href="settings.html?t=account" data-t="account">Account Info</a>
+          <a href="settings.html?t=security" data-t="security">Security</a>
+          <a href="settings.html?t=privacy" data-t="privacy">Privacy</a>
+        </nav>
+        <section class="create-main">
+          <div class="card" data-pane="account" hidden>
+            <h2>Account Info</h2>
+            <div class="set-row"><span class="set-label">Username</span><span id="s-username"></span></div>
+            <p class="muted small set-help">Usernames cannot be changed.</p>
+            <div class="set-row"><span class="set-label">Birthday</span><span id="s-birthday"></span></div>
+            <div class="set-row"><span class="set-label">Member since</span><span id="s-since"></span></div>
+            <div class="set-row"><span class="set-label">Owos</span><span id="s-balance"></span></div>
+            <div class="set-row"><span class="set-label">Premium</span><span id="s-premium"></span></div>
+            <label class="lbl" for="s-gender">Gender</label>
+            <select id="s-gender"><option value="">Prefer not to say</option><option value="male">Male</option><option value="female">Female</option></select>
+            <label class="lbl" for="s-about">About (shown on your profile)</label>
+            <textarea id="s-about" rows="4" maxlength="1000"></textarea>
+            <div class="row-end"><button class="btn-green" id="save-account" type="button">Save</button></div>
+          </div>
+
+          <div class="card" data-pane="security" hidden>
+            <h2>Security</h2>
+            <form id="pw-form" novalidate>
+              <label class="lbl" for="pw-cur">Current password</label>
+              <input id="pw-cur" type="password" autocomplete="current-password">
+              <label class="lbl" for="pw-new">New password (at least 8 characters)</label>
+              <input id="pw-new" type="password" autocomplete="new-password">
+              <label class="lbl" for="pw-new2">Confirm new password</label>
+              <input id="pw-new2" type="password" autocomplete="new-password">
+              <p class="field-error" id="pw-error"></p>
+              <div class="row-end"><button class="btn-green" type="submit">Change password</button></div>
+            </form>
+            <hr class="set-hr">
+            <h3>Sessions</h3>
+            <p class="muted small">Log out of Owoxy on every device where you are signed in, including this one.</p>
+            <button class="btn-outline-red" id="logout-all" type="button">Log out of all devices</button>
+          </div>
+
+          <div class="card" data-pane="privacy" hidden>
+            <h2>Privacy</h2>
+            <label class="lbl" for="s-msg">Who can message me?</label>
+            <select id="s-msg"><option value="friends">Friends</option><option value="nobody">No one</option></select>
+            <label class="lbl" for="s-req">Who can send me friend requests?</label>
+            <select id="s-req"><option value="everyone">Everyone</option><option value="nobody">No one</option></select>
+            <p class="muted small">Your inventory and Owos balance are always private.</p>
+            <div class="row-end"><button class="btn-green" id="save-privacy" type="button">Save</button></div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="module" src="js/common.js"></script>
+  <script type="module" src="js/settings.js"></script>
+</body>
+</html>

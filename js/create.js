@@ -6,7 +6,7 @@ import { itemCard, loadThumbs } from './cards.js';
 import { CREATE_RULES } from './config.js';
 import { CLOTHING_MAP } from './clothing-map.js';
 import { createItem, friendlyError, myCreations, setItemPrice, uploadFile } from './items.js';
-import { autoFit, parseOBJ, validateAccessory } from './obj.js';
+import { autoFit, autoScale, parseOBJ, validateAccessory } from './obj.js';
 import { initShell } from './shell.js';
 import { analyzeClothing } from './template.js';
 
@@ -15,11 +15,15 @@ if (user) {
   initShell(user, 'create');
   const $ = (id) => document.getElementById(id);
   let t = new URLSearchParams(location.search).get('t');
-  if (!['shirt', 'pants', 'ugc'].includes(t)) t = 'shirt';
+  if (!['shirt', 'pants', 'ugc', 'face'].includes(t)) t = 'shirt';
+  // UGC e Faces: só a conta Owoxy. Camisa e calça: todo mundo.
+  document.querySelectorAll('#create-nav a[data-admin]').forEach((a) => { a.hidden = !user.isAdmin; });
+  const restricted = !user.isAdmin && (t === 'ugc' || t === 'face');
 
   const TEXT = {
     shirt: { title: 'Shirts', sub: 'Create a shirt for the Owoxy catalog using the clothing template.', up: 'Upload a Shirt', mine: 'My Shirts', kind: 'shirt' },
     pants: { title: 'Pants', sub: 'Create pants for the Owoxy catalog using the clothing template.', up: 'Upload Pants', mine: 'My Pants', kind: 'pants' },
+    face: { title: 'Faces', sub: 'Upload a face image (PNG). When worn, it replaces the default face of the noob.', up: 'Upload a Face', mine: 'My Faces', kind: 'facedecal' },
     ugc: { title: 'UGC', sub: 'Upload your own 3D accessory (hat, hair, face or back). It must follow the rules below.', up: 'Upload an Accessory', mine: 'My UGC', kind: 'accessory' },
   }[t];
 
@@ -31,10 +35,16 @@ if (user) {
   document.title = `Owoxy - Create ${TEXT.title}`;
 
   const isUGC = t === 'ugc';
-  $('clothing-fields').hidden = isUGC;
+  const isFace = t === 'face';
+  $('clothing-fields').hidden = isUGC || isFace;
   $('ugc-fields').hidden = !isUGC;
-  $('lbl-name').textContent = isUGC ? '4. Name' : '3. Name';
-  $('lbl-price').textContent = isUGC ? '5. Price (Owos)' : '4. Price (Owos)';
+  $('face-fields').hidden = !isFace;
+  $('lbl-name').textContent = isUGC ? '4. Name' : isFace ? '2. Name' : '3. Name';
+  $('lbl-price').textContent = isUGC ? '5. Price (Owos)' : isFace ? '3. Price (Owos)' : '4. Price (Owos)';
+  if (restricted) {
+    $('upload-card').innerHTML = '<h2>Only the Owoxy account can create this</h2><p class="muted">UGC accessories and Faces are made by the official Owoxy account. You can still create Shirts and Pants!</p><p><a class="btn-green" href="create.html?t=shirt">Create a Shirt</a></p>';
+    $('my-title').hidden = true; $('mine').hidden = true; $('c-sub').textContent = '';
+  }
   $('tpl-guide').href = `assets/templates/${t === 'pants' ? 'pants' : 'shirt'}-template.png`;
   $('tpl-blank').href = `assets/templates/${t === 'pants' ? 'pants' : 'shirt'}-blank.png`;
   const typeSel = $('ugc-type');
@@ -44,13 +54,13 @@ if (user) {
   let api = null;
   const urls = [];
   const blobUrl = (file) => { const u = URL.createObjectURL(file); urls.push(u); return u; };
-  mountAvatar($('preview'), { view: 'full', look: {} }).then((a) => {
+  mountAvatar($('preview'), { view: isFace ? 'head' : 'full', look: {} }).then((a) => {
     api = a;
     $('toggle-2d').addEventListener('click', () => { const on = $('toggle-2d').textContent === '3D'; a.setSpin(on); $('toggle-2d').textContent = on ? '2D' : '3D'; });
   }).catch((err) => { console.error(err); $('preview-note').textContent = '3D preview is not available in this browser.'; });
 
   // ---- estado do formulário ----
-  const state = { file: null, ok: false, triangles: null, meshFile: null, texFile: null, info: null, auto: [0, 0, 0], meshUrl: null, texUrl: null };
+  const state = { file: null, ok: false, triangles: null, meshFile: null, texFile: null, info: null, auto: [0, 0, 0], meshUrl: null, texUrl: null, scale: 1 };
 
   // opções só da conta Owoxy
   $('admin-sale').hidden = !user.isAdmin;
@@ -60,15 +70,24 @@ if (user) {
   const adjust = () => [Number($('pos-x').value), Number($('pos-y').value), -Number($('pos-z').value)];
   const currentOffset = () => state.auto.map((n, k) => Math.round((n + adjust()[k]) * 100) / 100);
   const showOutputs = () => { $('out-x').textContent = $('pos-x').value; $('out-y').textContent = $('pos-y').value; $('out-z').textContent = $('pos-z').value; };
-  const previewAccessory = () => api?.setLook({ accessories: [{ type: typeSel.value, meshUrl: state.meshUrl, texUrl: state.texUrl, offset: currentOffset() }] });
+  const previewAccessory = () => api?.setLook({ accessories: [{ type: typeSel.value, meshUrl: state.meshUrl, texUrl: state.texUrl, offset: currentOffset(), scale: state.scale }] });
   for (const k of ['x', 'y', 'z']) $(`pos-${k}`).addEventListener('input', () => { showOutputs(); if (state.ok) previewAccessory(); });
   const autoPosition = () => {
-    state.auto = autoFit(state.info, typeSel.value);
+    state.auto = autoFit(state.info, typeSel.value, state.scale);
     for (const k of ['x', 'y', 'z']) $(`pos-${k}`).value = 0;
     showOutputs();
     previewAccessory();
   };
   $('pos-reset').addEventListener('click', () => { if (state.info) autoPosition(); });
+  // Auto scale: ajusta o tamanho do acessório ao boneco (e reposiciona)
+  const setScale = (v) => { state.scale = v; $('ugc-scale').value = v; };
+  $('auto-scale').addEventListener('click', () => { if (!state.info) return; setScale(autoScale(state.info, typeSel.value)); toast(`Scale set to x${state.scale}`); checkUGC(false); });
+  $('ugc-scale').addEventListener('change', () => {
+    const v = Number($('ugc-scale').value);
+    if (!(v >= 0.05 && v <= 20)) { $('ugc-scale').value = state.scale; return; }
+    state.scale = v;
+    if (state.info) checkUGC(false);
+  });
 
   function showChecks(checks) {
     $('checks').innerHTML = checks.map((c) => `<li class="${c.ok ? 'ok' : c.warn ? 'warn' : 'bad'}">${c.ok ? '✓' : c.warn ? '!' : '✕'} ${c.text}</li>`).join('');
@@ -122,8 +141,38 @@ if (user) {
     refreshButton();
   });
 
+  // ---- Faces: um PNG quadrado ----
+  $('file-face').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    state.ok = false; state.file = null;
+    if (!file) { showChecks([]); refreshButton(); return; }
+    try {
+      const checks = [];
+      const typeOk = file.type === 'image/png';
+      checks.push({ ok: typeOk, text: typeOk ? 'PNG file' : 'The face must be a PNG file.' });
+      const sizeOk = file.size <= CREATE_RULES.clothing.maxBytes;
+      checks.push({ ok: sizeOk, text: sizeOk ? `File size is ${(file.size / 1024).toFixed(0)} KB (max 5 MB)` : 'The file is bigger than 5 MB.' });
+      let dimsOk = false;
+      if (typeOk) {
+        const img = await readImage(file);
+        const { naturalWidth: w, naturalHeight: h } = img;
+        const range = w >= 64 && h >= 64 && w <= 1024 && h <= 1024;
+        const square = Math.abs(w / h - 1) <= 0.1;
+        dimsOk = range && square;
+        checks.push({ ok: range, text: range ? `Size is ${w} x ${h}` : `Size must be between 64 x 64 and 1024 x 1024 (yours is ${w} x ${h})` });
+        checks.push({ ok: square, text: square ? 'The image is square' : 'The image must be square (same width and height)' });
+      }
+      showChecks(checks);
+      state.ok = typeOk && sizeOk && dimsOk;
+      state.file = file;
+      if (state.ok && api) { await api.setLook({ face: blobUrl(file) }); $('preview-note').textContent = 'Preview: your face on the noob.'; }
+    } catch (err) { showChecks([{ ok: false, text: err.message || 'Could not read this image.' }]); }
+    refreshButton();
+  });
+
   // ---- UGC: lê o .obj e confere os critérios ----
-  async function checkUGC() {
+  async function checkUGC(fresh = true) {
+    if (fresh) setScale(1);
     state.ok = false;
     const mesh = state.meshFile;
     if (!mesh) { showChecks([]); $('pos-box').hidden = true; refreshButton(); return; }
@@ -135,7 +184,9 @@ if (user) {
         tex = { width: img.naturalWidth, height: img.naturalHeight, bytes: state.texFile.size };
       }
       const info = parseOBJ(await mesh.text());
-      const res = validateAccessory(info, { fileBytes: mesh.size, tex, autoPosition: true });
+      // arquivo novo grande demais: já aplica o Auto scale (o botão serve para refazer quando quiser)
+      if (fresh && Math.max(...info.size) > CREATE_RULES.ugc.maxSize) setScale(autoScale(info, typeSel.value));
+      const res = validateAccessory(info, { fileBytes: mesh.size, tex, autoPosition: true, scale: state.scale });
       showChecks(res.checks);
       state.ok = res.errors.length === 0;
       state.triangles = info.triangles;
@@ -178,10 +229,10 @@ if (user) {
       if (isUGC) {
         const meshPath = await uploadFile(user.id, state.meshFile, 'obj', 'text/plain');
         const imagePath = state.texFile ? await uploadFile(user.id, state.texFile, 'png', 'image/png') : null;
-        args = { kind: 'accessory', accessoryType: typeSel.value, name: $('i-name').value.trim(), price, imagePath, meshPath, triangles: state.triangles, offset: currentOffset() };
+        args = { kind: 'accessory', accessoryType: typeSel.value, name: $('i-name').value.trim(), price, imagePath, meshPath, triangles: state.triangles, offset: currentOffset(), scale: state.scale };
       } else {
         const imagePath = await uploadFile(user.id, state.file, 'png', 'image/png');
-        args = { kind: t, name: $('i-name').value.trim(), price, imagePath };
+        args = { kind: isFace ? 'facedecal' : t, name: $('i-name').value.trim(), price, imagePath };
       }
       if (user.isAdmin) {
         const limited = $('sale-type').value || null;

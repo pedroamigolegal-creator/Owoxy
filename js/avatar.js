@@ -101,9 +101,70 @@ function makeBodyTexture(material) {
     texture.needsUpdate = true;
   };
 
+  // cor original do atlas num ponto (u, v) da textura (para achar o desenho do rosto)
+  const sample = (u, v) => {
+    const x = Math.min(base.width - 1, Math.max(0, Math.floor(u * base.width)));
+    const y = Math.min(base.height - 1, Math.max(0, Math.floor((material.map.flipY ? 1 - v : v) * base.height)));
+    const i = (y * base.width + x) * 4;
+    return [base.data[i], base.data[i + 1], base.data[i + 2]];
+  };
+
   return {
+    sample,
     setColors(colors) { state.colors = { ...state.colors, ...(colors || {}) }; redraw(); },
     setClothes({ shirt, pants }) { state.shirt = shirt || null; state.pants = pants || null; redraw(); },
+  };
+}
+
+/**
+ * Rosto trocável: o rosto original do noob é geometria preta (a boca) pintada com a cor preta do atlas.
+ * Ao vestir uma Face, pintamos essa geometria com a cor da pele e colocamos um "adesivo" (plano com a imagem PNG) na frente da cabeça.
+ */
+function buildFaceKit(mesh, body, pivot) {
+  mesh.geometry = mesh.geometry.clone();   // o modelo é compartilhado entre palcos: este palco usa a sua cópia
+  const pos = mesh.geometry.attributes.position;
+  const uv = mesh.geometry.attributes.uv;
+  if (!pos || !uv) return null;
+  const head = [];
+  const dark = [];
+  for (let i = 0; i < pos.count; i++) {
+    if (pos.getZ(i) <= 4.02) continue;          // a cabeça é a parte de cima do modelo
+    head.push(i);
+    const [r, g, b] = body.sample(uv.getX(i), uv.getY(i));
+    if (r + g + b < 150) dark.push(i);
+  }
+  if (head.length < 50) return null;
+  const skin = head.find((i) => !dark.includes(i));
+  if (skin === undefined) return null;
+  const skinUV = [uv.getX(skin), uv.getY(skin)];
+  const original = dark.map((i) => [uv.getX(i), uv.getY(i)]);
+
+  // tamanho e posição da cabeça (no espaço do pivot: o rosto aponta para -X)
+  pivot.updateMatrixWorld(true);
+  mesh.updateMatrixWorld(true);
+  const box = new THREE.Box3();
+  const v = new THREE.Vector3();
+  for (const i of head) { v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrixWorld); pivot.worldToLocal(v); box.expandByPoint(v); }
+  const size = box.getSize(new THREE.Vector3());
+  const side = Math.min(size.y, size.z) * 0.97;
+  const center = box.getCenter(new THREE.Vector3());
+
+  let decal = null;
+  return {
+    setFace(img) {
+      if (decal) { pivot.remove(decal); decal.material.map?.dispose(); decal.material.dispose(); decal.geometry.dispose(); decal = null; }
+      dark.forEach((i, k) => { const [a, b] = img ? skinUV : original[k]; uv.setXY(i, a, b); });
+      uv.needsUpdate = true;
+      if (!img) return;
+      const map = new THREE.Texture(img);
+      map.colorSpace = THREE.SRGBColorSpace;
+      map.needsUpdate = true;
+      decal = new THREE.Mesh(new THREE.PlaneGeometry(side, side),
+        new THREE.MeshStandardMaterial({ map, transparent: true, alphaTest: 0.02, roughness: 1, metalness: 0 }));
+      decal.rotation.y = -Math.PI / 2;                        // o plano olha para -X (frente do noob)
+      decal.position.set(box.min.x - 0.012, center.y, center.z);
+      pivot.add(decal);
+    },
   };
 }
 
@@ -139,9 +200,11 @@ export async function createStage(canvas, { view = 'full', modelUrl = CONFIG.def
   pivot.rotation.y = FACE_ROTATION_Y;
 
   let body = null;
+  let bodyMesh = null;
   model.traverse((o) => {
     if (o.isMesh && o.material?.map?.image && !body) {
       o.material = o.material.clone();
+      bodyMesh = o;
       body = makeBodyTexture(o.material);
     }
   });
@@ -150,6 +213,8 @@ export async function createStage(canvas, { view = 'full', modelUrl = CONFIG.def
   const box = new THREE.Box3().setFromObject(pivot);
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
+
+  const faceKit = bodyMesh && body ? buildFaceKit(bodyMesh, body, pivot) : null;
 
   const camera = new THREE.PerspectiveCamera(25, w / h, 0.1, 100);
   const fovTan = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
@@ -190,6 +255,7 @@ export async function createStage(canvas, { view = 'full', modelUrl = CONFIG.def
       });
       const holder = new THREE.Group();
       obj.position.set(...(a.offset || [0, 0, 0]));            // posição corrigida do acessório (no espaço do próprio modelo)
+      obj.scale.setScalar(a.scale || 1);                       // tamanho corrigido (auto scale)
       holder.add(obj);
       holder.rotation.y = Math.PI / 2;                       // frente do acessório (-Z) -> frente do modelo (-X)
       holder.position.set(...(ATTACH[a.type] || ATTACH.hat));
@@ -203,10 +269,12 @@ export async function createStage(canvas, { view = 'full', modelUrl = CONFIG.def
    * (qualquer campo pode faltar; o que faltar fica "sem roupa")
    */
   const setLook = async (look = {}) => {
-    const [shirt, pants] = await Promise.all([
+    const [shirt, pants, face] = await Promise.all([
       look.shirt ? loadImage(look.shirt).catch(() => null) : null,
       look.pants ? loadImage(look.pants).catch(() => null) : null,
+      look.face ? loadImage(look.face).catch(() => null) : null,
     ]);
+    faceKit?.setFace(face);
     if (body) {
       body.setColors({ ...CONFIG.defaultColors, ...(look.colors || {}) });
       body.setClothes({ shirt, pants });

@@ -27,7 +27,8 @@
           <h4>Avatar Items</h4>
           <a href="create.html?t=shirt" data-t="shirt">Shirts</a>
           <a href="create.html?t=pants" data-t="pants">Pants</a>
-          <a href="create.html?t=ugc" data-t="ugc">UGC</a>
+          <a href="create.html?t=ugc" data-t="ugc" data-admin hidden>UGC</a>
+          <a href="create.html?t=face" data-t="face" data-admin hidden>Faces</a>
         </nav>
         <section class="create-main">
           <h1 class="page-title" id="c-title"></h1>
@@ -44,6 +45,11 @@
                   <label class="lbl" for="file-image">2. Choose your PNG</label>
                   <input id="file-image" type="file" accept="image/png">
                 </div>
+                <div id="face-fields" hidden>
+                  <label class="lbl" for="file-face">1. Choose your face image (PNG)</label>
+                  <p class="muted small">A square PNG (between 64 x 64 and 1024 x 1024, up to 5 MB). Use a transparent background so the head color shows through. It replaces the default face when worn.</p>
+                  <input id="file-face" type="file" accept="image/png">
+                </div>
                 <div id="ugc-fields" hidden>
                   <label class="lbl" for="ugc-type">1. Accessory type</label>
                   <select id="ugc-type"></select>
@@ -52,6 +58,9 @@
                   <label class="lbl" for="file-tex">3. Texture (optional PNG, up to 1024 x 1024)</label>
                   <input id="file-tex" type="file" accept="image/png">
                   <div id="pos-box" hidden>
+                    <label class="lbl">Size</label>
+                    <p class="muted small">Auto scale resizes the accessory to fit the noob.</p>
+                    <div class="row-gap"><label class="slider scale-row">Scale <input id="ugc-scale" type="number" min="0.05" max="20" step="0.05" value="1"></label><button class="btn-green sm" id="auto-scale" type="button">Auto scale</button></div>
                     <label class="lbl">Position</label>
                     <p class="muted small">Owoxy fixes the position for you: hats and hair go on top of the head, faces on the face, backs on the back. If it still looks off, adjust it here.</p>
                     <label class="slider">Left / Right <input id="pos-x" type="range" min="-2" max="2" step="0.05" value="0"><output id="out-x">0</output></label>

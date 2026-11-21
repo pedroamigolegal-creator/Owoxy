@@ -2,7 +2,7 @@ import { requireUser } from './auth.js';
 import { mountAvatar } from './avatar.js';
 import { hydrateHeads, toast, userTile, verifiedBadge } from './common.js';
 import { CONFIG } from './config.js';
-import { lookOfUser } from './items.js';
+import { friendlyError, lookOfUser } from './items.js';
 import { initShell } from './shell.js';
 import { friendStatus, getProfile, listFriends, removeFriend, respondFriendRequest, saveAbout, sendFriendRequest, sendMessage } from './social.js';
 
@@ -97,7 +97,7 @@ if (me) {
         else if (act === 'message') { $('msg-title').textContent = `Message ${p.username}`; $('msg-dialog').showModal(); return; }
         await renderActions();
         loadFriends();
-      } catch (err) { console.error(err); toast('Something went wrong. Try again.'); }
+      } catch (err) { console.error(err); toast(friendlyError(err)); }
     });
     renderActions();
 
@@ -110,7 +110,7 @@ if (me) {
         $('msg-subject').value = ''; $('msg-body').value = '';
       } catch (err) {
         console.error(err);
-        toast(String(err.message || '').includes('friends') ? 'You can only message friends.' : 'Could not send the message.');
+        toast(String(err.message || '').includes('disabled') ? 'This user turned off messages.' : String(err.message || '').includes('friends') ? 'You can only message friends.' : 'Could not send the message.');
       }
     });
 

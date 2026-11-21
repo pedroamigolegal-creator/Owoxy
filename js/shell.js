@@ -32,7 +32,7 @@ export function initShell(user, active, { query = '' } = {}) {
       <div class="gear-wrap">
         <button class="icon-btn" id="gear" data-i="gear" aria-label="Settings"></button>
         <div class="gear-menu" id="gear-menu">
-          <button data-soon>Settings</button>
+          <button id="open-settings">Settings</button>
           <button id="logout">Log Out</button>
         </div>
       </div>
@@ -58,6 +58,7 @@ export function initShell(user, active, { query = '' } = {}) {
   const menu = document.getElementById('gear-menu');
   gear.addEventListener('click', (e) => { e.stopPropagation(); menu.classList.toggle('open'); });
   document.addEventListener('click', () => menu.classList.remove('open'));
+  document.getElementById('open-settings').addEventListener('click', () => { location.href = 'settings.html'; });
   document.getElementById('logout').addEventListener('click', async () => { await logOut(); location.href = 'login.html'; });
 
   refreshUnread();

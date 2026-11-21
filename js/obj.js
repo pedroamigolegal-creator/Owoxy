@@ -54,7 +54,7 @@ export function parseOBJ(text) {
  * Confere o acessório. info = parseOBJ(...). tex = { width, height, bytes } da textura PNG (ou null).
  * Devolve { errors: [...], warnings: [...], checks: [{ ok, text }] } para mostrar na tela.
  */
-export function validateAccessory(info, { fileBytes = 0, tex = null, autoPosition = false } = {}) {
+export function validateAccessory(info, { fileBytes = 0, tex = null, autoPosition = false, scale = 1 } = {}) {
   const R = CREATE_RULES.ugc;
   const checks = [];
   const add = (ok, text, warn = false) => checks.push({ ok, text, warn });
@@ -63,8 +63,8 @@ export function validateAccessory(info, { fileBytes = 0, tex = null, autoPositio
   add(info.vertices > 0 && info.faces > 0 && !info.badFace && !info.badNumber, info.badFace || (info.badNumber ? 'The mesh has invalid numbers.' : `Valid mesh: ${info.vertices} vertices, ${info.faces} faces`));
   add(info.triangles >= 1 && info.triangles <= R.maxTriangles, `${info.triangles} triangles (max ${R.maxTriangles})`);
 
-  const biggest = Math.max(...info.size);
-  add(biggest <= R.maxSize && biggest >= R.minSize, `Largest side is ${biggest.toFixed(2)} studs (between ${R.minSize} and ${R.maxSize})`);
+  const biggest = Math.max(...info.size) * scale;   // com a escala escolhida
+  add(biggest <= R.maxSize && biggest >= R.minSize, `Largest side is ${biggest.toFixed(2)} studs${scale !== 1 ? ` (after scale x${scale})` : ''} (between ${R.minSize} and ${R.maxSize})`);
 
   // a origem do modelo é o ponto de encaixe: tem que estar perto do acessório
   // (com o auto-posicionamento ligado, o Owoxy corrige isso sozinho)
@@ -88,18 +88,36 @@ export function validateAccessory(info, { fileBytes = 0, tex = null, autoPositio
 }
 
 /**
+ * Auto scale: escala que deixa o acessório do tamanho certo para o noob (cabeça ~1.2 studs de largura, corpo ~5 de altura).
+ *  - hat / hair: a largura (maior lado na horizontal) fica 1.4 studs, um pouco maior que a cabeça
+ *  - face (acessório de rosto): a largura fica 1.0 stud
+ *  - back: o maior lado fica 2.0 studs
+ */
+export const SCALE_TARGET = { hat: 1.4, hair: 1.4, face: 1.0, back: 2.0 };
+export function autoScale(info, type) {
+  const [sx, sy, sz] = info.size;
+  const current = type === 'back' ? Math.max(sx, sy, sz) : Math.max(sx, sz);
+  if (!(current > 0)) return 1;
+  const s = (SCALE_TARGET[type] || 1.4) / current;
+  return Math.max(0.05, Math.min(20, Math.round(s * 100) / 100));
+}
+
+/**
  * Auto-posicionamento: calcula o deslocamento [x, y, z] (em studs, no espaço do modelo; frente = -Z, cima = +Y)
  * para o acessório ficar no lugar certo do boneco, não importa onde o criador deixou a origem do modelo.
+ * "scale" é a escala já escolhida (o deslocamento é aplicado depois de escalar).
  *  - hat / hair: centrado em cima da cabeça, com a base do modelo no topo da cabeça
  *  - face: centrado no rosto, com a parte de trás do modelo encostada no rosto e o resto para a frente
  *  - back: centrado nas costas, com o lado de dentro do modelo encostado nas costas
  */
-export function autoFit(info, type) {
-  const c = info.center;
+export function autoFit(info, type, scale = 1) {
+  const c = info.center.map((n) => n * scale);
+  const lo = info.min.map((n) => n * scale);
+  const hi = info.max.map((n) => n * scale);
   const clamp = (n) => Math.max(-50, Math.min(50, Math.round(n * 100) / 100));
   let off;
-  if (type === 'face') off = [-c[0], -c[1], -info.max[2]];
-  else if (type === 'back') off = [-c[0], -c[1], -info.min[2]];
-  else off = [-c[0], -info.min[1], -c[2]];   // hat, hair
+  if (type === 'face') off = [-c[0], -c[1], -hi[2]];
+  else if (type === 'back') off = [-c[0], -c[1], -lo[2]];
+  else off = [-c[0], -lo[1], -c[2]];   // hat, hair
   return off.map((n) => clamp(n + 0));
 }

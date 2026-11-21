@@ -58,3 +58,13 @@ Rode `supabase/005_limiteds_premium.sql` no SQL Editor **depois** do 004 (pode r
 - **Limited / Limited Unique** (só a conta Owoxy, no Create): Limited pode ser revendido; Limited Unique tem estoque e cópias numeradas (#1, #2...). Revenda na página do item (vendedor recebe 70%, taxa de 30%).
 - **Prazo de venda** (só Owoxy): "Available until" no Create ou na página do item.
 - **Catalog**: itens Offsale ficam escondidos; o botão "Offsale items: Show / Don't show" muda isso (o navegador lembra).
+
+## Taxa de 30%, Faces, UGC só da Owoxy e Settings (supabase/006_fees_faces_settings.sql)
+
+Rode `supabase/006_fees_faces_settings.sql` no SQL Editor **depois** do 004 e do 005 (não rode o 005 de novo depois dele).
+
+- **Vendas**: em toda compra (e revenda) 70% vai para quem criou/vendeu e 30% para a conta Owoxy (a conta com `is_admin`). Arredondamento: o criador recebe a parte inteira de 70% (5 Owos: 3 para o criador e 2 para a Owoxy). Se a Owoxy é a criadora, fica com tudo.
+- **Create**: Shirts e Pants para todos; UGC e Faces só para a conta Owoxy (o servidor também confere).
+- **UGC**: botão **Auto scale** (ajusta o tamanho ao boneco) além do auto-posicionamento.
+- **Faces**: PNG quadrado (64 a 1024 px). Ao vestir, substitui o rosto do noob (aba Clothing do Avatar ou Inventory).
+- **Settings**: Account Info (gênero, About), Security (trocar senha, sair de todos os aparelhos) e Privacy (quem pode mandar mensagem / pedido de amizade).

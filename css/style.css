@@ -341,3 +341,16 @@ dialog.confirm .row-end { justify-content: center; }
 .premium-card h2 { margin: 0; }
 .perks { padding-left: 20px; line-height: 1.7; }
 .sell-link { display: block; text-align: center; margin-top: 4px; }
+
+/* ===== Settings, Faces, escala ===== */
+.settings { display: flex; gap: 22px; align-items: flex-start; }
+.settings .card h2 { margin-top: 0; }
+.settings input, .settings select { width: 100%; background: #191a1c; color: #fff; border: 1px solid #484b4e; border-radius: 4px; padding: 8px 10px; font: inherit; font-size: 14px; }
+.settings textarea { margin-bottom: 8px; }
+.set-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #3c3f42; }
+.set-label { color: var(--muted); font-weight: 600; }
+.set-help { margin: 4px 0 0; }
+.set-hr { border: 0; border-top: 1px solid #3c3f42; margin: 20px 0; }
+.scale-row { grid-template-columns: 60px 90px; }
+.create .scale-row input { width: 90px; }
+@media (max-width: 760px) { .settings { flex-direction: column; } }

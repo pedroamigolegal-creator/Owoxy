@@ -48,6 +48,22 @@ export async function logIn(username, password) {
 }
 
 export async function logOut() { await sb.auth.signOut(); }
+// Sai em todos os aparelhos
+export async function logOutEverywhere() { await sb.auth.signOut({ scope: 'global' }); }
+
+// Troca de senha: confere a senha atual entrando de novo, depois grava a nova.
+export async function changePassword(username, current, next) {
+  const message = validatePassword(next, username);
+  if (message) throw { message };
+  const { error: e1 } = await sb.auth.signInWithPassword({ email: emailOf(username), password: current || '' });
+  if (e1) throw { message: 'Your current password is incorrect.' };
+  const { error: e2 } = await sb.auth.updateUser({ password: next });
+  if (e2) throw { message: 'Could not change the password. Please try again.' };
+}
+
+export async function saveSettings({ gender, privacyMessages, privacyFriendRequests }) {
+  await rpc('update_settings', { p_gender: gender || '', p_privacy_messages: privacyMessages, p_privacy_friend_requests: privacyFriendRequests });
+}
 
 export async function saveAvatar(colors) { await rpc('save_avatar', { colors }); }
 
@@ -68,6 +84,8 @@ export async function currentUser() {
     verified: Boolean(p.verified),
     isAdmin: Boolean(p.is_admin),
     premiumUntil: p.premium_until || null,
+    privacyMessages: p.privacy_messages || 'friends',
+    privacyFriendRequests: p.privacy_friend_requests || 'everyone',
     premium: Boolean(p.premium_until && new Date(p.premium_until) > new Date()),
     createdAt: p.created_at,
   };
