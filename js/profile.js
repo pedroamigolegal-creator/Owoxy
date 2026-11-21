@@ -1,6 +1,6 @@
 import { requireUser } from './auth.js';
 import { mountAvatar } from './avatar.js';
-import { toast, userTile, verifiedBadge } from './common.js';
+import { hydrateHeads, toast, userTile, verifiedBadge } from './common.js';
 import { CONFIG } from './config.js';
 import { lookOfUser } from './items.js';
 import { initShell } from './shell.js';
@@ -68,6 +68,7 @@ if (me) {
         $('p-friends').textContent = friends.length;
         $('friends-count').textContent = friends.length;
         $('friends-row').innerHTML = friends.length ? friends.map(userTile).join('') : '<p class="muted pad">No friends yet.</p>';
+        hydrateHeads($('friends-row'));
       } catch (err) { console.error(err); }
     }
     loadFriends();

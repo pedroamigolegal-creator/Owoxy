@@ -1,5 +1,5 @@
 import { requireUser } from './auth.js';
-import { userTile } from './common.js';
+import { hydrateHeads, userTile } from './common.js';
 import { initShell } from './shell.js';
 import { searchUsers } from './social.js';
 
@@ -17,6 +17,7 @@ if (user) {
     try {
       const users = await searchUsers(q);
       box.innerHTML = users.length ? users.map(userTile).join('') : '<p class="muted">No users found.</p>';
+      hydrateHeads(box);
     } catch (err) {
       console.error(err);
       box.innerHTML = '<p class="muted">Search failed. Did you run supabase/003_social.sql?</p>';

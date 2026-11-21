@@ -226,7 +226,7 @@ export async function mountAvatar(canvas, { view = 'head', modelUrl = CONFIG.def
   const { pivot, render } = stage;
   if (colors) stage.setColors(colors);
   if (look) await stage.setLook({ colors, ...look });
-  else render();
+  render();
 
   let spinning = view === 'full' && spin;
   let flat = false; // visão "2D": parado, de frente

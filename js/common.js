@@ -93,6 +93,11 @@ document.addEventListener('DOMContentLoaded', hydrate);
 // Cartão de usuário para listas (amigos, busca, pedidos): boneco colorido + nome + selo.
 export function userTile(u) {
   return `<a class="friend" href="profile.html?u=${encodeURIComponent(u.username)}">
-    <div class="friend-pic">${miniNoob(u.avatar_colors)}</div>
+    <div class="friend-pic">${miniNoob(u.avatar_colors)}<img alt="" data-head="${u.id}" data-colors="${esc(JSON.stringify(u.avatar_colors || {}))}"></div>
     <span class="friend-name">${esc(u.username)}${u.verified ? verifiedBadge() : ''}</span></a>`;
+}
+
+// Troca os bonequinhos das listas pela foto 3D (carrega o 3D só quando precisa; se falhar, fica o bonequinho)
+export function hydrateHeads(root = document) {
+  import('./heads.js').then((m) => m.hydrateHeads(root)).catch((err) => console.error(err));
 }

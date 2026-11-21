@@ -1,5 +1,5 @@
 import { requireUser } from './auth.js';
-import { esc, miniNoob, toast, userTile, verifiedBadge } from './common.js';
+import { esc, hydrateHeads, miniNoob, toast, userTile, verifiedBadge } from './common.js';
 import { initShell } from './shell.js';
 import { friendRequests, getProfile, listFriends, respondFriendRequest } from './social.js';
 
@@ -17,6 +17,7 @@ if (user) {
       const friends = await listFriends(targetId);
       document.getElementById('f-count').textContent = friends.length;
       document.getElementById('friends').innerHTML = friends.length ? friends.map(userTile).join('') : '<p class="muted">No friends yet.</p>';
+      hydrateHeads(document.getElementById('friends'));
 
       if (isSelf) {
         const reqs = await friendRequests();
@@ -24,10 +25,11 @@ if (user) {
         document.getElementById('req-count').textContent = reqs.length;
         document.getElementById('requests').innerHTML = reqs.map((r) => `
           <div class="friend req">
-            <a href="profile.html?u=${encodeURIComponent(r.username)}"><div class="friend-pic">${miniNoob(r.avatar_colors)}</div>
+            <a href="profile.html?u=${encodeURIComponent(r.username)}"><div class="friend-pic">${miniNoob(r.avatar_colors)}<img alt="" data-head="${r.id}" data-colors="${esc(JSON.stringify(r.avatar_colors || {}))}"></div>
             <span class="friend-name">${esc(r.username)}${r.verified ? verifiedBadge() : ''}</span></a>
             <div class="req-actions"><button class="btn-green sm" data-id="${r.id}" data-ok="1">Accept</button><button class="btn-gray sm" data-id="${r.id}" data-ok="0">Decline</button></div>
           </div>`).join('');
+        hydrateHeads(document.getElementById('requests'));
       }
     } catch (err) {
       console.error(err);
