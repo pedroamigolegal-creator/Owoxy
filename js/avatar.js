@@ -4,9 +4,10 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { CONFIG } from './config.js';
 import { CLOTHING_MAP } from './clothing-map.js';
+import { buildDecalGeometry, classifyParts, faceMaterial, faceRegion } from './rig.js';
 
 // O rosto do modelo aponta para -X; girar 90° em Y deixa ele virado para a câmera (+Z).
-const FACE_ROTATION_Y = Math.PI / 2;
+export const FACE_ROTATION_Y = Math.PI / 2;
 // Foto de perfil ("headshot"): 0 = de frente. Valores positivos/negativos viram o boneco para um dos lados.
 const HEAD_TURN = 0;
 
@@ -16,7 +17,7 @@ const hexToRgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)
 
 // Onde cada tipo de acessório "encaixa" (modelo já centralizado; frente = -X; 1 unidade = 1 stud).
 // O desenho do acessório deve ter a origem (0,0,0) no ponto de encaixe, Y para cima e a frente voltada para -Z (como no Roblox).
-const ATTACH = {
+export const ATTACH = {
   hat: [0, 2.99, 0],
   hair: [0, 2.99, 0],
   face: [-0.42, 2.39, 0],
@@ -38,13 +39,13 @@ export function loadImage(url) {
   return imageCache.get(url);
 }
 const modelCache = new Map();
-const loadModel = (url) => {
+export const loadModel = (url) => {
   if (!modelCache.has(url)) modelCache.set(url, new GLTFLoader().loadAsync(url));
   return modelCache.get(url);
 };
 
 // ---------- textura do corpo (cores + roupas) ----------
-function makeBodyTexture(material) {
+export function makeBodyTexture(material) {
   const image = material.map.image;
   const canvas = document.createElement('canvas');
   canvas.width = image.width;
@@ -117,52 +118,51 @@ function makeBodyTexture(material) {
 }
 
 /**
- * Rosto trocável: o rosto original do noob é geometria preta (a boca) pintada com a cor preta do atlas.
- * Ao vestir uma Face, pintamos essa geometria com a cor da pele e colocamos um "adesivo" (plano com a imagem PNG) na frente da cabeça.
+ * Rosto trocável: o rosto original do noob é um pedacinho de geometria preta (a boca).
+ * Ao vestir uma Face, pintamos esse pedaço com a cor da pele e colamos a imagem na frente da cabeça (ver rig.js).
  */
 function buildFaceKit(mesh, body, pivot) {
   mesh.geometry = mesh.geometry.clone();   // o modelo é compartilhado entre palcos: este palco usa a sua cópia
-  const pos = mesh.geometry.attributes.position;
-  const uv = mesh.geometry.attributes.uv;
-  if (!pos || !uv) return null;
-  const head = [];
-  const dark = [];
-  for (let i = 0; i < pos.count; i++) {
-    if (pos.getZ(i) <= 4.02) continue;          // a cabeça é a parte de cima do modelo
-    head.push(i);
-    const [r, g, b] = body.sample(uv.getX(i), uv.getY(i));
-    if (r + g + b < 150) dark.push(i);
-  }
-  if (head.length < 50) return null;
-  const skin = head.find((i) => !dark.includes(i));
+  const geo = mesh.geometry;
+  const pos = geo.attributes.position;
+  const nor = geo.attributes.normal;
+  const uv = geo.attributes.uv;
+  const parts = classifyParts(geo);
+  if (!parts || !nor || !uv) return null;
+
+  // cabeça: vértices dos triângulos da cabeça
+  const headVerts = new Set();
+  for (let t = 0; t < parts.length; t++) if (parts[t] === 'head') for (let k = 0; k < 3; k++) headVerts.add(geo.index.array[t * 3 + k]);
+  const dark = [...headVerts].filter((i) => { const [r, g, b] = body.sample(uv.getX(i), uv.getY(i)); return r + g + b < 150; });
+  const skin = [...headVerts].find((i) => !dark.includes(i));
   if (skin === undefined) return null;
   const skinUV = [uv.getX(skin), uv.getY(skin)];
   const original = dark.map((i) => [uv.getX(i), uv.getY(i)]);
 
-  // tamanho e posição da cabeça (no espaço do pivot: o rosto aponta para -X)
+  // tudo para o espaço do pivot (o rosto aponta para -X)
   pivot.updateMatrixWorld(true);
   mesh.updateMatrixWorld(true);
-  const box = new THREE.Box3();
+  const toPivot = new THREE.Matrix4().copy(pivot.matrixWorld).invert().multiply(mesh.matrixWorld);
+  const positions = new Float32Array(pos.count * 3);
+  const normals = new Float32Array(pos.count * 3);
   const v = new THREE.Vector3();
-  for (const i of head) { v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrixWorld); pivot.worldToLocal(v); box.expandByPoint(v); }
-  const size = box.getSize(new THREE.Vector3());
-  const side = Math.min(size.y, size.z) * 0.97;
-  const center = box.getCenter(new THREE.Vector3());
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i).applyMatrix4(toPivot); positions.set([v.x, v.y, v.z], i * 3);
+    v.fromBufferAttribute(nor, i).transformDirection(toPivot); normals.set([v.x, v.y, v.z], i * 3);
+  }
+  const region = faceRegion([...headVerts].map((i) => [positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]]));
+  const headIndex = [];
+  for (let t = 0; t < parts.length; t++) if (parts[t] === 'head') headIndex.push(geo.index.array[t * 3], geo.index.array[t * 3 + 1], geo.index.array[t * 3 + 2]);
+  const decalGeo = buildDecalGeometry({ positions, normals, index: headIndex }, region);
 
   let decal = null;
   return {
     setFace(img) {
-      if (decal) { pivot.remove(decal); decal.material.map?.dispose(); decal.material.dispose(); decal.geometry.dispose(); decal = null; }
+      if (decal) { pivot.remove(decal); decal.material.map?.dispose(); decal.material.dispose(); decal = null; }
       dark.forEach((i, k) => { const [a, b] = img ? skinUV : original[k]; uv.setXY(i, a, b); });
       uv.needsUpdate = true;
-      if (!img) return;
-      const map = new THREE.Texture(img);
-      map.colorSpace = THREE.SRGBColorSpace;
-      map.needsUpdate = true;
-      decal = new THREE.Mesh(new THREE.PlaneGeometry(side, side),
-        new THREE.MeshStandardMaterial({ map, transparent: true, alphaTest: 0.02, roughness: 1, metalness: 0 }));
-      decal.rotation.y = -Math.PI / 2;                        // o plano olha para -X (frente do noob)
-      decal.position.set(box.min.x - 0.012, center.y, center.z);
+      if (!img || !decalGeo) return;
+      decal = new THREE.Mesh(decalGeo, faceMaterial(img));
       pivot.add(decal);
     },
   };

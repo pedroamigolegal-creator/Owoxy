@@ -68,3 +68,14 @@ Rode `supabase/006_fees_faces_settings.sql` no SQL Editor **depois** do 004 e do
 - **UGC**: botão **Auto scale** (ajusta o tamanho ao boneco) além do auto-posicionamento.
 - **Faces**: PNG quadrado (64 a 1024 px). Ao vestir, substitui o rosto do noob (aba Clothing do Avatar ou Inventory).
 - **Settings**: Account Info (gênero, About), Security (trocar senha, sair de todos os aparelhos) e Privacy (quem pode mandar mensagem / pedido de amizade).
+
+## Games: Talk To Others
+
+`games.html` lists the games; `game.html` is **Talk To Others** (small town, up to 100 players per server).
+
+- Before playing you choose **Computer** (WASD/arrows, Space, Enter to chat, Tab for the player list, Esc for the menu) or **Mobile** (joystick + JUMP button).
+- Your own noob is used as an R6 character (head, torso, arms, legs animated: walk, jump, idle). Faces, shirts, pants and accessories are shown.
+- Networking is Supabase **Realtime** (no new SQL): servers are channels `ttos-1`, `ttos-2`, ... Presence tells who is in; broadcast carries positions (~5/s) and chat. The 100-player cap is enforced by presence order: the 101st player goes to the next server.
+- Limits to know: the Supabase free plan has Realtime message quotas, so 100 players moving at once is more than the free plan comfortably supports. Positions and chat are trusted from the client (no moderation or word filter yet).
+
+Code: `js/game/` — `world.js` (town), `character.js` (R6 rig), `physics.js`, `net.js`, `main.js` (loading, controls, chat, menu); face/rig helpers in `js/rig.js`.

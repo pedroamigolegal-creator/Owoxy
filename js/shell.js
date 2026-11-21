@@ -11,6 +11,7 @@ const NAV = [
   ['friends', 'Friends', 'friends.html', 'groups'],
   ['avatar', 'Avatar', 'avatar.html', 'avatar'],
   ['inventory', 'Inventory', 'inventory.html', 'inventory'],
+  ['games', 'Games', 'games.html', 'avatar'],
   ['groups', 'Groups', null, 'groups'],
   ['premium', 'Premium', 'premium.html', 'premium'],
 ];
@@ -21,7 +22,7 @@ export function initShell(user, active, { query = '' } = {}) {
     <a class="logo" href="home.html"><i></i>OWOXY</a>
     <nav>
       <a href="home.html">Home</a>
-      <a href="#" data-soon>Games</a>
+      <a href="games.html">Games</a>
       <a href="catalog.html">Catalog</a>
       <a href="create.html">Create</a>
     </nav>
