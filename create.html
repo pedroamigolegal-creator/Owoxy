@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Owoxy - Create</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="topbar-slot"></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar-slot"></aside>
+    <main class="main wide" id="main">
+      <div class="create">
+        <nav class="create-nav" id="create-nav" aria-label="Create">
+          <h2>Create</h2>
+          <h4>Experiences</h4>
+          <a href="#" data-soon>Games</a>
+          <h4>Avatar Items</h4>
+          <a href="create.html?t=shirt" data-t="shirt">Shirts</a>
+          <a href="create.html?t=pants" data-t="pants">Pants</a>
+          <a href="create.html?t=ugc" data-t="ugc">UGC</a>
+        </nav>
+        <section class="create-main">
+          <h1 class="page-title" id="c-title"></h1>
+          <p class="muted" id="c-sub"></p>
+
+          <div class="card" id="upload-card">
+            <h2 id="u-title"></h2>
+            <div class="upload-grid">
+              <form id="upload-form" novalidate>
+                <div id="clothing-fields">
+                  <label class="lbl">1. Get the template</label>
+                  <p class="muted small">Download it, paint your design inside the boxes, and export as a PNG (585 x 559). The Roblox classic clothing template has the same layout.
+                    <a id="tpl-guide" href="#" download>Template with guides</a> &middot; <a id="tpl-blank" href="#" download>Blank template</a></p>
+                  <label class="lbl" for="file-image">2. Choose your PNG</label>
+                  <input id="file-image" type="file" accept="image/png">
+                </div>
+                <div id="ugc-fields" hidden>
+                  <label class="lbl" for="ugc-type">1. Accessory type</label>
+                  <select id="ugc-type"></select>
+                  <label class="lbl" for="file-mesh">2. Choose your 3D model (.obj)</label>
+                  <input id="file-mesh" type="file" accept=".obj">
+                  <label class="lbl" for="file-tex">3. Texture (optional PNG, up to 1024 x 1024)</label>
+                  <input id="file-tex" type="file" accept="image/png">
+                </div>
+                <ul class="checks" id="checks"></ul>
+                <label class="lbl" for="i-name" id="lbl-name">3. Name</label>
+                <input id="i-name" maxlength="50" placeholder="Item name (3 to 50 characters)" autocomplete="off">
+                <label class="lbl" for="i-price" id="lbl-price">4. Price (Owos)</label>
+                <input id="i-price" type="number" min="0" max="1000000" step="1" placeholder="Leave blank for Offsale. 0 = Free">
+                <p class="muted small">Blank = <b>Offsale</b> (not for sale). 0 = <b>Free</b>. You get the item in your inventory automatically.</p>
+                <div class="row-end"><button class="btn-green" id="upload-btn" type="submit" disabled>Upload</button></div>
+              </form>
+              <div class="upload-preview">
+                <div class="preview-card"><canvas id="preview" width="280" height="340"></canvas><button class="toggle-2d" id="toggle-2d" type="button">2D</button></div>
+                <p class="muted small" id="preview-note">Preview: your item on the noob.</p>
+              </div>
+            </div>
+          </div>
+
+          <h2 class="sub-title" id="my-title"></h2>
+          <div class="cat-grid" id="mine"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="module" src="js/common.js"></script>
+  <script type="module" src="js/create.js"></script>
+</body>
+</html>

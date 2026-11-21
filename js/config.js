@@ -14,3 +14,18 @@ export const CONFIG = {
   // cores originais do noob (pele = cabeça e braços)
   defaultColors: { skin: '#f5cd30', torso: '#0d69ac', legs: '#a4bd47' },
 };
+
+// Regras do Create (inspiradas nos requisitos de upload do Roblox; o servidor confere os principais de novo)
+export const CREATE_RULES = {
+  clothing: { width: 585, height: 559, maxBytes: 5 * 1024 * 1024 },     // camisa/calça: molde PNG 585 x 559
+  ugc: {
+    maxMeshBytes: 5 * 1024 * 1024,
+    maxTriangles: 4000,        // máximo de triângulos do acessório
+    maxSize: 4,                // maior lado, em studs (o noob tem 5 studs de altura)
+    minSize: 0.2,
+    maxOriginDistance: 2,      // a origem (0,0,0) do modelo é o ponto de encaixe: tem que ficar perto do acessório
+    maxTextureSize: 1024,      // textura PNG, no máximo 1024 x 1024
+    maxTextureBytes: 5 * 1024 * 1024,
+  },
+  accessoryTypes: { hat: 'Hat', hair: 'Hair', face: 'Face', back: 'Back' },
+};

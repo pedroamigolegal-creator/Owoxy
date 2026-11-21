@@ -42,6 +42,24 @@ export function toast(message) {
   toast._t = setTimeout(() => el.classList.remove('show'), 2200);
 }
 
+// Janela de confirmação ("Are you sure...?") com dois botões. Devolve true (confirmou) ou false (cancelou).
+export function confirmDialog({ title = 'Confirm', message = '', confirmText = 'OK', cancelText = 'Cancel', danger = false } = {}) {
+  return new Promise((resolve) => {
+    const dlg = document.createElement('dialog');
+    dlg.className = 'confirm';
+    dlg.innerHTML = `<h3></h3><p class="confirm-msg"></p><div class="row-end"><button type="button" class="btn-gray" data-v="0"></button><button type="button" class="${danger ? 'btn-red' : 'btn-green'}" data-v="1"></button></div>`;
+    dlg.querySelector('h3').textContent = title;
+    dlg.querySelector('.confirm-msg').textContent = message;
+    dlg.querySelector('[data-v="0"]').textContent = cancelText;
+    dlg.querySelector('[data-v="1"]').textContent = confirmText;
+    let answer = false;
+    dlg.addEventListener('click', (e) => { const b = e.target.closest('button[data-v]'); if (b) { answer = b.dataset.v === '1'; dlg.close(); } });
+    dlg.addEventListener('close', () => { dlg.remove(); resolve(answer); });
+    document.body.appendChild(dlg);
+    dlg.showModal();
+  });
+}
+
 export function formatCompact(n) {
   if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M+';
   if (n >= 1e4) return Math.floor(n / 1e3) + 'K+';

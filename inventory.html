@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Owoxy - Inventory</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="topbar-slot"></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar-slot"></aside>
+    <main class="main wide" id="main">
+      <h1 class="page-title">Inventory</h1>
+      <div class="tabs2 left" id="inv-tabs">
+        <button class="on" data-k="">All</button>
+        <button data-k="shirt">Shirts</button>
+        <button data-k="pants">Pants</button>
+        <button data-k="accessory">Accessories</button>
+      </div>
+      <p class="muted">Everything you buy or create shows up here automatically. Click an item to wear it.</p>
+      <div class="cat-grid" id="grid"></div>
+    </main>
+  </div>
+  <script type="module" src="js/common.js"></script>
+  <script type="module" src="js/inventory.js"></script>
+</body>
+</html>

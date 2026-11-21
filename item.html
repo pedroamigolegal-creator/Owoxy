@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Owoxy - Item</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="topbar-slot"></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar-slot"></aside>
+    <main class="main" id="main">
+      <p class="muted" id="loading">Loading...</p>
+      <div id="item" hidden>
+        <p class="crumb"><a href="catalog.html">Catalog</a> &rsaquo; <span id="i-kind"></span></p>
+        <section class="card item-card">
+          <div class="item-view">
+            <canvas id="view" width="380" height="440"></canvas>
+            <button class="toggle-2d" id="toggle-2d" type="button">2D</button>
+          </div>
+          <div class="item-info">
+            <h1 id="i-name"></h1>
+            <p class="item-by">By <a id="i-by" href="#"></a><span id="i-badge"></span></p>
+            <div class="price-row" id="i-price"></div>
+            <div class="item-actions" id="i-actions"></div>
+            <p class="muted" id="i-note"></p>
+            <div class="admin-box" id="admin-box" hidden>
+              <b>Owoxy admin</b>
+              <button class="btn-red" id="i-delete" type="button">Delete from catalog</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="module" src="js/common.js"></script>
+  <script type="module" src="js/item.js"></script>
+</body>
+</html>

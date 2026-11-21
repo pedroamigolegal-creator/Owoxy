@@ -66,6 +66,7 @@ export async function currentUser() {
     balance: Number(p.balance),
     avatar: { model: p.avatar_model, colors: p.avatar_colors || null },
     verified: Boolean(p.verified),
+    isAdmin: Boolean(p.is_admin),
     createdAt: p.created_at,
   };
 }

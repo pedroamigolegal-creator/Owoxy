@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Owoxy - Catalog</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="topbar-slot"></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar-slot"></aside>
+    <main class="main wide" id="main">
+      <div class="catalog-head">
+        <h1 class="page-title">Catalog</h1>
+        <form class="cat-search" id="cat-search"><input id="cat-q" placeholder="Search Catalog" maxlength="50" autocomplete="off"><button class="btn-gray" type="submit">Search</button></form>
+      </div>
+      <div class="catalog">
+        <nav class="cat-filters" id="filters" aria-label="Categories">
+          <h3>Category</h3>
+          <a data-k="" href="catalog.html">All Items</a>
+          <h4>Clothing</h4>
+          <a data-k="shirt" href="catalog.html?k=shirt">Shirts</a>
+          <a data-k="pants" href="catalog.html?k=pants">Pants</a>
+          <h4>Accessories</h4>
+          <a data-k="accessory" href="catalog.html?k=accessory">All Accessories</a>
+          <a data-k="hat" href="catalog.html?k=hat">Hats</a>
+          <a data-k="hair" href="catalog.html?k=hair">Hair</a>
+          <a data-k="face" href="catalog.html?k=face">Face</a>
+          <a data-k="back" href="catalog.html?k=back">Back</a>
+        </nav>
+        <section class="cat-main">
+          <p class="muted" id="cat-title"></p>
+          <div class="cat-grid" id="grid"></div>
+          <div class="row-center"><button class="btn-gray" id="more" hidden>Load more</button></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="module" src="js/common.js"></script>
+  <script type="module" src="js/catalog.js"></script>
+</body>
+</html>

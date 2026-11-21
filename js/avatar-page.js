@@ -2,6 +2,9 @@ import { requireUser, saveAvatar } from './auth.js';
 import { mountAvatar } from './avatar.js';
 import { toast } from './common.js';
 import { CONFIG } from './config.js';
+import { equipItem, friendlyError, lookOfEquipped, myInventory, publicUrl, unequipItem } from './items.js';
+import { renderThumbnail } from './avatar.js';
+import { lookOfItem, thumbView } from './items.js';
 import { initShell } from './shell.js';
 
 const user = await requireUser();
@@ -25,13 +28,21 @@ const state = { ...CONFIG.defaultColors, ...(user?.avatar?.colors || {}) };
 let tab = 'Body';
 let part = 'skin';
 let avatar = null;
+let inventory = [];
+let invLoaded = false;
+const refreshLook = () => avatar?.setLook(lookOfEquipped(state, inventory));
+async function loadInventory() {
+  try { inventory = await myInventory(null); invLoaded = true; refreshLook(); } catch (err) { console.error(err); }
+}
 
 // --- Avatar 3D ---
 const canvas = document.getElementById('preview');
 const toggle = document.getElementById('toggle-2d');
 mountAvatar(canvas, { view: 'full', modelUrl: user?.avatar?.model, colors: state })
-  .then((api) => {
+  .then(async (api) => {
     avatar = api;
+    await loadInventory();
+    if (tab !== 'Body') render();
     let spinning = true;
     toggle.addEventListener('click', () => {
       spinning = !spinning;
@@ -68,6 +79,18 @@ function render() {
     ? PARTS.map((p) => `<button class="pill ${p.key === part ? 'on' : ''}" data-part="${p.key}">${p.label}</button>`).join('')
     : '';
 
+  if (tab === 'Clothing') {
+    const list = inventory;
+    grid.innerHTML = list.length ? list.map((i) => `<button class="item" data-inv="${i.id}" aria-pressed="${i.equipped}">
+      <span class="thumb"><img alt="" data-thumb="${i.id}">${i.equipped ? '<i class="check">✓</i>' : ''}</span>
+      <span class="name">${i.name.replace(/</g, '&lt;')}</span></button>`).join('')
+      : `<p class="muted empty">${invLoaded ? 'No clothes yet. Get some in the <a href="catalog.html"><u>Catalog</u></a> or make your own on the <a href="create.html"><u>Create</u></a> page.' : 'Loading...'}</p>`;
+    for (const i of list) {
+      const img = grid.querySelector(`img[data-thumb="${i.id}"]`);
+      renderThumbnail(lookOfItem(i), { view: thumbView(i), key: i.id }).then((u) => { if (img) { img.src = u; img.classList.add('ready'); } }).catch(() => {});
+    }
+    return;
+  }
   if (!isBody) {
     grid.innerHTML = `<p class="muted empty">Nothing here yet. ${tab === 'Recent' ? 'Items you use will show up here.' : 'Clothes and accessories are coming with the Owoxy catalog.'}</p>`;
     return;
@@ -88,7 +111,15 @@ pills.addEventListener('click', (e) => {
   const b = e.target.closest('button[data-part]');
   if (b) { part = b.dataset.part; render(); }
 });
-grid.addEventListener('click', (e) => {
+grid.addEventListener('click', async (e) => {
+  const inv = e.target.closest('button[data-inv]');
+  if (inv) {
+    const id = Number(inv.dataset.inv);
+    const it = inventory.find((x) => x.id === id);
+    try { if (it.equipped) await unequipItem(id); else await equipItem(id); await loadInventory(); render(); }
+    catch (err) { console.error(err); toast(friendlyError(err)); }
+    return;
+  }
   const b = e.target.closest('button[data-hex]');
   if (!b) return;
   state[part] = b.dataset.hex;
@@ -96,5 +127,5 @@ grid.addEventListener('click', (e) => {
   render();
   scheduleSave();
 });
-document.getElementById('get-more').addEventListener('click', () => toast('The Owoxy catalog is coming soon!'));
+document.getElementById('get-more').addEventListener('click', () => { location.href = 'catalog.html'; });
 render();

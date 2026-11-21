@@ -10,7 +10,7 @@ const NAV = [
   ['messages', 'Messages', 'messages.html', 'chat'],
   ['friends', 'Friends', 'friends.html', 'groups'],
   ['avatar', 'Avatar', 'avatar.html', 'avatar'],
-  ['inventory', 'Inventory', null, 'inventory'],
+  ['inventory', 'Inventory', 'inventory.html', 'inventory'],
   ['groups', 'Groups', null, 'groups'],
   ['premium', 'Premium', null, 'premium'],
   ['money', 'Money', null, 'money'],
@@ -27,13 +27,13 @@ export function initShell(user, active, { query = '' } = {}) {
     <nav>
       <a href="home.html">Home</a>
       <a href="#" data-soon>Games</a>
-      <a href="avatar.html">Avatar Shop</a>
-      <a href="#" data-soon>Create</a>
+      <a href="catalog.html">Catalog</a>
+      <a href="create.html">Create</a>
     </nav>
     <form class="search" id="search-form" role="search"><input id="search" name="q" placeholder="Search" aria-label="Search" autocomplete="off" maxlength="20"></form>
     <div class="right">
       <a class="icon-btn" href="messages.html" aria-label="Messages"><span data-i="chat"></span><b class="count" id="msg-count" hidden></b></a>
-      <span class="balance" id="balance-wrap" title="${user.balance} ${CONFIG.currencyName}"><span data-i="coin"></span><span>${formatCompact(user.balance)}</span></span>
+      <span class="balance" id="balance-wrap" title="${user.balance} ${CONFIG.currencyName}"><span data-i="coin"></span><span id="balance-num">${formatCompact(user.balance)}</span></span>
       <div class="gear-wrap">
         <button class="icon-btn" id="gear" data-i="gear" aria-label="Settings"></button>
         <div class="gear-menu" id="gear-menu">
@@ -76,4 +76,12 @@ export async function refreshUnread() {
     el.hidden = !n;
     el.textContent = n > 99 ? '99+' : n;
   } catch { /* sem contador */ }
+}
+
+// Atualiza o saldo mostrado na barra de cima (depois de comprar, receber Owos etc.)
+export function setBalance(n) {
+  const num = document.getElementById('balance-num');
+  if (num) num.textContent = formatCompact(Number(n));
+  const wrap = document.getElementById('balance-wrap');
+  if (wrap) wrap.title = `${n} ${CONFIG.currencyName}`;
 }

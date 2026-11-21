@@ -2,6 +2,7 @@ import { requireUser } from './auth.js';
 import { mountAvatar } from './avatar.js';
 import { toast, userTile, verifiedBadge } from './common.js';
 import { CONFIG } from './config.js';
+import { lookOfUser } from './items.js';
 import { initShell } from './shell.js';
 import { friendStatus, getProfile, listFriends, removeFriend, respondFriendRequest, saveAbout, sendFriendRequest, sendMessage } from './social.js';
 
@@ -23,10 +24,12 @@ if (me) {
     const colors = { ...CONFIG.defaultColors, ...(p.avatar_colors || {}) };
     document.title = `Owoxy - ${p.username}`;
 
+    const look = { colors, ...(await lookOfUser(p.id).catch(() => ({}))) };
+
     // Cabeçalho
     $('p-name').textContent = p.username;
     if (p.verified) $('p-badge').innerHTML = verifiedBadge();
-    mountAvatar($('head'), { view: 'head', modelUrl: p.avatar_model, colors })
+    mountAvatar($('head'), { view: 'head', modelUrl: p.avatar_model, colors, look })
       .catch((err) => console.error('Avatar 3D indisponível:', err));
 
     // About
@@ -48,7 +51,7 @@ if (me) {
     }
 
     // Currently Wearing
-    mountAvatar($('full'), { view: 'full', modelUrl: p.avatar_model, colors })
+    mountAvatar($('full'), { view: 'full', modelUrl: p.avatar_model, colors, look })
       .then((api) => {
         let spinning = true;
         $('toggle-2d').addEventListener('click', () => { spinning = !spinning; api.setSpin(spinning); $('toggle-2d').textContent = spinning ? '2D' : '3D'; });

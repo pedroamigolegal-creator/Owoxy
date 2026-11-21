@@ -37,3 +37,14 @@ Segurança: senhas ficam só no Supabase Auth; aniversário e saldo são privado
 Modelo 3D "Roblox Noob" por [vanyabro85](https://sketchfab.com/vanyabro85) ([Sketchfab](https://sketchfab.com/models/adbbe7953c1b4f678e1ee2f1033fcff1)), licença [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/). Mantenha este crédito.
 
 Owoxy não é afiliado à Roblox Corporation.
+
+## Catalog, Create e Inventory (supabase/004_catalog.sql)
+
+1. No Supabase: SQL Editor → rode o arquivo `supabase/004_catalog.sql`.
+2. Crie a conta **Owoxy** no site e rode (separado) para torná-la admin (só ela pode apagar itens do catálogo):
+   `update public.profiles set is_admin = true where lower(username) = 'owoxy';`
+3. Para testar compras: botão "Claim daily Owos" na Home (25 Owos a cada 24h).
+
+- **Create**: Shirts / Pants (molde PNG 585x559, analisado antes do upload) e UGC (.obj ≤ 4000 triângulos, textura opcional ≤ 1024x1024).
+- Preço em branco = **Offsale**, 0 = **Free**. O item criado vai direto para o inventário do criador.
+- Comprar abre uma confirmação (Buy / Cancel). Itens comprados vão para o Inventory e podem ser vestidos no Avatar (aba Clothing).

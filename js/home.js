@@ -1,7 +1,8 @@
 import { requireUser } from './auth.js';
 import { mountAvatar } from './avatar.js';
-import { verifiedBadge, userTile } from './common.js';
-import { initShell } from './shell.js';
+import { toast, verifiedBadge, userTile } from './common.js';
+import { claimDaily, lookOfUser } from './items.js';
+import { initShell, setBalance } from './shell.js';
 import { listFriends } from './social.js';
 
 const user = await requireUser();
@@ -12,12 +13,25 @@ if (user) {
 
   // Foto de perfil = cabeça do noob 3D
   const canvas = document.getElementById('avatar-canvas');
-  mountAvatar(canvas, { view: 'head', modelUrl: user.avatar?.model, colors: user.avatar?.colors }).catch((err) => {
+  const look = await lookOfUser(user.id).catch(() => ({}));
+  mountAvatar(canvas, { view: 'head', modelUrl: user.avatar?.model, colors: user.avatar?.colors, look: { colors: user.avatar?.colors, ...look } }).catch((err) => {
     console.error('Não foi possível carregar o avatar 3D:', err);
     const fallback = document.createElement('div');
     fallback.className = 'avatar-fallback';
     fallback.textContent = user.username[0].toUpperCase();
     canvas.replaceWith(fallback);
+  });
+
+  // Owos diários
+  const daily = document.getElementById('daily');
+  if (daily) daily.addEventListener('click', async () => {
+    daily.disabled = true;
+    try {
+      const r = await claimDaily();
+      if (r.claimed) { setBalance(r.balance); toast(`You got ${r.amount} Owos!`); }
+      else toast('You already claimed today. Come back later!');
+    } catch (err) { console.error(err); toast('Could not claim. Did you run supabase/004_catalog.sql?'); }
+    daily.disabled = false;
   });
 
   // Amigos
