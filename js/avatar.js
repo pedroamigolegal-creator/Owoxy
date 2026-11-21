@@ -9,7 +9,7 @@ import { CLOTHING_MAP } from './clothing-map.js';
 const FACE_ROTATION_Y = Math.PI / 2;
 // Foto de perfil ("headshot"): o boneco fica virado ~30° (de lado), como na foto de perfil do Roblox.
 // Para virar para o outro lado, troque o sinal.
-const HEAD_TURN = 0.5;
+const HEAD_TURN = -0.5;
 
 // Cores originais da textura do noob; é por elas que achamos cada parte para recolorir.
 const TEXTURE_KEYS = { skin: [245, 205, 48], torso: [13, 105, 172], legs: [164, 189, 71] };
@@ -214,7 +214,9 @@ export async function createStage(canvas, { view = 'full', modelUrl = CONFIG.def
     await setAccessories(look.accessories).catch((err) => console.error('Acessório não carregou:', err));
   };
 
-  return { pivot, camera, renderer, canvas, render, setView, setLook, setColors: (c) => body?.setColors(c) };
+  const resize = (rw, rh) => { renderer.setSize(rw, rh, false); camera.aspect = rw / rh; camera.updateProjectionMatrix(); };
+
+  return { pivot, camera, renderer, canvas, render, setView, resize, setLook, setColors: (c) => body?.setColors(c) };
 }
 
 /**
@@ -278,6 +280,7 @@ export function renderThumbnail(look, { view = 'full', key = null } = {}) {
       thumbStage = await createStage(c, { view });
     }
     thumbStage.setView(view);
+    if (view === 'head') thumbStage.resize(256, 256); else thumbStage.resize(240, 300);   // foto de perfil é quadrada (cabe no círculo)
     await thumbStage.setLook(look);
     thumbStage.render();
     return thumbStage.canvas.toDataURL('image/png');
