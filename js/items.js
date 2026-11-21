@@ -134,6 +134,6 @@ export function friendlyError(err) {
   if (m.includes('messages disabled')) return 'This user turned off messages.';
   if (m.includes('invalid scale')) return 'Scale must be between 0.05 and 20.';
   if (m.includes('not your item')) return 'You can only change items you created.';
-  if (m.includes('Could not find the function') || m.includes('PGRST202')) return 'The catalog is not ready yet. Run supabase/004_catalog.sql in Supabase.';
+  if (m.includes('Could not find the function') || m.includes('PGRST202')) return 'The database is out of date. In Supabase, run supabase/004_catalog.sql, 005_limiteds_premium.sql and 006_fees_faces_settings.sql (in this order), then refresh the site.';
   return 'Something went wrong. Please try again.';
 }

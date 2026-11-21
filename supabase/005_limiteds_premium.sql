@@ -345,3 +345,6 @@ begin
     execute format('grant execute on function public.%s to authenticated', f);
   end loop;
 end $$;
+
+-- Avisa a API do Supabase para recarregar as funções novas
+notify pgrst, 'reload schema';
