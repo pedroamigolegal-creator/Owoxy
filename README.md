@@ -87,3 +87,13 @@ Code: `js/game/` — `world.js` (town), `character.js` (R6 rig), `physics.js`, `
 ## Admin: Created Accounts
 
 Run `supabase/007_created_accounts.sql`. The Owoxy (admin) account gets a "Created Accounts" item in the sidebar (`accounts.html`) listing username, creation date and time, gender, Owos and Premium. Passwords are intentionally not shown: Supabase stores only irreversible hashes, and storing plain-text passwords would expose every user.
+
+## Moderation, reports and game pages (migration 008)
+
+Run `supabase/008_moderation_games.sql` after 007. Only the **Owoxy** account can use these:
+
+- **Created Accounts** (`accounts.html`): status filter and Ban / Unban / Delete / Undelete per account (admins are protected). Banned and deleted accounts cannot log in (`auth.users.banned_until` is set and their sessions are removed), disappear from search and profiles, and see the reason on the login page.
+- **Reports** (`reports.html`): reports sent by players from the Esc menu inside the games, with Ban / Delete / Close.
+- **Game pages** (`game-page.html?g=ttos|nds`): Play, like/dislike, favorite, visits, live server list with Join; `games.html` has Continue Playing, Favorites and All Games; the home page has Recommended For You.
+
+Note: an access token that was already issued can keep working for up to about an hour after a ban; the site signs banned users out on the next page load.

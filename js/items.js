@@ -129,11 +129,15 @@ export function friendlyError(err) {
   if (m.includes('item not found')) return 'This item is no longer available.';
   if (m.includes('daily upload limit')) return 'You reached the daily upload limit. Try again tomorrow.';
   if (m.includes('too many triangles')) return 'The model has too many triangles (max 4000).';
+  if (m.includes('cannot moderate yourself')) return 'You cannot do this to your own account.';
+  if (m.includes('cannot moderate an admin')) return 'You cannot do this to an admin account.';
+  if (m.includes('too many reports')) return 'You sent too many reports today. Try again tomorrow.';
+  if (m.includes('invalid reason')) return 'Pick a reason for the report.';
   if (m.includes('admins only')) return 'Only the Owoxy account can do this.';
   if (m.includes('friend requests disabled')) return 'This user is not accepting friend requests.';
   if (m.includes('messages disabled')) return 'This user turned off messages.';
   if (m.includes('invalid scale')) return 'Scale must be between 0.05 and 20.';
   if (m.includes('not your item')) return 'You can only change items you created.';
-  if (m.includes('Could not find the function') || m.includes('PGRST202')) return 'The database is out of date. In Supabase, run supabase/004_catalog.sql, 005_limiteds_premium.sql and 006_fees_faces_settings.sql (in this order), then refresh the site.';
+  if (m.includes('Could not find the function') || m.includes('PGRST202')) return 'The database is out of date. In Supabase, run supabase/004 to 008 (004_catalog, 005_limiteds_premium, 006_fees_faces_settings, 007_created_accounts, 008_moderation_games) in this order, then refresh the site.';
   return 'Something went wrong. Please try again.';
 }

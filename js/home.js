@@ -4,12 +4,16 @@ import { hydrateHeads, toast, verifiedBadge, userTile } from './common.js';
 import { claimDaily, lookOfUser } from './items.js';
 import { initShell, setBalance } from './shell.js';
 import { listFriends } from './social.js';
+import { cardHTML, GAME_LIST, recentGames, GAMES } from './game-data.js';
 
 const user = await requireUser();
 if (user) {
   initShell(user, 'home');
   document.getElementById('username').textContent = user.username;
   if (user.verified) document.getElementById('badge').innerHTML = verifiedBadge();
+
+  { const rec = recentGames(); const ids = [...rec, ...GAME_LIST.map((g) => g.id).filter((i) => !rec.includes(i))];
+    document.getElementById('home-grid').innerHTML = ids.map((i) => cardHTML(GAMES[i], null, { verified: verifiedBadge() })).join(''); }
 
   // Foto de perfil = cabeça do noob 3D
   const canvas = document.getElementById('avatar-canvas');

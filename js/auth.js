@@ -43,8 +43,24 @@ export async function signUp({ username, password, birthday, gender }) {
 
 export async function logIn(username, password) {
   const { error } = await sb.auth.signInWithPassword({ email: emailOf(username || ''), password: password || '' });
-  if (error) throw { field: 'login', message: 'Incorrect username or password.' };
-  return currentUser();
+  if (error) {
+    if (error.code === 'user_banned' || /banned/i.test(error.message || '')) throw { field: 'login', message: 'This account is banned or deleted. If you think this is a mistake, contact the Owoxy team.' };
+    throw { field: 'login', message: 'Incorrect username or password.' };
+  }
+  const user = await currentUser();
+  if (!user) throw { field: 'login', message: blockedMessage() || 'This account cannot be used right now.' };
+  return user;
+}
+
+// Conta banida ou deletada: sai da sessão e guarda o motivo para a tela de login mostrar
+export function blockedMessage() {
+  try {
+    const b = JSON.parse(sessionStorage.getItem('owoxy.blocked') || 'null');
+    if (!b) return '';
+    if (b.deleted) return 'This account has been deleted.';
+    const until = b.until ? ` until ${new Date(b.until).toLocaleString()}` : ' permanently';
+    return `This account is banned${until}.${b.reason ? ` Reason: ${b.reason}` : ''}`;
+  } catch { return ''; }
 }
 
 export async function logOut() { await sb.auth.signOut(); }
@@ -74,6 +90,11 @@ export async function currentUser() {
   try { p = await rpc('my_profile'); } catch { return null; }
   p = Array.isArray(p) ? p[0] : p;
   if (!p) return null;
+  if (p.deleted_at || (p.banned_at && (!p.ban_until || new Date(p.ban_until) > new Date()))) {
+    try { sessionStorage.setItem('owoxy.blocked', JSON.stringify({ deleted: !!p.deleted_at, reason: p.ban_reason, until: p.ban_until })); } catch { /* sem armazenamento */ }
+    await sb.auth.signOut();
+    return null;
+  }
   return {
     id: p.id,
     username: p.username,

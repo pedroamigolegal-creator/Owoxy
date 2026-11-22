@@ -123,3 +123,44 @@ export function promptDialog({ title = '', message = '', placeholder = '', confi
     input.focus();
   });
 }
+
+// Janela com vários campos (texto, número ou lista). Devolve { nome: valor } ou null se cancelar.
+export function formDialog({ title = '', message = '', fields = [], confirmText = 'OK', cancelText = 'Cancel', danger = false } = {}) {
+  return new Promise((resolve) => {
+    const dlg = document.createElement('dialog');
+    dlg.className = 'confirm';
+    dlg.innerHTML = '<h3></h3><p class="confirm-msg"></p><div class="form-fields"></div><div class="row-end"><button type="button" class="btn-gray" data-v="0"></button><button type="button" data-v="1"></button></div>';
+    dlg.querySelector('h3').textContent = title;
+    dlg.querySelector('.confirm-msg').textContent = message;
+    const box = dlg.querySelector('.form-fields');
+    const inputs = {};
+    for (const f of fields) {
+      const wrap = document.createElement('label');
+      wrap.className = 'form-field';
+      wrap.append(document.createTextNode(f.label || f.name));
+      let el;
+      if (f.options) {
+        el = document.createElement('select');
+        for (const o of f.options) { const op = document.createElement('option'); op.value = typeof o === 'object' ? o.value : o; op.textContent = typeof o === 'object' ? o.label : o; el.append(op); }
+      } else { el = document.createElement('input'); el.type = f.type || 'text'; el.placeholder = f.placeholder || ''; el.maxLength = f.maxLength || 200; if (f.min !== undefined) el.min = f.min; if (f.max !== undefined) el.max = f.max; }
+      if (f.value !== undefined) el.value = f.value;
+      el.className = 'prompt-input';
+      wrap.append(el); box.append(wrap); inputs[f.name] = el;
+    }
+    const ok = dlg.querySelector('[data-v="1"]');
+    ok.className = danger ? 'btn-red' : 'btn-green';
+    dlg.querySelector('[data-v="0"]').textContent = cancelText;
+    ok.textContent = confirmText;
+    let answer = null;
+    dlg.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-v]');
+      if (!b) return;
+      if (b.dataset.v === '1') answer = Object.fromEntries(Object.entries(inputs).map(([k, el]) => [k, el.value.trim()]));
+      dlg.close();
+    });
+    dlg.addEventListener('close', () => { dlg.remove(); resolve(answer); });
+    document.body.appendChild(dlg);
+    dlg.showModal();
+    Object.values(inputs)[0]?.focus();
+  });
+}

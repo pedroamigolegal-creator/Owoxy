@@ -16,9 +16,12 @@ const rankOf = (state) => Object.entries(state)
  * handlers: { onRoster(list), onPos(key, data), onChat(key, text), onProgress(text) }
  * Devolve { server, key, sendPos(data), sendChat(text), leave() }.
  */
-export async function joinServer(user, handlers, prefix = 'ttos') {
+export async function joinServer(user, handlers, prefix = 'ttos', start = 0) {
   const key = `${user.id}:${tabId}`;
-  for (let n = 1; n <= MAX_SERVERS; n++) {
+  const order = [];
+  if (start >= 1 && start <= MAX_SERVERS) order.push(start);
+  for (let n = 1; n <= MAX_SERVERS; n++) if (n !== start) order.push(n);
+  for (const n of order) {
     handlers.onProgress?.(`Looking for a server (${n})...`);
     const conn = await tryServer(n, user, key, handlers, prefix);
     if (conn) return conn;
@@ -72,4 +75,17 @@ function tryServer(n, user, key, handlers, prefix) {
       }, 900);
     });
   });
+}
+
+/** Quantos jogadores há em cada servidor (1..count), sem entrar neles. Devolve [n1, n2, ...]. */
+export async function liveCounts(prefix, count = 6) {
+  const one = (n) => new Promise((resolve) => {
+    const ch = sb.channel(`${prefix}-${n}`, { config: { presence: { key: `watch:${tabId}:${n}` } } });
+    let done = false;
+    const end = (v) => { if (done) return; done = true; clearTimeout(timer); sb.removeChannel(ch); resolve(v); };
+    const timer = setTimeout(() => end(0), 6000);
+    ch.on('presence', { event: 'sync' }, () => setTimeout(() => end(Math.min(Object.keys(ch.presenceState()).length, MAX_PLAYERS)), 150));
+    ch.subscribe((st) => { if (st === 'CHANNEL_ERROR' || st === 'TIMED_OUT') end(0); });
+  });
+  return Promise.all(Array.from({ length: count }, (_, i) => one(i + 1)));
 }

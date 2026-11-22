@@ -12,12 +12,17 @@
     <aside class="sidebar" id="sidebar-slot"></aside>
     <main class="main wide" id="main">
       <h1 class="page-title">Created Accounts</h1>
-      <p class="muted">Only the Owoxy account can see this page. Times are shown in your local time zone.</p>
-      <form id="acc-search" class="row-gap"><input id="acc-q" type="text" maxlength="20" placeholder="Search username"> <button class="btn-green" type="submit">Search</button></form>
+      <p class="muted">Only the Owoxy account can see this page. Times are shown in your local time zone. Banned and deleted accounts cannot log in; both can be undone.</p>
+      <form id="acc-search" class="row-gap">
+        <input id="acc-q" type="text" maxlength="20" placeholder="Search username">
+        <select id="acc-status" aria-label="Status"><option value="all">All</option><option value="active">Active</option><option value="banned">Banned</option><option value="deleted">Deleted</option></select>
+        <button class="btn-green" type="submit">Search</button>
+        <a class="btn-gray" href="reports.html" style="padding:6px 12px;border-radius:4px">Reports</a>
+      </form>
       <p id="acc-total" class="muted"></p>
       <div class="card" style="overflow-x:auto">
         <table class="acc-table">
-          <thead><tr><th>#</th><th>Username</th><th>Created (date)</th><th>Time</th><th>Gender</th><th>Owos</th><th>Premium</th></tr></thead>
+          <thead><tr><th>#</th><th>Username</th><th>Created (date)</th><th>Time</th><th>Gender</th><th>Owos</th><th>Premium</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="acc-body"></tbody>
         </table>
       </div>

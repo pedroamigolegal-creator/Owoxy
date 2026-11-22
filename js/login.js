@@ -1,14 +1,16 @@
-import { logIn, redirectIfLoggedIn } from './auth.js';
+import { blockedMessage, logIn, redirectIfLoggedIn } from './auth.js';
 
 await redirectIfLoggedIn();
 
 const form = document.getElementById('login-form');
 const error = document.getElementById('login-error');
 const submit = document.getElementById('submit');
+error.textContent = blockedMessage();   // veio de uma conta banida/deletada
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   error.textContent = '';
+  try { sessionStorage.removeItem('owoxy.blocked'); } catch { /* ok */ }
   form.password.classList.remove('bad');
   submit.disabled = true;
   try {

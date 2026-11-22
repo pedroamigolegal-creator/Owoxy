@@ -13,20 +13,10 @@
     <aside class="sidebar" id="sidebar-slot"></aside>
     <main class="main">
       <h1 class="page-title">Games</h1>
-      <div class="games-grid">
-        <a class="game-card" href="game.html">
-          <div class="game-thumb"><img src="assets/games/talk-to-others.svg" alt="" width="512" height="512"></div>
-          <h3>Talk To Others</h3>
-          <p class="by">By Owoxy <span id="badge"></span></p>
-          <p class="meta">Chat and hang out in a small town &middot; up to 100 players</p>
-        </a>
-        <a class="game-card" href="game.html?g=nds">
-          <div class="game-thumb"><img src="assets/games/natural-disaster-survival.svg" alt="" width="512" height="512"></div>
-          <h3>Natural Disaster Survival</h3>
-          <p class="by">By Owoxy <span id="badge2"></span></p>
-          <p class="meta">Survive 8 different disasters &middot; up to 100 players</p>
-        </a>
-      </div>
+      <div id="row-recent" hidden><h2 class="game-row-title">Continue Playing</h2><div class="games-grid" id="g-recent"></div></div>
+      <div id="row-fav" hidden><h2 class="game-row-title">Favorites</h2><div class="games-grid" id="g-fav"></div></div>
+      <h2 class="game-row-title">All Games</h2>
+      <div class="games-grid" id="g-all"></div>
     </main>
   </div>
   <script type="module" src="js/games.js"></script>

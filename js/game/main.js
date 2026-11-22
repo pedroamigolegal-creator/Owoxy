@@ -1,7 +1,9 @@
 // "Talk To Others": escolha de dispositivo, carregamento, mundo, controles, chat, lista de jogadores e menu Esc.
 import * as THREE from 'three';
 import { requireUser } from '../auth.js';
-import { esc, toast, verifiedBadge } from '../common.js';
+import { esc, formDialog, toast, verifiedBadge } from '../common.js';
+import { friendlyError } from '../items.js';
+import { rpc } from '../supabase.js';
 import { CONFIG } from '../config.js';
 import { lookOfUser } from '../items.js';
 import { createCharacter, loadTemplate } from './character.js';
@@ -10,7 +12,9 @@ import { headingFor, lerpAngle, stepPlayer, GROUND_Y } from './physics.js';
 
 const $ = (id) => document.getElementById(id);
 // jogos: ?g=nds abre o Natural Disaster Survival; sem nada abre o Talk To Others
-const GAME = new URLSearchParams(location.search).get('g') === 'nds' ? 'nds' : 'ttos';
+const QS = new URLSearchParams(location.search);
+const GAME = QS.get('g') === 'nds' ? 'nds' : 'ttos';
+const START_SERVER = Number(QS.get('s')) || 0;
 const TITLE = GAME === 'nds' ? 'Natural Disaster Survival' : 'Talk To Others';
 document.title = `Owoxy - ${TITLE}`;
 $('device-title').textContent = TITLE; $('menu-title').textContent = TITLE;
@@ -194,7 +198,7 @@ try {
       addChatLine(r.name, text, r.verified);
       showBubble(r, text);
     },
-  }, GAME);
+  }, GAME, START_SERVER);
 } catch (e) { fail(e); }
 // o roster pode ter chegado antes de net existir: garante que "eu" não vire jogador remoto
 if (remotes.has(net.key)) removeRemote(net.key);
@@ -334,7 +338,21 @@ me.bubble = null;
 
 // ---------- lista de jogadores e menu Esc ----------
 function rowHTML(p, you) {
-  return `<li><span class="pname">${esc(p.name)}</span>${p.verified ? verifiedBadge() : ''}${you ? '<em>you</em>' : ''}</li>`;
+  const rep = !you && p.uid ? `<button class="rep-btn" type="button" data-uid="${esc(p.uid)}" data-name="${esc(p.name)}" title="Report">Report</button>` : '';
+  return `<li><span class="pname">${esc(p.name)}</span>${p.verified ? verifiedBadge() : ''}${you ? '<em>you</em>' : ''}${rep}</li>`;
+}
+const REASONS = ['Inappropriate chat', 'Harassment or bullying', 'Scam or phishing', 'Cheating or exploiting', 'Inappropriate username', 'Other'];
+async function reportPlayer(uid, name) {
+  const v = await formDialog({ title: `Report ${name}`, message: 'Tell us what happened. Our moderators will review it.', confirmText: 'Submit report', danger: true,
+    fields: [{ name: 'reason', label: 'Reason', options: REASONS }, { name: 'details', label: 'Details (optional)', maxLength: 300 }] });
+  if (!v) return;
+  try {
+    await rpc('submit_report', { p_target: uid, p_reason: v.reason, p_details: v.details || null, p_context: `${TITLE}, server ${net?.server ?? '?'}` });
+    toast('Report sent. Thank you!');
+  } catch (err) { console.error(err); toast(friendlyError(err)); }
+}
+for (const id of ['players-list', 'menu-players']) {
+  $(id).addEventListener('click', (e) => { const b = e.target.closest('.rep-btn'); if (b) reportPlayer(b.dataset.uid, b.dataset.name); });
 }
 function renderRoster() {
   const count = `${Math.min(roster.length, MAX_PLAYERS)} / ${MAX_PLAYERS}`;
