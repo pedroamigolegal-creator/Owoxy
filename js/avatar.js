@@ -137,7 +137,8 @@ function buildFaceKit(mesh, body, pivot) {
   const skin = [...headVerts].find((i) => !dark.includes(i));
   if (skin === undefined) return null;
   const skinUV = [uv.getX(skin), uv.getY(skin)];
-  const original = dark.map((i) => [uv.getX(i), uv.getY(i)]);
+  const allHead = [...headVerts];
+  const original = allHead.map((i) => [uv.getX(i), uv.getY(i)]);
 
   // tudo para o espaço do pivot (o rosto aponta para -X)
   pivot.updateMatrixWorld(true);
@@ -159,7 +160,7 @@ function buildFaceKit(mesh, body, pivot) {
   return {
     setFace(img) {
       if (decal) { pivot.remove(decal); decal.material.map?.dispose(); decal.material.dispose(); decal = null; }
-      dark.forEach((i, k) => { const [a, b] = img ? skinUV : original[k]; uv.setXY(i, a, b); });
+      allHead.forEach((i, k) => { const [a, b] = img ? skinUV : original[k]; uv.setXY(i, a, b); });
       uv.needsUpdate = true;
       if (!img || !decalGeo) return;
       decal = new THREE.Mesh(decalGeo, faceMaterial(img));
@@ -249,7 +250,7 @@ export async function createStage(canvas, { view = 'full', modelUrl = CONFIG.def
         a.texUrl ? loadImage(a.texUrl).catch(() => null) : null,
       ]);
       let map = null;
-      if (tex) { map = new THREE.Texture(tex); map.colorSpace = THREE.SRGBColorSpace; map.needsUpdate = true; }
+      if (tex) { map = new THREE.Texture(tex); map.colorSpace = THREE.SRGBColorSpace; map.wrapS = map.wrapT = THREE.RepeatWrapping; map.needsUpdate = true; }
       obj.traverse((o) => {
         if (o.isMesh) o.material = new THREE.MeshStandardMaterial({ map, color: map ? 0xffffff : 0xcccccc, roughness: 0.7, metalness: 0, side: THREE.DoubleSide });
       });

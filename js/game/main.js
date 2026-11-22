@@ -22,6 +22,16 @@ let net = null;
 const remotes = new Map();        // key -> jogador remoto
 let roster = [];                  // lista de presence (até 100)
 let menuOpen = false;
+let ready = false;                // só depois que a tela do jogo está montada
+
+// qualquer erro aparece numa faixa vermelha (ajuda a achar o problema)
+function reportError(err) {
+  console.error(err);
+  const el = $('err');
+  if (el) { el.hidden = false; el.textContent = 'Error: ' + (err?.message || err); }
+}
+addEventListener('error', (e) => reportError(e.error || e.message));
+addEventListener('unhandledrejection', (e) => reportError(e.reason));
 
 // ---------- 1) escolha do dispositivo ----------
 $('player-name').textContent = user.username;
@@ -38,11 +48,9 @@ try { if (device === 'mobile') await document.documentElement.requestFullscreen?
 // ---------- 2) tela de carregamento ----------
 const loading = $('loading');
 loading.hidden = false;
-const bar = $('load-bar'), loadText = $('load-text');
-const TIPS = ['Press Enter to chat with everyone in the server.', 'Chat bubbles appear above the head of whoever is talking.', 'Press Tab to see who is in the server.', 'Press Esc to open the game menu.', 'Drag with the mouse to turn the camera.'];
-$('load-tip').textContent = 'Tip: ' + (device === 'mobile' ? 'Drag on the screen to turn the camera.' : TIPS[Math.floor(Math.random() * TIPS.length)]);
-const progress = (pct, text) => { bar.style.width = pct + '%'; if (text) loadText.textContent = text; };
-const minDelay = new Promise((r) => setTimeout(r, 1800));   // dá tempo de ver a tela, como no Roblox
+const loadText = $('load-text');
+const progress = (pct, text) => { if (text) loadText.textContent = text; };
+const minDelay = new Promise((r) => setTimeout(r, 2200));   // dá tempo de ver a tela, como no Roblox
 
 function fail(err) {
   console.error(err);
@@ -53,7 +61,7 @@ function fail(err) {
 }
 $('load-retry').addEventListener('click', () => location.reload());
 
-progress(5, 'Starting...');
+progress(5, 'Joining server');
 const canvas = $('stage');
 let renderer;
 try {
@@ -74,9 +82,9 @@ addEventListener('resize', resize);
 
 let tpl, world;
 try {
-  progress(15, 'Loading character...');
+  progress(15, 'Loading character');
   tpl = await loadTemplate(user.avatar?.model || CONFIG.defaultAvatar);
-  progress(40, 'Building the town...');
+  progress(40, 'Loading map');
   world = buildWorld();
   scene.add(world.group);
 } catch (e) { fail(e); }
@@ -112,7 +120,7 @@ function blobShadow() {
 }
 
 // jogador local
-progress(55, 'Dressing your character...');
+progress(55, 'Loading character');
 const me = { state: { x: 0, y: GROUND_Y, z: 0, vy: 0 }, heading: 0, ...makeActor(null) };
 function respawn() {
   const p = world.spawnPoint();
@@ -125,7 +133,7 @@ respawn();
 lookOfUser(user.id).then((l) => me.c.setLook({ colors: user.avatar?.colors || undefined, ...l })).catch(() => me.c.setLook({ colors: user.avatar?.colors || undefined }));
 
 // ---------- rede ----------
-progress(70, 'Connecting to the server...');
+progress(70, 'Joining server');
 const lookQueue = [];
 let lookActive = 0;
 function queueLook(r) { lookQueue.push(r); pumpLooks(); }
@@ -155,7 +163,7 @@ function removeRemote(key) {
 
 try {
   net = await joinServer(user, {
-    onProgress: (t) => progress(75, t),
+    onProgress: () => progress(75, 'Joining server'),
     onRoster(list) {
       roster = list;
       const keys = new Set(list.map((p) => p.key));
@@ -169,7 +177,7 @@ try {
       if (!r.seen) { r.seen = true; r.actor.holder.position.set(d.x, d.y, d.z); r.actor.holder.rotation.y = d.h; r.actor.holder.visible = true; }
     },
     onChat(k, text) {
-      const r = remotes.get(k); if (!r) return;
+      const r = remotes.get(k); if (!r || !ready) return;
       addChatLine(r.name, text, r.verified);
       showBubble(r, text);
     },
@@ -180,12 +188,11 @@ if (remotes.has(net.key)) removeRemote(net.key);
 $('server-name').textContent = `Server ${net.server}`;
 addEventListener('pagehide', () => { net?.leave(); });
 
-progress(100, 'Ready!');
+progress(100, 'Joining server');
 await minDelay;
 loading.classList.add('done');
 setTimeout(() => { loading.hidden = true; }, 600);
 $('hud').hidden = false;
-addChatLine('', `Welcome to Talk To Others, ${user.username}! Say hi!`, false, true);
 
 // ---------- entrada ----------
 const keys = new Set();
@@ -199,7 +206,7 @@ addEventListener('keydown', (e) => {
   }
   if (e.key === 'Escape') { e.preventDefault(); toggleMenu(); return; }
   if (menuOpen) return;
-  if (e.key === 'Enter' || e.key === '/') { e.preventDefault(); $('chat-input').focus(); return; }
+  if (e.key === 'Enter' || e.key === '/') { e.preventDefault(); showChat(); return; }
   if (e.key === 'Tab') { e.preventDefault(); $('players').classList.toggle('hidden'); return; }
   keys.add(e.code);
   if (e.code === 'Space') e.preventDefault();
@@ -286,17 +293,24 @@ $('chat-form').addEventListener('submit', (e) => {
 });
 $('chat-input').addEventListener('focus', () => { chatFocused = true; keys.clear(); $('chat').classList.remove('faded'); });
 $('chat-input').addEventListener('blur', () => { chatFocused = false; chatFade = performance.now() + 6000; });
-$('chat-btn').addEventListener('click', () => $('chat-input').focus());
+const showChat = () => { $('chat').classList.remove('off', 'faded'); $('chat-input').focus(); };
+$('chat-btn').addEventListener('click', () => {
+  const c = $('chat');
+  if (c.classList.contains('off')) showChat(); else if (chatFocused) { $('chat-input').blur(); c.classList.add('off'); } else showChat();
+});
 
-// balões brancos
+// balões (como no Roblox): até 3 mensagens empilhadas sobre a cabeça, cada uma some depois de 8 s
 const bubbleLayer = $('bubbles');
 function showBubble(who, text) {
-  if (!who.bubble) { who.bubble = document.createElement('div'); who.bubble.className = 'bubble'; bubbleLayer.append(who.bubble); }
-  who.bubble.textContent = text;
-  who.bubble.hidden = false;
-  who.bubbleUntil = performance.now() + 8000;
+  if (!who.bubble) { who.bubble = document.createElement('div'); who.bubble.className = 'bubble-stack'; bubbleLayer.append(who.bubble); }
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  b.textContent = text;
+  b.dataset.until = String(performance.now() + 8000);
+  who.bubble.append(b);
+  while (who.bubble.children.length > 3) who.bubble.firstChild.remove();
 }
-me.bubble = null; me.bubbleUntil = 0;
+me.bubble = null;
 
 // ---------- lista de jogadores e menu Esc ----------
 function rowHTML(p, you) {
@@ -312,6 +326,7 @@ function renderRoster() {
 }
 $('players-head').addEventListener('click', () => $('players').classList.toggle('collapsed'));
 $('players-btn').addEventListener('click', () => $('players').classList.toggle('hidden'));
+$('players').classList.add('hidden');
 
 function toggleMenu(force) {
   menuOpen = force ?? !menuOpen;
@@ -354,6 +369,9 @@ function placeLabel(el, pos, yOff, maxDist, camPos) {
 
 function frame(now) {
   requestAnimationFrame(frame);
+  try { tick(now); } catch (err) { reportError(err); }
+}
+function tick(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
 
   // entrada -> direção no mundo (relativa à câmera)
@@ -424,11 +442,13 @@ function frame(now) {
   }
   for (const r of [me, ...remotes.values()]) {
     if (!r.bubble) continue;
-    if (!settings.bubbles || t > r.bubbleUntil) { r.bubble.hidden = true; continue; }
-    r.bubble.hidden = false;
+    for (const b of [...r.bubble.children]) if (t > Number(b.dataset.until)) b.remove();
+    if (!settings.bubbles || !r.bubble.children.length) { r.bubble.style.display = 'none'; continue; }
     placeLabel(r.bubble, r === me ? me.holder.position : r.actor.holder.position, H + (r.tag && r.tag.style.display !== 'none' ? 3.4 : 2.0), 110, cpos);
   }
   if (!chatFocused && t > chatFade) $('chat').classList.add('faded');
 }
 resize();
+ready = true;
+addChatLine('', `Welcome to Talk To Others, ${user.username}! Say hi!`, false, true);
 requestAnimationFrame(frame);

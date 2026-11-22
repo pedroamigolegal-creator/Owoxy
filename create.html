@@ -53,10 +53,12 @@
                 <div id="ugc-fields" hidden>
                   <label class="lbl" for="ugc-type">1. Accessory type</label>
                   <select id="ugc-type"></select>
-                  <label class="lbl" for="file-mesh">2. Choose your 3D model (.obj)</label>
-                  <input id="file-mesh" type="file" accept=".obj">
-                  <label class="lbl" for="file-tex">3. Texture (optional PNG, up to 1024 x 1024)</label>
-                  <input id="file-tex" type="file" accept="image/png">
+                  <label class="lbl" for="file-mesh">2. Choose your 3D model (.obj or .fbx)</label>
+                  <p class="muted small">You can select several files at once: the model (.obj or .fbx), its .mtl and the texture image. An .fbx is converted to .obj for you.</p>
+                  <input id="file-mesh" type="file" accept=".obj,.fbx,.mtl,.png,.jpg,.jpeg" multiple>
+                  <label class="lbl" for="file-tex">3. Texture (optional PNG or JPG, up to 1024 x 1024)</label>
+                  <input id="file-tex" type="file" accept="image/png,image/jpeg">
+                  <label class="row-gap small"><input id="tex-flip" type="checkbox"> Flip the texture upside-down (use this if the texture looks upside-down on the model)</label>
                   <div id="pos-box" hidden>
                     <label class="lbl">Size</label>
                     <p class="muted small">Auto scale resizes the accessory to fit the noob.</p>

@@ -124,7 +124,7 @@ export function createCharacter(tpl) {
     if (face && tpl.decalGeo) {
       ownHeadGeo = tpl.geos.head.clone();
       const uv = ownHeadGeo.attributes.uv;
-      for (const i of tpl.dark) uv.setXY(i, tpl.skinUV[0], tpl.skinUV[1]);
+      for (let i = 0; i < uv.count; i++) uv.setXY(i, tpl.skinUV[0], tpl.skinUV[1]);   // cabeça toda lisa: o rosto original não vaza
       uv.needsUpdate = true;
       meshes.head.geometry = ownHeadGeo;
       decal = new THREE.Mesh(tpl.decalGeo, faceMaterial(face));
@@ -138,7 +138,7 @@ export function createCharacter(tpl) {
       try {
         const [obj, tex] = await Promise.all([OBJ.loadAsync(a.meshUrl), a.texUrl ? loadImage(a.texUrl).catch(() => null) : null]);
         let map = null;
-        if (tex) { map = new THREE.Texture(tex); map.colorSpace = THREE.SRGBColorSpace; map.needsUpdate = true; }
+        if (tex) { map = new THREE.Texture(tex); map.colorSpace = THREE.SRGBColorSpace; map.wrapS = map.wrapT = THREE.RepeatWrapping; map.needsUpdate = true; }
         obj.traverse((o) => { if (o.isMesh) o.material = new THREE.MeshStandardMaterial({ map, color: map ? 0xffffff : 0xcccccc, roughness: 0.7, metalness: 0, side: THREE.DoubleSide }); });
         obj.position.set(...(a.offset || [0, 0, 0]));
         obj.scale.setScalar(a.scale || 1);

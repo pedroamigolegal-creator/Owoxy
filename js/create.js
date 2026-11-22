@@ -60,7 +60,7 @@ if (user) {
   }).catch((err) => { console.error(err); $('preview-note').textContent = '3D preview is not available in this browser.'; });
 
   // ---- estado do formulário ----
-  const state = { file: null, ok: false, triangles: null, meshFile: null, texFile: null, info: null, auto: [0, 0, 0], meshUrl: null, texUrl: null, scale: 1 };
+  const state = { file: null, ok: false, triangles: null, meshFile: null, texFile: null, mtlFile: null, texPng: null, info: null, auto: [0, 0, 0], meshUrl: null, texUrl: null, scale: 1 };
 
   // opções só da conta Owoxy
   $('admin-sale').hidden = !user.isAdmin;
@@ -170,31 +170,79 @@ if (user) {
     refreshButton();
   });
 
-  // ---- UGC: lê o .obj e confere os critérios ----
+  // ---- UGC: lê o modelo (.obj ou .fbx), o .mtl e a textura, e confere os critérios ----
+  const extOf = (f) => (f.name.split('.').pop() || '').toLowerCase();
+
+  // .fbx vira .obj (o resto do Owoxy trabalha com .obj)
+  async function fbxToObj(file) {
+    const [{ FBXLoader }, { OBJExporter }, THREE] = await Promise.all([
+      import('three/addons/loaders/FBXLoader.js'), import('three/addons/exporters/OBJExporter.js'), import('three')]);
+    const root = new FBXLoader().parse(await file.arrayBuffer(), '');
+    root.updateMatrixWorld(true);
+    let meshes = 0;
+    root.traverse((o) => { if (o.isMesh) meshes++; });
+    if (!meshes) throw new Error('This .fbx has no 3D mesh inside.');
+    const text = new OBJExporter().parse(root);
+    return new File([text], file.name.replace(/\.fbx$/i, '') + '.obj', { type: 'text/plain' });
+  }
+
+  // lê o .mtl: textura citada e cor principal
+  async function readMtl(file) {
+    const out = { tex: null, color: null };
+    for (const raw of (await file.text()).split(/\r?\n/)) {
+      const l = raw.trim();
+      if (/^map_Kd\s/i.test(l)) out.tex = l.split(/\s+/).pop().split(/[\\/]/).pop();
+      else if (/^Kd\s/i.test(l) && !out.color) { const c = l.split(/\s+/).slice(1, 4).map(Number); if (c.length === 3 && c.every(Number.isFinite)) out.color = c; }
+    }
+    return out;
+  }
+
+  // textura final em PNG: a imagem escolhida (png/jpg), ou uma cor lisa vinda do .mtl; vira de cabeça para baixo se pedido
+  async function buildTexture(mtl) {
+    const flip = $('tex-flip').checked;
+    const c = document.createElement('canvas');
+    if (state.texFile) {
+      if (!/^image\/(png|jpeg)$/.test(state.texFile.type)) throw new Error('The texture must be a PNG or JPG image.');
+      const img = await readImage(state.texFile);
+      c.width = img.naturalWidth; c.height = img.naturalHeight;
+      const x = c.getContext('2d');
+      if (flip) { x.translate(0, c.height); x.scale(1, -1); }
+      x.drawImage(img, 0, 0);
+    } else if (mtl?.color && !mtl.color.every((v) => v > 0.98)) {
+      c.width = c.height = 16;
+      const x = c.getContext('2d');
+      x.fillStyle = `rgb(${mtl.color.map((v) => Math.round(Math.min(1, Math.max(0, v)) * 255)).join(',')})`;
+      x.fillRect(0, 0, 16, 16);
+    } else return null;
+    const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
+    return { blob, width: c.width, height: c.height, bytes: blob.size };
+  }
+
   async function checkUGC(fresh = true) {
     if (fresh) setScale(1);
     state.ok = false;
     const mesh = state.meshFile;
     if (!mesh) { showChecks([]); $('pos-box').hidden = true; refreshButton(); return; }
     try {
-      let tex = null;
-      if (state.texFile) {
-        if (state.texFile.type !== 'image/png') throw new Error('The texture must be a PNG file.');
-        const img = await readImage(state.texFile);
-        tex = { width: img.naturalWidth, height: img.naturalHeight, bytes: state.texFile.size };
-      }
+      const mtl = state.mtlFile ? await readMtl(state.mtlFile) : null;
+      const notes = [];
+      if (mtl?.tex && !state.texFile) notes.push({ ok: false, warn: true, text: `The .mtl uses the texture "${mtl.tex}". Select that image too (step 3).` });
+      const built = await buildTexture(mtl);
+      state.texPng = built ? built.blob : null;
+      const tex = built ? { width: built.width, height: built.height, bytes: built.bytes } : null;
       const info = parseOBJ(await mesh.text());
       // arquivo novo grande demais: já aplica o Auto scale (o botão serve para refazer quando quiser)
       if (fresh && Math.max(...info.size) > CREATE_RULES.ugc.maxSize) setScale(autoScale(info, typeSel.value));
       const res = validateAccessory(info, { fileBytes: mesh.size, tex, autoPosition: true, scale: state.scale });
-      showChecks(res.checks);
+      if (state.mtlFile && !state.texFile && state.texPng) notes.push({ ok: true, text: 'Color taken from the .mtl file' });
+      showChecks([...notes, ...res.checks]);
       state.ok = res.errors.length === 0;
       state.triangles = info.triangles;
       state.info = info;
       $('pos-box').hidden = !state.ok;
       if (state.ok) {
         state.meshUrl = blobUrl(mesh);
-        state.texUrl = state.texFile ? blobUrl(state.texFile) : null;
+        state.texUrl = state.texPng ? blobUrl(state.texPng) : null;
         if (api) { autoPosition(); $('preview-note').textContent = 'Preview: your accessory on the noob, positioned automatically.'; }
       }
     } catch (err) {
@@ -203,8 +251,21 @@ if (user) {
     }
     refreshButton();
   }
-  $('file-mesh').addEventListener('change', (e) => { state.meshFile = e.target.files[0] || null; checkUGC(); });
-  $('file-tex').addEventListener('change', (e) => { state.texFile = e.target.files[0] || null; checkUGC(); });
+  $('file-mesh').addEventListener('change', async (e) => {
+    const files = [...e.target.files];
+    state.meshFile = null; state.mtlFile = null;
+    const img = files.find((f) => /^image\//.test(f.type));
+    if (img) { state.texFile = img; }
+    state.mtlFile = files.find((f) => extOf(f) === 'mtl') || null;
+    const model = files.find((f) => ['obj', 'fbx'].includes(extOf(f)));
+    try {
+      if (model) state.meshFile = extOf(model) === 'fbx' ? await fbxToObj(model) : model;
+      else if (files.length) throw new Error('Select a .obj or .fbx model file.');
+    } catch (err) { console.error(err); showChecks([{ ok: false, text: err.message || 'Could not read this model.' }]); state.meshFile = null; refreshButton(); return; }
+    checkUGC();
+  });
+  $('file-tex').addEventListener('change', (e) => { state.texFile = e.target.files[0] || null; checkUGC(false); });
+  $('tex-flip').addEventListener('change', () => { if (state.meshFile) checkUGC(false); });
   typeSel.addEventListener('change', () => { if (state.meshFile) checkUGC(); });
 
   // ---- upload ----
@@ -228,7 +289,7 @@ if (user) {
       let args;
       if (isUGC) {
         const meshPath = await uploadFile(user.id, state.meshFile, 'obj', 'text/plain');
-        const imagePath = state.texFile ? await uploadFile(user.id, state.texFile, 'png', 'image/png') : null;
+        const imagePath = state.texPng ? await uploadFile(user.id, state.texPng, 'png', 'image/png') : null;
         args = { kind: 'accessory', accessoryType: typeSel.value, name: $('i-name').value.trim(), price, imagePath, meshPath, triangles: state.triangles, offset: currentOffset(), scale: state.scale };
       } else {
         const imagePath = await uploadFile(user.id, state.file, 'png', 'image/png');
@@ -244,7 +305,7 @@ if (user) {
       toast('Uploaded! It is in your Inventory and in the Catalog.');
       $('upload-form').reset();
       $('stock-wrap').hidden = true; $('pos-box').hidden = true; state.info = null;
-      state.ok = false; state.file = null; state.meshFile = null; state.texFile = null;
+      state.ok = false; state.file = null; state.meshFile = null; state.texFile = null; state.mtlFile = null; state.texPng = null;
       showChecks([]);
       if (api) api.setLook({});
       await loadMine();

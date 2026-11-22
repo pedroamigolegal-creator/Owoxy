@@ -16,22 +16,15 @@
 .device-options small { color: #a9adb3; font-size: 12px; line-height: 1.3; }
 .device-card .back { display: inline-block; margin-top: 16px; color: #8fb8ff; font-size: 13px; }
 
-/* carregamento estilo Roblox */
-#loading { flex-direction: column; justify-content: space-between; z-index: 60; transition: opacity .5s; }
+/* carregamento estilo Roblox: fundo cinza, "Joining server" no meio, logo girando no canto */
+#loading { background: #2d2d2d; z-index: 60; flex-direction: column; gap: 18px; transition: opacity .5s; }
 #loading.done { opacity: 0; pointer-events: none; }
-.load-center { margin: auto; text-align: center; }
-.load-icon { width: 150px; height: 150px; margin: 0 auto 18px; border-radius: 14px; background: linear-gradient(135deg, #3aa0ff, #7b5cff); display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 800; letter-spacing: 1px; box-shadow: 0 8px 24px rgba(0,0,0,.45); }
-.load-center h2 { margin: 0; font-size: 30px; }
-.by { margin: 6px 0 22px; color: #bfc3c9; display: flex; align-items: center; justify-content: center; gap: 5px; }
-.by .verified { width: 16px; height: 16px; }
-.spinner { width: 34px; height: 34px; margin: 0 auto; border: 4px solid rgba(255,255,255,.2); border-top-color: #fff; border-radius: 50%; animation: spin 0.9s linear infinite; }
+#load-text { margin: 0; font-size: 13px; color: #e6e6e6; letter-spacing: .2px; }
+.load-logo { position: fixed; right: 30px; bottom: 28px; width: 46px; height: 46px; animation: spin 3s linear infinite; }
+.load-logo i { position: absolute; inset: 0; background: #fff; border-radius: 6px; transform: rotate(14deg); }
+.load-logo i::after { content: ''; position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; background: #2d2d2d; border-radius: 2px; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.load-bottom { padding: 0 8vw 36px; text-align: center; }
-.bar { height: 8px; background: rgba(255,255,255,.18); border-radius: 4px; overflow: hidden; }
-.bar i { display: block; height: 100%; width: 0; background: #fff; transition: width .35s; }
-#load-text { margin: 10px 0 4px; font-size: 14px; }
-.tip { color: #9a9ea5; font-size: 13px; margin: 4px 0 0; }
-#loading.failed .spinner { display: none; }
+#loading.failed .load-logo { animation: none; }
 #loading.failed #load-text { color: #ff8a8a; }
 
 /* HUD */
@@ -41,17 +34,22 @@
 #tags > *, #bubbles > * { position: absolute; left: 0; top: 0; pointer-events: none; }
 .nametag { color: #fff; font-size: 13px; font-weight: 700; text-shadow: 0 0 3px #000, 0 0 3px #000; white-space: nowrap; display: flex; align-items: center; gap: 3px; }
 .nametag .verified, #players .verified, .plist .verified, .chat-line .verified { width: 14px; height: 14px; flex: none; }
-.bubble { background: #fff; color: #111; border-radius: 10px; padding: 6px 10px; font-size: 14px; font-weight: 600; max-width: 220px; text-align: center; word-wrap: break-word; box-shadow: 0 2px 6px rgba(0,0,0,.35); }
-.bubble::after { content: ''; position: absolute; left: 50%; bottom: -6px; margin-left: -6px; border: 6px solid transparent; border-bottom: 0; border-top-color: #fff; }
+.bubble-stack { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.bubble { position: relative; background: rgba(255,255,255,.92); color: #222; border-radius: 6px; padding: 4px 9px; font-size: 13px; font-weight: 500; max-width: 210px; text-align: center; word-wrap: break-word; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
 
 .hud-btn { position: fixed; width: 42px; height: 42px; border-radius: 8px; border: 0; background: rgba(0,0,0,.5); color: #fff; font-size: 20px; cursor: pointer; }
 #menu-btn { top: 10px; left: 10px; }
-#players-btn { top: 10px; right: 10px; display: none; }
-#chat-btn { top: 10px; left: 58px; display: none; }
-.is-mobile #players-btn, .is-mobile #chat-btn { display: block; }
+#chat-btn { top: 10px; left: 58px; }
+#players-btn { top: 10px; right: 10px; border-radius: 50%; }
+.hud-btn { display: flex; align-items: center; justify-content: center; padding: 0; }
+.owoxy-ico { position: relative; width: 22px; height: 22px; display: block; }
+.owoxy-ico i { position: absolute; inset: 0; background: #fff; border-radius: 4px; transform: rotate(14deg); }
+.owoxy-ico i::after { content: ''; position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; background: #3a3d41; border-radius: 1.5px; }
+#err { position: fixed; left: 0; right: 0; bottom: 0; background: #b3261e; color: #fff; font-size: 12px; padding: 6px 10px; z-index: 99; user-select: text; -webkit-user-select: text; }
+#err[hidden] { display: none; }
 
-#players { position: fixed; top: 10px; right: 10px; width: 220px; max-height: 50vh; background: rgba(0,0,0,.5); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; font-size: 13px; }
-.is-mobile #players { top: 58px; width: 170px; max-height: 40vh; }
+#players { position: fixed; top: 58px; right: 10px; width: 220px; max-height: 50vh; background: rgba(0,0,0,.5); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; font-size: 13px; }
+.is-mobile #players { width: 170px; max-height: 40vh; }
 #players.hidden { display: none; }
 #players-head { display: flex; justify-content: space-between; padding: 8px 10px; background: rgba(255,255,255,.1); cursor: pointer; }
 #players.collapsed #players-list { display: none; }
@@ -60,11 +58,12 @@
 #players li em, .plist li em { margin-left: auto; color: #9ad; font-style: normal; font-size: 11px; }
 .pname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-#chat { position: fixed; left: 10px; bottom: 10px; width: min(360px, 60vw); transition: opacity .4s; }
-.is-mobile #chat { top: 58px; bottom: auto; width: min(300px, 46vw); }
+#chat { position: fixed; left: 10px; top: 58px; width: min(330px, 60vw); transition: opacity .4s; }
+#chat.off { display: none; }
+.is-mobile #chat { width: min(300px, 46vw); }
 #chat.faded { opacity: .45; }
 .is-mobile #chat.faded #chat-form { display: none; }
-#chat-log { max-height: 160px; overflow-y: auto; background: rgba(0,0,0,.4); border-radius: 8px 8px 0 0; padding: 6px 8px; font-size: 13px; text-shadow: 0 0 2px #000; scrollbar-width: none; }
+#chat-log { max-height: 150px; overflow-y: auto; background: rgba(0,0,0,.4); border-radius: 8px 8px 0 0; padding: 6px 8px; font-size: 13px; text-shadow: 0 0 2px #000; scrollbar-width: none; }
 .chat-line { margin: 2px 0; word-wrap: break-word; }
 .chat-line b { margin-right: 2px; color: #7cc4ff; }
 .chat-line .verified { vertical-align: -2px; margin-right: 3px; }
