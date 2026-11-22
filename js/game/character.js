@@ -159,9 +159,14 @@ export function createCharacter(tpl) {
   let phase = 0;
   const pose = { armA: 0, armB: 0, legA: 0, legB: 0 };
   const ease = (cur, target, dt) => cur + (target - cur) * (1 - Math.exp(-dt * 16));
-  function update(dt, { moving = false, airborne = false, speed = 1 } = {}) {
+  function update(dt, { moving = false, airborne = false, speed = 1, emote = 0 } = {}) {
     let target;
-    if (airborne) target = { armA: -2.7, armB: -2.7, legA: 0.35, legB: -0.35 };            // pulo: braços para cima
+    let bob = 0;
+    if (emote && !moving && !airborne) {
+      phase += dt * (emote === 2 ? 9 : 10);
+      if (emote === 1) target = { armA: -2.55 + Math.sin(phase) * 0.45, armB: 0.04, legA: 0, legB: 0 };                 // acenar
+      else { const s = Math.sin(phase); target = { armA: -2.3 + s * 0.8, armB: -2.3 - s * 0.8, legA: Math.sin(phase * 2) * 0.5, legB: -Math.sin(phase * 2) * 0.5 }; bob = Math.abs(Math.sin(phase)) * 0.45; }   // dançar
+    } else if (airborne) target = { armA: -2.7, armB: -2.7, legA: 0.35, legB: -0.35 };            // pulo: braços para cima
     else if (moving) {
       phase += dt * 11 * speed;
       const s = Math.sin(phase) * 0.95;
@@ -172,6 +177,7 @@ export function createCharacter(tpl) {
       target = { armA: b, armB: -b, legA: 0, legB: 0 };
     }
     for (const k of Object.keys(pose)) { pose[k] = ease(pose[k], target[k], dt); meshes[k].rotation.z = pose[k]; }
+    root.position.y += (bob - root.position.y) * (1 - Math.exp(-dt * 14));
   }
 
   function dispose() { if (ownHeadGeo) ownHeadGeo.dispose(); if (decal) { decal.material.map?.dispose(); decal.material.dispose(); } }

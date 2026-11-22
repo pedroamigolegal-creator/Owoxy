@@ -38,9 +38,28 @@ export function buildWorld() {
   const gtex = new THREE.CanvasTexture(gc); gtex.wrapS = gtex.wrapT = THREE.RepeatWrapping; gtex.repeat.set(40, 40); gtex.colorSpace = THREE.SRGBColorSpace;
   const grass = new THREE.Mesh(new THREE.PlaneGeometry(MAP * 2, MAP * 2), lambert(0xffffff, { map: gtex }));
   grass.rotation.x = -Math.PI / 2; grass.position.y = GROUND_Y; group.add(grass);
+  box(0, 0, MAP * 2 + 14, MAP * 2 + 14, -8, GROUND_Y - 0.05, 0xe6d3a3, false);              // praia em volta da ilha
   box(0, 0, MAP * 2, MAP * 2, -8, GROUND_Y - 0.02, 0x7a5a3a, false);                       // terra por baixo da ilha
   const roadMat = lambert(0x3a3d42);
   for (const [w, d] of [[MAP * 2, 12], [12, MAP * 2]]) { const r = new THREE.Mesh(new THREE.BoxGeometry(w, 0.05, d), roadMat); r.position.y = GROUND_Y + 0.03; group.add(r); }
+  // praça redonda no cruzamento, calçadas e faixas
+  { const plaza = new THREE.Mesh(new THREE.CylinderGeometry(20, 20, 0.12, 48), lambert(0xd9cfbd)); plaza.position.y = GROUND_Y + 0.05; group.add(plaza);
+    const rim = new THREE.Mesh(new THREE.CylinderGeometry(20.8, 20.8, 0.1, 48), lambert(0xa9a396)); rim.position.y = GROUND_Y + 0.03; group.add(rim);
+    const walk = lambert(0xc9c9c4);
+    for (const sgn of [-1, 1]) for (const [w, d, x, z] of [[MAP * 2, 3, 0, sgn * 7.5], [3, MAP * 2, sgn * 7.5, 0]]) { const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.1, d), walk); m.position.set(x, GROUND_Y + 0.07, z); group.add(m); }
+    const marks = [];
+    for (let p = 24; p < MAP - 2; p += 9) for (const sgn of [-1, 1]) { marks.push([sgn * p, 0, 4.5, 0.3]); marks.push([0, sgn * p, 0.3, 4.5]); }
+    for (let i = -2; i <= 2; i++) for (const sgn of [-1, 1]) { marks.push([sgn * 23, i * 2.2, 2.6, 1.1]); marks.push([i * 2.2, sgn * 23, 1.1, 2.6]); }
+    const inst = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 0.02, 1), new THREE.MeshLambertMaterial({ color: 0xf3f3f0 }), marks.length);
+    const dm = new THREE.Object3D();
+    marks.forEach(([x, z, w, d], i) => { dm.position.set(x, GROUND_Y + 0.07, z); dm.scale.set(w, 1, d); dm.updateMatrix(); inst.setMatrixAt(i, dm.matrix); });
+    group.add(inst);
+    // fonte (dá para subir na borda: 1.0 de altura)
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(4.6, 4.9, 1.0, 28), lambert(0xb8b2a6)); base.position.y = 0.5; group.add(base);
+    const pool = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 0.1, 28), new THREE.MeshLambertMaterial({ color: 0x4aa8e0 })); pool.position.y = 0.95; group.add(pool);
+    const col = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 3.4, 10), lambert(0xb8b2a6)); col.position.y = 2.2; group.add(col);
+    const bowl = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 0.5, 0.5, 14), lambert(0xb8b2a6)); bowl.position.y = 3.9; group.add(bowl);
+    boxes.push({ minX: -4.4, maxX: 4.4, minY: 0, maxY: 1.0, minZ: -4.4, maxZ: 4.4 }); }
   // lobby
   box(LOBBY.x, LOBBY.z, LOBBY.half * 2, LOBBY.half * 2, -8, GROUND_Y, 0xb8b4aa, false);
   const lobbyTop = new THREE.Mesh(new THREE.PlaneGeometry(LOBBY.half * 2, LOBBY.half * 2), lambert(0xd9d5c8));
@@ -52,6 +71,18 @@ export function buildWorld() {
     const sign = new THREE.Mesh(new THREE.PlaneGeometry(32, 8), new THREE.MeshBasicMaterial({ map: t, side: THREE.DoubleSide }));
     sign.position.set(LOBBY.x + 22, 12, LOBBY.z); sign.rotation.y = -Math.PI / 2; group.add(sign);
     box(LOBBY.x + 22.5, LOBBY.z - 12, 1, 1, 0, 8, 0x555a60, false); box(LOBBY.x + 22.5, LOBBY.z + 12, 1, 1, 0, 8, 0x555a60, false); }
+
+  // enfeites do lobby
+  for (const [ox, oz] of [[-22, -22], [22, -22], [-22, 22], [22, 22], [0, -24], [0, 24]]) {
+    box(LOBBY.x + ox, LOBBY.z + oz, 0.5, 0.5, 0, 8, 0x3b3d42, false);
+    const b = new THREE.Mesh(new THREE.SphereGeometry(0.8, 8, 6), new THREE.MeshBasicMaterial({ color: 0xfff1b0 })); b.position.set(LOBBY.x + ox, 8.3, LOBBY.z + oz); group.add(b);
+  }
+  for (const [ox, oz] of [[-18, -8], [-18, 8], [18, -14], [18, 14]]) {
+    box(LOBBY.x + ox, LOBBY.z + oz, 1.4, 1.4, 0, 3.6, 0x7a5230, false);
+    const cr = new THREE.Mesh(new THREE.IcosahedronGeometry(3, 1), lambert(0x3f9a3c)); cr.position.set(LOBBY.x + ox, 5.8, LOBBY.z + oz); group.add(cr);
+  }
+  for (let i = 0; i < 4; i++) { const bedx = LOBBY.x - 10 + i * 6.6; box(bedx, LOBBY.z - 20, 4.4, 1.6, 0, 0.7, 0x8a5a2b, false); for (let k = 0; k < 4; k++) box(bedx - 1.5 + k, LOBBY.z - 20, 0.6, 0.6, 0.7, 1.4, [0xff5a8a, 0xffd24a, 0xffffff, 0xb36bff][(i + k) % 4], false); }
+  for (const oz of [-9, 9]) { box(LOBBY.x - 8, LOBBY.z + oz, 1.4, 4.4, 0.6, 1.0, 0x7a5230, false); box(LOBBY.x - 8.9, LOBBY.z + oz, 0.4, 4.4, 1.0, 2.2, 0x7a5230, false); box(LOBBY.x - 8, LOBBY.z + oz - 1.9, 1.2, 0.4, 0, 0.6, 0x3b3d42, false); box(LOBBY.x - 8, LOBBY.z + oz + 1.9, 1.2, 0.4, 0, 0.6, 0x3b3d42, false); }
 
   // ---- prédios (com degraus em espiral por fora, para dar para subir pulando) ----
   const palette = [0xc96f5a, 0xd9b26f, 0x7b9bc4, 0xa7b5a0, 0xcf8fa0, 0xe0d4b8, 0x8e8aa8];
@@ -82,6 +113,14 @@ export function buildWorld() {
   const spec = [[30, 30, 20, 20, 14], [58, 30, 18, 18, 22], [30, 58, 18, 18, 28], [-30, 30, 20, 20, 18], [-58, 30, 18, 18, 34], [-30, 58, 18, 18, 12],
     [30, -30, 20, 20, 24], [58, -30, 18, 18, 16], [-30, -30, 20, 20, 20], [-58, -30, 18, 18, 30], [-58, 58, 14, 14, 26], [58, 58, 14, 14, 20]];
   spec.forEach(([x, z, w, d, h], i) => building(x, z, w, d, h, palette[i % palette.length]));
+  spec.forEach(([x, z, w, d, h], i) => {
+    const t = 0.7, rim = lambert(0x6b6d72);
+    for (const [px, pz, pw, pd] of [[0, d / 2 - t / 2, w, t], [0, -d / 2 + t / 2, w, t], [w / 2 - t / 2, 0, t, d], [-w / 2 + t / 2, 0, t, d]]) box(x + px, z + pz, pw, pd, h, h + 1, 0, false, rim);   // parapeito
+    box(x - w * 0.22, z + d * 0.18, 3.4, 2.6, h, h + 2.2, 0x9aa0a6, false);                                                                          // ar-condicionado
+    const dz = z + (z > 0 ? -1 : 1) * (d / 2 + 0.05);                                                                                                // porta e toldo viradas para a praça
+    box(x, dz, 3.4, 0.3, 0, 4.6, 0x3b2a22, false);
+    box(x, dz + (z > 0 ? -1 : 1) * 0.9, 5.6, 1.8, 5.0, 5.4, [0xc4281c, 0x1f7a4d, 0x1a5fb4][i % 3], false);
+  });
 
   // ---- vulcão (enfeite sempre visível; a lava só aparece no desastre) ----
   const volcano = new THREE.Mesh(new THREE.ConeGeometry(20, 44, 20), lambert(0x5b4a40));
@@ -127,6 +166,13 @@ export function buildWorld() {
     fragmentShader: 'uniform vec3 top; uniform vec3 bottom; varying float h; void main(){ gl_FragColor = vec4(mix(bottom, top, clamp(h*1.6, 0.0, 1.0)), 1.0); }',
   }));
   sky.position.set(60, 0, 0); group.add(sky);
+  const clouds = [];
+  const cloudMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, fog: false });
+  for (let i = 0; i < 12; i++) {
+    const c = new THREE.Group();
+    for (let k = 0; k < 4; k++) { const b = new THREE.Mesh(new THREE.BoxGeometry(16 + rand() * 14, 5, 10 + rand() * 6), cloudMat); b.position.set(k * 10 - 15, rand() * 3, rand() * 6); c.add(b); }
+    c.position.set((rand() - 0.5) * 520 + 60, 110 + rand() * 40, (rand() - 0.5) * 420); group.add(c); clouds.push(c);
+  }
   const sun = new THREE.DirectionalLight(0xffffff, 1.4); sun.position.set(60, 120, 40);
   group.add(sun, new THREE.HemisphereLight(0xcfe8ff, 0x7a8f6a, 1.1));
 
@@ -293,7 +339,7 @@ export function buildWorld() {
       else if (S.ph === 'active') { ui.phase.textContent = DISASTER_NAMES[S.d]; ui.timer.textContent = fmt(round.remaining(wall)); ui.sub.textContent = `Survivors: ${aliveSet.size}  •  ${local.alive ? 'You are alive' : 'You are out'}`; }
       else { ui.phase.textContent = 'Round over'; ui.timer.textContent = ''; ui.sub.textContent = `Survivors: ${aliveSet.size}  •  Survivals: ${local.survived}`; }
     },
-    tick() {},
+    tick(dt) { for (const c of clouds) { c.position.x += dt * 2.5; if (c.position.x > 320) c.position.x = -200; } },
   };
   return world;
 }

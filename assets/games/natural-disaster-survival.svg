@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b2f4a"/><stop offset=".55" stop-color="#8a5a6e"/><stop offset="1" stop-color="#f0a35c"/></linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f7fc8"/><stop offset="1" stop-color="#14456f"/></linearGradient>
+    <radialGradient id="fire" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff2a8"/><stop offset=".5" stop-color="#ff7a1a"/><stop offset="1" stop-color="#ff7a1a" stop-opacity="0"/></radialGradient>
+    <linearGradient id="torn" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6c7078"/><stop offset=".5" stop-color="#a5a9b0"/><stop offset="1" stop-color="#5a5e66"/></linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#sky)"/>
+  <g fill="#1d1f2e" opacity=".55"><ellipse cx="90" cy="70" rx="90" ry="26"/><ellipse cx="260" cy="40" rx="120" ry="28"/><ellipse cx="440" cy="84" rx="90" ry="26"/></g>
+  <!-- meteoros -->
+  <g stroke-linecap="round"><path d="M70 40 L190 190" stroke="#ffb347" stroke-width="10" opacity=".55"/><circle cx="192" cy="192" r="22" fill="url(#fire)"/><circle cx="192" cy="192" r="9" fill="#ff6a1a"/>
+  <path d="M330 20 L420 130" stroke="#ffb347" stroke-width="8" opacity=".55"/><circle cx="422" cy="132" r="17" fill="url(#fire)"/><circle cx="422" cy="132" r="7" fill="#ff6a1a"/>
+  <path d="M250 70 L300 150" stroke="#ffb347" stroke-width="6" opacity=".5"/><circle cx="302" cy="152" r="12" fill="url(#fire)"/></g>
+  <!-- vulcão -->
+  <path d="M0 330 L70 250 L96 232 L120 250 L190 330Z" fill="#4a3a36"/><path d="M96 232 L88 190 M100 232 L112 170" stroke="#ff6a1a" stroke-width="6"/><ellipse cx="100" cy="232" rx="18" ry="6" fill="#ff7a1a"/>
+  <!-- tornado -->
+  <path d="M360 120 L470 120 L440 190 L455 190 L420 250 L435 250 L400 320 L410 320 L395 372 L380 372 L372 320 L385 320 L350 250 L365 250 L335 190 L350 190Z" fill="url(#torn)" opacity=".92"/>
+  <g stroke="#d8dbe0" stroke-width="3" opacity=".7" fill="none"><path d="M365 140 q45 12 95 0"/><path d="M352 170 q55 12 106 0"/><path d="M365 210 q40 12 78 0"/><path d="M372 250 q30 10 60 0"/><path d="M382 290 q20 8 40 0"/></g>
+  <!-- cidade -->
+  <rect y="330" width="512" height="182" fill="url(#sea)"/>
+  <path d="M0 392 Q256 360 512 392 L512 512 L0 512Z" fill="#6a9d4e"/>
+  <rect x="150" y="270" width="70" height="170" fill="#7b9bc4"/><rect x="230" y="310" width="64" height="130" fill="#c96f5a"/><rect x="60" y="340" width="70" height="100" fill="#d9b26f"/><rect x="310" y="350" width="60" height="90" fill="#a7b5a0"/>
+  <g fill="#ffe9a8"><rect x="162" y="288" width="14" height="18"/><rect x="190" y="288" width="14" height="18"/><rect x="162" y="324" width="14" height="18"/><rect x="190" y="324" width="14" height="18"/><rect x="162" y="360" width="14" height="18"/><rect x="242" y="328" width="14" height="18"/><rect x="268" y="328" width="14" height="18"/></g>
+  <!-- noob correndo -->
+  <g transform="translate(236 326)"><rect x="0" y="0" width="34" height="34" rx="6" fill="#f5cd30"/><rect x="-4" y="34" width="42" height="44" fill="#0d69ac"/><rect x="-20" y="34" width="14" height="38" fill="#f5cd30" transform="rotate(-35 -13 36)"/><rect x="40" y="34" width="14" height="38" fill="#f5cd30" transform="rotate(40 47 36)"/><rect x="0" y="78" width="18" height="34" fill="#4b974b" transform="rotate(-18 9 78)"/><rect x="20" y="78" width="18" height="34" fill="#4b974b" transform="rotate(22 29 78)"/><circle cx="11" cy="14" r="3" fill="#222"/><circle cx="24" cy="14" r="3" fill="#222"/><ellipse cx="17" cy="25" rx="6" ry="4" fill="#7a1c1c"/></g>
+  <text x="256" y="494" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="40" fill="#fff" stroke="#14213d" stroke-width="6" paint-order="stroke" letter-spacing="2">SURVIVE!</text>
+</svg>

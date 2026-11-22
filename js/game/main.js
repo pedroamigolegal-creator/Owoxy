@@ -125,7 +125,7 @@ function blobShadow() {
 
 // jogador local
 progress(55, 'Loading character');
-const me = { state: { x: 0, y: GROUND_Y, z: 0, vy: 0 }, heading: 0, ...makeActor(null) };
+const me = { state: { x: 0, y: GROUND_Y, z: 0, vy: 0 }, heading: 0, emote: 0, ...makeActor(null) };
 function respawn() {
   const p = world.spawnPoint();
   Object.assign(me.state, { x: p.x, y: GROUND_Y, z: p.z, vy: 0 });
@@ -159,7 +159,7 @@ function pumpLooks() {
 
 function addRemote(p) {
   const actor = makeActor(null);
-  const r = { key: p.key, uid: p.uid, name: p.name, verified: p.verified, actor, tx: 0, ty: GROUND_Y, tz: 0, th: 0, moving: false, air: false, seen: false, tag: null, bubble: null, bubbleUntil: 0 };
+  const r = { key: p.key, uid: p.uid, name: p.name, verified: p.verified, actor, tx: 0, ty: GROUND_Y, tz: 0, th: 0, moving: false, air: false, emote: 0, seen: false, tag: null, bubble: null, bubbleUntil: 0 };
   actor.holder.visible = false;       // só aparece depois da primeira posição
   remotes.set(p.key, r);
   queueLook(r);
@@ -185,7 +185,7 @@ try {
     },
     onPos(k, d) {
       const r = remotes.get(k); if (!r) return;
-      r.tx = d.x; r.ty = d.y; r.tz = d.z; r.th = d.h; r.moving = !!d.m; r.air = !!d.a;
+      r.tx = d.x; r.ty = d.y; r.tz = d.z; r.th = d.h; r.moving = !!d.m; r.air = !!d.a; r.emote = d.e || 0;
       if (!r.seen) { r.seen = true; r.actor.holder.position.set(d.x, d.y, d.z); r.actor.holder.rotation.y = d.h; r.actor.holder.visible = true; }
     },
     onEvent(k, d) { if (ready) world.onEvent?.(k, d); },
@@ -201,7 +201,6 @@ if (remotes.has(net.key)) removeRemote(net.key);
 $('server-name').textContent = `Server ${net.server}`;
 addEventListener('pagehide', () => { net?.leave(); });
 
-world.attach?.({ me, remotes, net, user, teleport, hud: $('hud'), say: (t) => addChatLine('', t, false, true), roster: () => roster, camera: () => camera });
 progress(100, 'Joining server');
 await minDelay;
 loading.classList.add('done');
@@ -297,6 +296,13 @@ $('chat-form').addEventListener('submit', (e) => {
   const text = input.value.replace(/\s+/g, ' ').trim().slice(0, 120);
   input.value = '';
   if (!text) { input.blur(); return; }
+  const cmd = text.toLowerCase();
+  if (cmd[0] === '/') {
+    const e = { '/wave': 1, '/dance': 2, '/stop': 0 }[cmd];
+    if (e === undefined) addChatLine('', 'Commands: /wave  /dance  /stop', false, true); else me.emote = e;
+    if (device === 'pc') input.blur();
+    return;
+  }
   const now = performance.now();
   if (now - lastSent < 900) { toast('Slow down a little!'); return; }
   lastSent = now;
@@ -403,17 +409,18 @@ function tick(now) {
   if (res.moving) me.heading = lerpAngle(me.heading, headingFor(mx, mz), 1 - Math.exp(-dt * 14));
   me.holder.position.set(me.state.x, me.state.y, me.state.z);
   me.holder.rotation.y = me.heading;
-  me.c.update(dt, { moving: res.moving, airborne: res.airborne });
+  if (res.moving || res.airborne) me.emote = 0;           // andar ou pular para a animação
+  me.c.update(dt, { moving: res.moving, airborne: res.airborne, emote: me.emote });
   const sh = me.holder.getObjectByName('shadow');
   if (sh) { const k = Math.max(0.4, 1 - (me.state.y - GROUND_Y) / 14); sh.scale.set(k, k, k); sh.position.y = 0.12 - (me.state.y - GROUND_Y); }
 
   // posição enviada ~5x por segundo (e a cada 1 s mesmo parado)
   if (now - sendAt > 200) {
     const s = me.state;
-    const msg = `${s.x.toFixed(2)},${s.y.toFixed(2)},${s.z.toFixed(2)},${me.heading.toFixed(2)},${res.moving ? 1 : 0},${res.airborne ? 1 : 0}`;
+    const msg = `${s.x.toFixed(2)},${s.y.toFixed(2)},${s.z.toFixed(2)},${me.heading.toFixed(2)},${res.moving ? 1 : 0},${res.airborne ? 1 : 0},${me.emote}`;
     if (msg !== lastSent2 || now - sendAt > 1000) {
       sendAt = now; lastSent2 = msg;
-      net.sendPos({ x: +s.x.toFixed(2), y: +s.y.toFixed(2), z: +s.z.toFixed(2), h: +me.heading.toFixed(2), m: res.moving ? 1 : 0, a: res.airborne ? 1 : 0 });
+      net.sendPos({ x: +s.x.toFixed(2), y: +s.y.toFixed(2), z: +s.z.toFixed(2), h: +me.heading.toFixed(2), m: res.moving ? 1 : 0, a: res.airborne ? 1 : 0, e: me.emote });
     }
   }
 
@@ -428,7 +435,7 @@ function tick(now) {
     g.position.z += (r.tz - g.position.z) * kPos;
     g.rotation.y = lerpAngle(g.rotation.y, r.th, 1 - Math.exp(-dt * 12));
     const moving = Math.hypot(r.tx - g.position.x, r.tz - g.position.z) > 0.15 || r.moving;
-    r.actor.c.update(dt, { moving, airborne: r.air });
+    r.actor.c.update(dt, { moving, airborne: r.air, emote: moving ? 0 : r.emote });
     const s = g.getObjectByName('shadow');
     if (s) { const k = Math.max(0.4, 1 - (g.position.y - GROUND_Y) / 14); s.scale.set(k, k, k); s.position.y = 0.12 - (g.position.y - GROUND_Y); }
   }
@@ -466,6 +473,7 @@ function tick(now) {
   if (!chatFocused && t > chatFade) $('chat').classList.add('faded');
 }
 resize();
+world.attach?.({ me, remotes, net, user, teleport, hud: $('hud'), say: (t) => addChatLine('', t, false, true), roster: () => roster, camera: () => camera });
 ready = true;
 addChatLine('', `Welcome to ${TITLE}, ${user.username}! Say hi!`, false, true);
 requestAnimationFrame(frame);

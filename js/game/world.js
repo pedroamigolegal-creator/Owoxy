@@ -197,6 +197,23 @@ export function buildWorld() {
   }
   for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2 + 0.4; bench(Math.cos(a) * 17, Math.sin(a) * 17, -a + Math.PI / 2); }
 
+  // ---- arbustos e canteiros de flores ----
+  const bushMat = [lambert(0x3a8f3a), lambert(0x2f7d33)];
+  for (let i = 0, n = 0; i < 300 && n < 60; i++) {
+    const x = (rand() - 0.5) * 220, z = (rand() - 0.5) * 220;
+    if (Math.abs(x) < half + walkW + 2 || Math.abs(z) < half + walkW + 2 || Math.hypot(x, z) < 32) continue;
+    if (colliders.some((c) => (c.r !== undefined ? Math.hypot(x - c.x, z - c.z) < c.r + 3 : x > c.minX - 3 && x < c.maxX + 3 && z > c.minZ - 3 && z < c.maxZ + 3))) continue;
+    n++;
+    const b = new THREE.Mesh(new THREE.IcosahedronGeometry(1.3 + rand() * 0.6, 1), bushMat[n % 2]);
+    b.position.set(x, 1, z); group.add(b);
+  }
+  const petals = [0xff5a8a, 0xffd24a, 0xffffff, 0xb36bff, 0xff8a3d];
+  for (let k = 0; k < 28; k++) {   // anel de flores em volta da fonte
+    const a2 = (k / 28) * Math.PI * 2, rr = 10.5;
+    box(0.9, 0.9, 0.9, 0x2f7d33, Math.cos(a2) * rr, 0, Math.sin(a2) * rr);
+    box(0.7, 0.7, 0.7, petals[k % petals.length], Math.cos(a2) * rr, 0.9, Math.sin(a2) * rr);
+  }
+
   // ---- céu e nuvens ----
   const sky = new THREE.Mesh(new THREE.SphereGeometry(450, 24, 12), new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false,
