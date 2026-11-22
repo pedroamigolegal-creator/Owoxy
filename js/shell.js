@@ -15,6 +15,7 @@ const NAV = [
   ['groups', 'Groups', null, 'groups'],
   ['premium', 'Premium', 'premium.html', 'premium'],
 ];
+const ADMIN_NAV = [['accounts', 'Created Accounts', 'accounts.html', 'groups']];
 
 export function initShell(user, active, { query = '' } = {}) {
   document.getElementById('topbar-slot').innerHTML = `
@@ -42,7 +43,7 @@ export function initShell(user, active, { query = '' } = {}) {
 
   document.getElementById('sidebar-slot').innerHTML =
     `<div class="user">${user.username.replace(/[<>&"]/g, '')}</div>` +
-    NAV.map(([key, label, href, ico]) =>
+    (user.isAdmin ? [...NAV, ...ADMIN_NAV] : NAV).map(([key, label, href, ico]) =>
       `<a ${key === active ? 'class="active"' : ''} href="${href || '#'}" ${href ? '' : 'data-soon'}><span data-i="${ico}"></span>${label}</a>`).join('') +
     '<div class="section-title">Events</div>';
 

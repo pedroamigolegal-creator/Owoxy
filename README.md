@@ -79,3 +79,11 @@ Rode `supabase/006_fees_faces_settings.sql` no SQL Editor **depois** do 004 e do
 - Limits to know: the Supabase free plan has Realtime message quotas, so 100 players moving at once is more than the free plan comfortably supports. Positions and chat are trusted from the client (no moderation or word filter yet).
 
 Code: `js/game/` — `world.js` (town), `character.js` (R6 rig), `physics.js`, `net.js`, `main.js` (loading, controls, chat, menu); face/rig helpers in `js/rig.js`.
+
+## Games: Natural Disaster Survival
+
+`game.html?g=nds` — a recreation of the classic survival idea (original code and assets, not Roblox's). Players wait in a lobby; every round the host (first player in the server) picks one of 8 disasters: Earthquake, Meteor Shower, Tornado, Flood, Volcanic Eruption, Blizzard, Acid Rain, Thunderstorm. Climb buildings (spiral steps), hide under shelters, survive until the timer ends. Servers are Realtime channels `nds-1`, `nds-2`... (max 100). Round state is broadcast by the host; disasters are computed from a shared seed and time, and each player decides locally whether they died (client-trusted).
+
+## Admin: Created Accounts
+
+Run `supabase/007_created_accounts.sql`. The Owoxy (admin) account gets a "Created Accounts" item in the sidebar (`accounts.html`) listing username, creation date and time, gender, Owos and Premium. Passwords are intentionally not shown: Supabase stores only irreversible hashes, and storing plain-text passwords would expose every user.

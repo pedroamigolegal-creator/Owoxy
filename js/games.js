@@ -6,4 +6,5 @@ const user = await requireUser();
 if (user) {
   initShell(user, 'games');
   document.getElementById('badge').innerHTML = verifiedBadge();
+  document.getElementById('badge2').innerHTML = verifiedBadge();
 }

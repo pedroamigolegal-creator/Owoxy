@@ -7,9 +7,13 @@ import { lookOfUser } from '../items.js';
 import { createCharacter, loadTemplate } from './character.js';
 import { joinServer, MAX_PLAYERS } from './net.js';
 import { headingFor, lerpAngle, stepPlayer, GROUND_Y } from './physics.js';
-import { buildWorld } from './world.js';
 
 const $ = (id) => document.getElementById(id);
+// jogos: ?g=nds abre o Natural Disaster Survival; sem nada abre o Talk To Others
+const GAME = new URLSearchParams(location.search).get('g') === 'nds' ? 'nds' : 'ttos';
+const TITLE = GAME === 'nds' ? 'Natural Disaster Survival' : 'Talk To Others';
+document.title = `Owoxy - ${TITLE}`;
+$('device-title').textContent = TITLE; $('menu-title').textContent = TITLE;
 const user = await requireUser();
 if (!user) throw new Error('not logged in');
 
@@ -85,7 +89,7 @@ try {
   progress(15, 'Loading character');
   tpl = await loadTemplate(user.avatar?.model || CONFIG.defaultAvatar);
   progress(40, 'Loading map');
-  world = buildWorld();
+  world = (await import(GAME === 'nds' ? './nds.js' : './world.js')).buildWorld();
   scene.add(world.group);
 } catch (e) { fail(e); }
 applyQuality();
@@ -125,8 +129,15 @@ const me = { state: { x: 0, y: GROUND_Y, z: 0, vy: 0 }, heading: 0, ...makeActor
 function respawn() {
   const p = world.spawnPoint();
   Object.assign(me.state, { x: p.x, y: GROUND_Y, z: p.z, vy: 0 });
-  me.heading = headingFor(-p.x, -p.z);   // olha para a fonte
+  me.heading = headingFor(-p.x, -p.z);   // olha para o centro
   camTheta = Math.atan2(p.x, p.z);        // câmera atrás do personagem
+}
+// leva o jogador para um ponto (usado pelos jogos com rodadas)
+function teleport(x, y, z, heading = me.heading) {
+  Object.assign(me.state, { x, y, z, vy: 0 });
+  me.heading = heading;
+  camTheta = Math.atan2(Math.cos(heading), -Math.sin(heading));   // câmera atrás do personagem
+  if (net) net.sendPos({ x: +x.toFixed(2), y: +y.toFixed(2), z: +z.toFixed(2), h: +heading.toFixed(2), m: 0, a: 0 });
 }
 let camTheta = 0, camPhi = 0.38, camDist = H * 3.4;
 respawn();
@@ -170,24 +181,27 @@ try {
       for (const p of list) if (!remotes.has(p.key) && !(net && p.key === net.key)) addRemote(p);
       for (const k of [...remotes.keys()]) if (!keys.has(k)) removeRemote(k);
       renderRoster();
+      world.onRoster?.(list);
     },
     onPos(k, d) {
       const r = remotes.get(k); if (!r) return;
       r.tx = d.x; r.ty = d.y; r.tz = d.z; r.th = d.h; r.moving = !!d.m; r.air = !!d.a;
       if (!r.seen) { r.seen = true; r.actor.holder.position.set(d.x, d.y, d.z); r.actor.holder.rotation.y = d.h; r.actor.holder.visible = true; }
     },
+    onEvent(k, d) { if (ready) world.onEvent?.(k, d); },
     onChat(k, text) {
       const r = remotes.get(k); if (!r || !ready) return;
       addChatLine(r.name, text, r.verified);
       showBubble(r, text);
     },
-  });
+  }, GAME);
 } catch (e) { fail(e); }
 // o roster pode ter chegado antes de net existir: garante que "eu" não vire jogador remoto
 if (remotes.has(net.key)) removeRemote(net.key);
 $('server-name').textContent = `Server ${net.server}`;
 addEventListener('pagehide', () => { net?.leave(); });
 
+world.attach?.({ me, remotes, net, user, teleport, hud: $('hud'), say: (t) => addChatLine('', t, false, true), roster: () => roster, camera: () => camera });
 progress(100, 'Joining server');
 await minDelay;
 loading.classList.add('done');
@@ -335,7 +349,7 @@ function toggleMenu(force) {
 }
 $('menu-btn').addEventListener('click', () => toggleMenu(true));
 $('resume').addEventListener('click', () => toggleMenu(false));
-$('reset').addEventListener('click', () => { respawn(); toggleMenu(false); });
+$('reset').addEventListener('click', () => { if (!world.onReset?.()) respawn(); toggleMenu(false); });
 $('leave').addEventListener('click', async () => { await net?.leave(); location.href = 'games.html'; });
 $('menu').addEventListener('pointerdown', (e) => { if (e.target === $('menu')) toggleMenu(false); });
 document.querySelectorAll('.menu-tabs button').forEach((b) => b.addEventListener('click', () => {
@@ -351,7 +365,7 @@ nm.addEventListener('change', () => { settings.names = nm.checked; saveSettings(
 qual.addEventListener('change', () => { settings.quality = qual.value; saveSettings(); applyQuality(); });
 
 // ---------- laço principal ----------
-const colliders = world.colliders;
+const colliders = world.colliders || [];
 const tmp = new THREE.Vector3();
 const camTarget = new THREE.Vector3();
 let last = performance.now(), sendAt = 0, lastSent2 = '';
@@ -384,8 +398,8 @@ function tick(now) {
   }
   const fx = -Math.sin(camTheta), fz = -Math.cos(camTheta), rx = Math.cos(camTheta), rz = -Math.sin(camTheta);
   const mx = rx * h + fx * v, mz = rz * h + fz * v;
-  const res = stepPlayer(me.state, { mx, mz, jump }, dt, colliders, world.bounds);
-  if (me.state.y < -40) respawn();
+  const res = world.step ? world.step(me.state, { mx, mz, jump }, dt) : stepPlayer(me.state, { mx, mz, jump }, dt, colliders, world.bounds);
+  if (me.state.y < -40) { if (world.onFall) world.onFall(); else respawn(); }
   if (res.moving) me.heading = lerpAngle(me.heading, headingFor(mx, mz), 1 - Math.exp(-dt * 14));
   me.holder.position.set(me.state.x, me.state.y, me.state.z);
   me.holder.rotation.y = me.heading;
@@ -408,6 +422,7 @@ function tick(now) {
   for (const r of remotes.values()) {
     if (!r.seen) continue;
     const g = r.actor.holder;
+    if (Math.hypot(r.tx - g.position.x, r.tz - g.position.z) > 40 || Math.abs(r.ty - g.position.y) > 40) g.position.set(r.tx, r.ty, r.tz);   // teletransporte: não desliza pelo mapa
     g.position.x += (r.tx - g.position.x) * kPos;
     g.position.y += (r.ty - g.position.y) * kPos;
     g.position.z += (r.tz - g.position.z) * kPos;
@@ -422,8 +437,10 @@ function tick(now) {
   camTarget.set(me.state.x, me.state.y + H * 0.75, me.state.z);
   const cp = Math.cos(camPhi);
   camera.position.set(camTarget.x + Math.sin(camTheta) * cp * camDist, Math.max(0.6, camTarget.y + Math.sin(camPhi) * camDist), camTarget.z + Math.cos(camTheta) * cp * camDist);
+  if (world.shake) { camera.position.x += (Math.random() - 0.5) * world.shake; camera.position.y += (Math.random() - 0.5) * world.shake; camera.position.z += (Math.random() - 0.5) * world.shake; }
   camera.lookAt(camTarget);
-  world.tick(dt);
+  world.tick?.(dt);
+  world.update?.(dt, now);
   renderer.render(scene, camera);
 
   // textos sobre as cabeças: balões (todos) e nomes (os 30 mais perto)
@@ -450,5 +467,5 @@ function tick(now) {
 }
 resize();
 ready = true;
-addChatLine('', `Welcome to Talk To Others, ${user.username}! Say hi!`, false, true);
+addChatLine('', `Welcome to ${TITLE}, ${user.username}! Say hi!`, false, true);
 requestAnimationFrame(frame);

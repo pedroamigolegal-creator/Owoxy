@@ -1,4 +1,4 @@
-// Rede do jogo: cada servidor é um canal do Supabase Realtime ("ttos-1", "ttos-2"...).
+// Rede dos jogos: cada servidor é um canal do Supabase Realtime ("ttos-1", "nds-1"...).
 // Presence = quem está no servidor. Broadcast = posições ('p') e chat ('c').
 // O limite de 100 é conferido pela ordem de entrada na presence: quem ficar na posição 100 ou depois vai para o próximo servidor.
 import { sb } from '../supabase.js';
@@ -16,19 +16,19 @@ const rankOf = (state) => Object.entries(state)
  * handlers: { onRoster(list), onPos(key, data), onChat(key, text), onProgress(text) }
  * Devolve { server, key, sendPos(data), sendChat(text), leave() }.
  */
-export async function joinServer(user, handlers) {
+export async function joinServer(user, handlers, prefix = 'ttos') {
   const key = `${user.id}:${tabId}`;
   for (let n = 1; n <= MAX_SERVERS; n++) {
     handlers.onProgress?.(`Looking for a server (${n})...`);
-    const conn = await tryServer(n, user, key, handlers);
+    const conn = await tryServer(n, user, key, handlers, prefix);
     if (conn) return conn;
   }
   throw new Error('All servers are full. Try again in a moment.');
 }
 
-function tryServer(n, user, key, handlers) {
+function tryServer(n, user, key, handlers, prefix) {
   return new Promise((resolve, reject) => {
-    const channel = sb.channel(`ttos-${n}`, { config: { presence: { key }, broadcast: { self: false, ack: false } } });
+    const channel = sb.channel(`${prefix}-${n}`, { config: { presence: { key }, broadcast: { self: false, ack: false } } });
     let settled = false, joined = false, t = Date.now();
 
     const roster = () => rankOf(channel.presenceState()).slice(0, MAX_PLAYERS);
@@ -37,6 +37,7 @@ function tryServer(n, user, key, handlers) {
 
     channel.on('presence', { event: 'sync' }, () => { if (joined) handlers.onRoster?.(roster()); });
     channel.on('broadcast', { event: 'p' }, ({ payload }) => { if (joined && payload?.k) handlers.onPos?.(payload.k, payload); });
+    channel.on('broadcast', { event: 'e' }, ({ payload }) => { if (joined && payload?.k) handlers.onEvent?.(payload.k, payload); });
     channel.on('broadcast', { event: 'c' }, ({ payload }) => { if (joined && payload?.k) handlers.onChat?.(payload.k, String(payload.m || '').slice(0, 120)); });
 
     channel.subscribe(async (status) => {
@@ -64,6 +65,7 @@ function tryServer(n, user, key, handlers) {
           server: n,
           key,
           sendPos: (d) => channel.send({ type: 'broadcast', event: 'p', payload: { ...d, k: key } }),
+          sendEvent: (d) => channel.send({ type: 'broadcast', event: 'e', payload: { ...d, k: key } }),
           sendChat: (m) => channel.send({ type: 'broadcast', event: 'c', payload: { k: key, m } }),
           leave: async () => { try { await channel.untrack(); } catch { /* sem problema */ } sb.removeChannel(channel); },
         });

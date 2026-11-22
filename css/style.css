@@ -354,3 +354,8 @@ dialog.confirm .row-end { justify-content: center; }
 .scale-row { grid-template-columns: 60px 90px; }
 .create .scale-row input { width: 90px; }
 @media (max-width: 760px) { .settings { flex-direction: column; } }
+
+/* Created Accounts (admin) */
+.acc-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.acc-table th, .acc-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #3a3d41; white-space: nowrap; }
+.acc-table .verified { width: 14px; height: 14px; vertical-align: -2px; margin-left: 4px; }

@@ -21,7 +21,7 @@
   <!-- 1) escolha do dispositivo -->
   <section id="device" class="overlay">
     <div class="device-card">
-      <h1>Talk To Others</h1>
+      <h1 id="device-title">Talk To Others</h1>
       <p>Hi <b id="player-name"></b>! How are you playing?</p>
       <div class="device-options">
         <button type="button" data-device="pc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg><b>Computer</b><small>WASD to walk, Space to jump, Enter to chat</small></button>
@@ -67,7 +67,7 @@
   <!-- menu Esc -->
   <div id="menu" class="overlay dim" hidden>
     <div class="menu-card">
-      <header><b>Talk To Others</b><span id="server-name"></span></header>
+      <header><b id="menu-title">Talk To Others</b><span id="server-name"></span></header>
       <div class="menu-tabs"><button type="button" class="on" data-tab="players">Players</button><button type="button" data-tab="settings">Settings</button><button type="button" data-tab="help">Help</button></div>
       <div class="menu-pane" data-pane="players"><p class="muted"><span id="menu-count">1 / 100</span> in this server</p><ul id="menu-players" class="plist"></ul></div>
       <div class="menu-pane" data-pane="settings" hidden>
