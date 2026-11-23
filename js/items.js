@@ -55,7 +55,7 @@ const avatarLookRaw = (userId) => rpc('avatar_look', { p_user: userId });
 export const priceLabel = (price) => (price == null ? 'Offsale' : price === 0 ? 'Free' : `${Number(price).toLocaleString('en-US')} ${CONFIG.currencyName}`);
 
 export const KIND_LABEL = { shirt: 'Shirt', pants: 'Pants', accessory: 'Accessory', facedecal: 'Face' };
-export const ACCESSORY_LABEL = { hat: 'Hat', hair: 'Hair', face: 'Face', back: 'Back', gear: 'Gear' };
+export const ACCESSORY_LABEL = { hat: 'Hat', hair: 'Hair', face: 'Face', back: 'Back', gear: 'Gear', neck: 'Neck' };
 
 // Look (para o avatar 3D) de um item sozinho: o noob vestindo só aquele item
 export function lookOfItem(item) {

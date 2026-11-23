@@ -113,3 +113,7 @@ Run `supabase/010_item_stats.sql` after 009. Every catalog item shows **Sales** 
 ## Gear (migration 011)
 
 Run `supabase/011_gear.sql` after 010. **Gear** is a new UGC accessory type (Create > UGC > type "Gear"). Whoever wears a Gear raises the right arm pointing forward, in the avatar editor and in the games. Model rule: the model's center is placed in the hand (auto-fit does this), front = -Z, size is auto-scaled to about 2.2 studs.
+
+## Neck and 3 hats (migration 012)
+
+Run `supabase/012_neck_hats.sql` after 011. **Neck** is a new UGC type (necklaces, scarves, ties; centered on the neck). You can now wear up to **3 hats** at once; equipping a 4th replaces the oldest one.

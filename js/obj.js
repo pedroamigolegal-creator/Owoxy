@@ -93,7 +93,7 @@ export function validateAccessory(info, { fileBytes = 0, tex = null, autoPositio
  *  - face (acessório de rosto): a largura fica 1.0 stud
  *  - back: o maior lado fica 2.0 studs
  */
-export const SCALE_TARGET = { hat: 1.4, hair: 1.4, face: 1.0, back: 2.0, gear: 2.2 };
+export const SCALE_TARGET = { hat: 1.4, hair: 1.4, face: 1.0, back: 2.0, gear: 2.2, neck: 1.6 };
 export function autoScale(info, type) {
   const [sx, sy, sz] = info.size;
   const current = type === 'back' || type === 'gear' ? Math.max(sx, sy, sz) : Math.max(sx, sz);
@@ -108,6 +108,7 @@ export function autoScale(info, type) {
  * "scale" é a escala já escolhida (o deslocamento é aplicado depois de escalar).
  *  - hat / hair: centrado em cima da cabeça, com a base do modelo no topo da cabeça
  *  - face: centrado no rosto, com a parte de trás do modelo encostada no rosto e o resto para a frente
+ *  - neck: centrado no pescoço (entre a cabeça e o tronco), largura 1.6 studs
  *  - gear: o centro do modelo fica na mão (o braço direito sobe apontando para a frente)
  *  - back: centrado nas costas, com o lado de dentro do modelo encostado nas costas
  */
@@ -119,6 +120,7 @@ export function autoFit(info, type, scale = 1) {
   let off;
   if (type === 'face') off = [-c[0], -c[1], -hi[2]];
   else if (type === 'back') off = [-c[0], -c[1], -lo[2]];
+  else if (type === 'neck') off = [-c[0], -c[1], -c[2]];   // centro do modelo no pescoço
   else if (type === 'gear') off = [-c[0], -c[1], -c[2]];   // o centro do modelo vai para a mão
   else off = [-c[0], -lo[1], -c[2]];   // hat, hair
   return off.map((n) => clamp(n + 0));

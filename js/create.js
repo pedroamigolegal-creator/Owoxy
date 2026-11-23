@@ -24,7 +24,7 @@ if (user) {
     shirt: { title: 'Shirts', sub: 'Create a shirt for the Owoxy catalog using the clothing template.', up: 'Upload a Shirt', mine: 'My Shirts', kind: 'shirt' },
     pants: { title: 'Pants', sub: 'Create pants for the Owoxy catalog using the clothing template.', up: 'Upload Pants', mine: 'My Pants', kind: 'pants' },
     face: { title: 'Faces', sub: 'Upload a face image (PNG). When worn, it replaces the default face of the noob.', up: 'Upload a Face', mine: 'My Faces', kind: 'facedecal' },
-    ugc: { title: 'UGC', sub: 'Upload your own 3D accessory (hat, hair, face, back or gear). It must follow the rules below.', up: 'Upload an Accessory', mine: 'My UGC', kind: 'accessory' },
+    ugc: { title: 'UGC', sub: 'Upload your own 3D accessory (hat, hair, face, back, neck or gear). It must follow the rules below.', up: 'Upload an Accessory', mine: 'My UGC', kind: 'accessory' },
   }[t];
 
   document.querySelectorAll('#create-nav a[data-t]').forEach((a) => a.classList.toggle('on', a.dataset.t === t));

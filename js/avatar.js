@@ -22,6 +22,7 @@ export const ATTACH = {
   hair: [0, 2.99, 0],
   face: [-0.42, 2.39, 0],
   back: [0.5, 0.89, 0],
+  neck: [0, 1.99, 0],
   gear: [-1.0, 1.6, -0.6],   // reserva: o encaixe real vem da posição da mão (ver armKit)
 };
 export const GEAR_RAISE = -1.5;   // braço direito levantado, apontando para a frente (rotação em Z, como no rig dos jogos)
