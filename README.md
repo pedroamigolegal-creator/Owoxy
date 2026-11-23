@@ -117,3 +117,7 @@ Run `supabase/011_gear.sql` after 010. **Gear** is a new UGC accessory type (Cre
 ## Neck and 3 hats (migration 012)
 
 Run `supabase/012_neck_hats.sql` after 011. **Neck** is a new UGC type (necklaces, scarves, ties; centered on the neck). You can now wear up to **3 hats** at once; equipping a 4th replaces the oldest one.
+
+## Owos Adds (migration 013)
+
+Run `supabase/013_owos_adds.sql` after 012. Only the Owoxy account sees **Owos Adds** in the menu: type an amount (quick buttons 1K+, 10K+, 100K+, 1M+, 1B+) and, optionally, a username to gift the Owos to someone else (empty = your own account). Every grant is logged in `owos_grants`. Balances in the top bar are shown as `1K+`, `1M+`, `1B+`.

@@ -61,8 +61,11 @@ export function confirmDialog({ title = 'Confirm', message = '', confirmText = '
 }
 
 export function formatCompact(n) {
-  if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M+';
-  if (n >= 1e4) return Math.floor(n / 1e3) + 'K+';
+  const short = (v, unit) => { const x = Math.floor(v * 10) / 10; return (Number.isInteger(x) ? String(x) : x.toFixed(1)) + unit + '+'; };
+  if (n >= 1e12) return short(n / 1e12, 'T');
+  if (n >= 1e9) return short(n / 1e9, 'B');
+  if (n >= 1e6) return short(n / 1e6, 'M');
+  if (n >= 1e3) return Math.floor(n / 1e3) + 'K+';
   return String(n);
 }
 

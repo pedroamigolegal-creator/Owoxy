@@ -15,7 +15,7 @@ const NAV = [
   ['groups', 'Groups', 'groups.html', 'groups'],
   ['premium', 'Premium', 'premium.html', 'premium'],
 ];
-const ADMIN_NAV = [['accounts', 'Created Accounts', 'accounts.html', 'groups'], ['reports', 'Reports', 'reports.html', 'groups']];
+const ADMIN_NAV = [['accounts', 'Created Accounts', 'accounts.html', 'groups'], ['reports', 'Reports', 'reports.html', 'groups'], ['owos', 'Owos Adds', 'owos.html', 'coin']];
 
 export function initShell(user, active, { query = '' } = {}) {
   document.getElementById('topbar-slot').innerHTML = `

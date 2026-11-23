@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Owoxy - Owos Adds</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="topbar-slot"></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar-slot"></aside>
+    <main class="main" id="main">
+      <h1 class="page-title">Owos Adds</h1>
+      <section class="card owos-card" id="owos-box">
+        <h2>How much Owos you need now?</h2>
+        <form id="owos-form" autocomplete="off">
+          <label class="form-field">Amount
+            <input id="o-amount" class="prompt-input" type="text" inputmode="numeric" placeholder="1000" maxlength="16" required>
+          </label>
+          <p class="owos-preview" id="o-preview">&nbsp;</p>
+          <div class="owos-quick" id="o-quick">
+            <button type="button" data-n="1000">1K+</button><button type="button" data-n="10000">10K+</button><button type="button" data-n="100000">100K+</button><button type="button" data-n="1000000">1M+</button><button type="button" data-n="1000000000">1B+</button>
+          </div>
+          <label class="form-field">Give to (username)
+            <input id="o-user" class="prompt-input" type="text" maxlength="20" placeholder="Leave empty to add to your own account">
+          </label>
+          <button class="btn-green" id="o-go" type="submit">Add Owos</button>
+        </form>
+        <p class="muted" id="o-result"></p>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="js/owos.js"></script>
+</body>
+</html>

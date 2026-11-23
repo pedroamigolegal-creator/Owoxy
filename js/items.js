@@ -159,6 +159,8 @@ export function friendlyError(err) {
   if (m.includes('owner cannot leave')) return 'The owner cannot leave. Delete the group instead.';
   if (m.includes('not the owner')) return 'Only the owner can do that.';
   if (m.includes('cannot follow yourself')) return 'You cannot follow yourself.';
+  if (m.includes('invalid amount')) return 'Type an amount from 1 up to 1,000,000,000,000.';
+  if (m.includes('user not found')) return 'No user with that name.';
   if (m.includes('admins only')) return 'Only the Owoxy account can do this.';
   if (m.includes('friend requests disabled')) return 'This user is not accepting friend requests.';
   if (m.includes('messages disabled')) return 'This user turned off messages.';
