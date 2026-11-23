@@ -10,8 +10,9 @@ if (user) {
 
   $('p-status').textContent = user.premium ? 'You are a Premium member' : 'You do not have Premium';
   $('p-until').textContent = user.premium ? `Premium until ${new Date(user.premiumUntil).toLocaleDateString()}` : '';
-  $('p-note').textContent = user.premium ? '' : 'Premium is given out by the Owoxy account for now. Without Premium you still get 25 Owos every day.';
-  $('p-claim').textContent = user.premium ? 'Claim 100 daily Owos' : 'Claim 25 daily Owos';
+  $('p-note').textContent = user.premium ? '' : 'Premium is given out by the Owoxy account for now. Have a promo code? Redeem it on the Promocodes page.';
+  $('p-claim').textContent = 'Claim 100 daily Owos';
+  $('p-claim').hidden = !user.premium;
 
   $('p-claim').addEventListener('click', async () => {
     $('p-claim').disabled = true;

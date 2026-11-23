@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Owoxy - Promo Codes</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="topbar-slot"></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar-slot"></aside>
+    <main class="main" id="main">
+      <h1 class="page-title">Redeem Owoxy Promo Codes</h1>
+      <section class="card promo-card">
+        <p class="muted">Got a promo code? Type it below to get your reward. Each code can be redeemed once per account, and some codes expire or run out.</p>
+        <form id="promo-form" autocomplete="off">
+          <input id="promo-code" class="prompt-input" type="text" maxlength="30" placeholder="Enter Code" aria-label="Promo code" required>
+          <button class="btn-green" id="promo-go" type="submit">Redeem</button>
+        </form>
+        <p id="promo-result" class="promo-result" role="status"></p>
+      </section>
+
+      <section class="card" id="promo-admin" hidden>
+        <h2>Owoxy admin: promo codes</h2>
+        <form id="pc-form" class="row-gap" autocomplete="off">
+          <input id="pc-code" placeholder="CODE" maxlength="30" required>
+          <input id="pc-owos" type="number" min="1" max="1000000000" placeholder="Owos" required>
+          <input id="pc-uses" type="number" min="1" placeholder="Max uses (empty = unlimited)">
+          <input id="pc-days" type="number" min="0" max="3650" placeholder="Days valid (empty = forever)">
+          <button class="btn-green" type="submit">Create</button>
+        </form>
+        <div style="overflow-x:auto"><table class="acc-table"><thead><tr><th>Code</th><th>Owos</th><th>Used</th><th>Expires</th><th>Status</th><th></th></tr></thead><tbody id="pc-body"></tbody></table></div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="js/promocodes.js"></script>
+</body>
+</html>

@@ -121,3 +121,7 @@ Run `supabase/012_neck_hats.sql` after 011. **Neck** is a new UGC type (necklace
 ## Owos Adds (migration 013)
 
 Run `supabase/013_owos_adds.sql` after 012. Only the Owoxy account sees **Owos Adds** in the menu: type an amount (quick buttons 1K+, 10K+, 100K+, 1M+, 1B+) and, optionally, a username to gift the Owos to someone else (empty = your own account). Every grant is logged in `owos_grants`. Balances in the top bar are shown as `1K+`, `1M+`, `1B+`.
+
+## Promo Codes, welcome Owos and Premium daily (migration 014)
+
+Run `supabase/014_promocodes.sql` after 013. **Promocodes** (menu, for everyone): type a code and redeem it, once per account (codes can have a max number of uses and an expiry). The Owoxy account creates and turns codes on/off on the same page. New accounts start with **100 Owos**. The daily Owos button left the home page: the daily claim is now only for **Premium** members (100 Owos every 24 h, on the Premium page).

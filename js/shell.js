@@ -14,6 +14,7 @@ const NAV = [
   ['games', 'Games', 'games.html', 'avatar'],
   ['groups', 'Groups', 'groups.html', 'groups'],
   ['premium', 'Premium', 'premium.html', 'premium'],
+  ['promocodes', 'Promocodes', 'promocodes.html', 'coin'],
 ];
 const ADMIN_NAV = [['accounts', 'Created Accounts', 'accounts.html', 'groups'], ['reports', 'Reports', 'reports.html', 'groups'], ['owos', 'Owos Adds', 'owos.html', 'coin']];
 

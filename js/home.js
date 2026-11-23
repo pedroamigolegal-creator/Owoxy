@@ -1,7 +1,7 @@
 import { requireUser } from './auth.js';
 import { mountAvatar } from './avatar.js';
 import { hydrateHeads, toast, verifiedBadge, userTile } from './common.js';
-import { claimDaily, lookOfUser } from './items.js';
+import { lookOfUser } from './items.js';
 import { initShell, setBalance } from './shell.js';
 import { listFriends } from './social.js';
 import { cardHTML, GAME_LIST, recentGames, GAMES } from './game-data.js';
@@ -24,19 +24,6 @@ if (user) {
     fallback.className = 'avatar-fallback';
     fallback.textContent = user.username[0].toUpperCase();
     canvas.replaceWith(fallback);
-  });
-
-  // Owos diários
-  const daily = document.getElementById('daily');
-  if (daily) daily.textContent = user.premium ? 'Claim 100 daily Owos (Premium)' : 'Claim 25 daily Owos';
-  if (daily) daily.addEventListener('click', async () => {
-    daily.disabled = true;
-    try {
-      const r = await claimDaily();
-      if (r.claimed) { setBalance(r.balance); toast(`You got ${r.amount} Owos!`); }
-      else toast('You already claimed today. Come back later!');
-    } catch (err) { console.error(err); toast('Could not claim. Did you run supabase/004_catalog.sql?'); }
-    daily.disabled = false;
   });
 
   // Amigos

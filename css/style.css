@@ -402,3 +402,5 @@ html { overflow-x: hidden; }
 .owos-card { max-width: 520px; } .owos-card h2 { margin-top: 0; }
 .owos-card form { display: grid; gap: 12px; } .owos-preview { margin: 0; color: #9aa; min-height: 1.2em; }
 .owos-quick { display: flex; gap: 8px; flex-wrap: wrap; } .owos-quick button { background: #3a3d41; color: #fff; border: 0; border-radius: 4px; padding: 6px 12px; cursor: pointer; } .owos-quick button:hover { background: #4a4e53; }
+.promo-card { max-width: 560px; } .promo-card form { display: flex; gap: 10px; margin: 12px 0; } .promo-card form input { flex: 1; min-width: 0; }
+.promo-result { min-height: 1.3em; margin: 4px 0 0; } .promo-result.ok { color: #2fb457; } .promo-result.bad { color: #ff6b61; }

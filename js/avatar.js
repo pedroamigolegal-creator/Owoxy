@@ -269,7 +269,7 @@ export async function createStage(canvas, { view = 'full', modelUrl = CONFIG.def
   const camera = new THREE.PerspectiveCamera(25, w / h, 0.1, 100);
   const fovTan = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   // [altura que cabe no quadro, quanto abaixo do topo fica o centro do quadro]
-  const FRAMES = { head: [0.56, 0.23], bust: [0.5, 0.2] };   // head = foto de perfil: cabeça e ombros, sem cobrir tudo
+  const FRAMES = { head: [0.62, 0.14], bust: [0.5, 0.2] };   // head = foto de perfil: cabeça e ombros, sem cobrir tudo
   const setView = (v) => {
     let target, dist;
     if (FRAMES[v]) {
@@ -363,9 +363,10 @@ export async function mountAvatar(canvas, { view = 'head', modelUrl = CONFIG.def
     let dragX = null;
     canvas.style.touchAction = 'pan-y';
     canvas.style.cursor = 'grab';
-    canvas.addEventListener('pointerdown', (e) => { if (flat) return; dragX = e.clientX; spinning = false; canvas.setPointerCapture(e.pointerId); canvas.style.cursor = 'grabbing'; });
+    let resume = null;
+    canvas.addEventListener('pointerdown', (e) => { if (flat) return; clearTimeout(resume); dragX = e.clientX; spinning = false; canvas.setPointerCapture(e.pointerId); canvas.style.cursor = 'grabbing'; });
     canvas.addEventListener('pointermove', (e) => { if (dragX === null) return; pivot.rotation.y += (e.clientX - dragX) * 0.012; dragX = e.clientX; });
-    const end = () => { dragX = null; canvas.style.cursor = 'grab'; };
+    const end = () => { if (dragX === null) return; dragX = null; canvas.style.cursor = 'grab'; clearTimeout(resume); resume = setTimeout(() => { if (!flat) spinning = true; }, 1200); };   // volta a girar sozinho
     canvas.addEventListener('pointerup', end);
     canvas.addEventListener('pointercancel', end);
   }

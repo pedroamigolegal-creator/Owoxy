@@ -161,6 +161,15 @@ export function friendlyError(err) {
   if (m.includes('cannot follow yourself')) return 'You cannot follow yourself.';
   if (m.includes('invalid amount')) return 'Type an amount from 1 up to 1,000,000,000,000.';
   if (m.includes('user not found')) return 'No user with that name.';
+  if (m.includes('premium only')) return 'Daily Owos are for Premium members.';
+  if (m.includes('code expired')) return 'This promo code has expired.';
+  if (m.includes('code already redeemed')) return 'You already redeemed this code.';
+  if (m.includes('code fully used')) return 'This promo code has reached its limit.';
+  if (m.includes('too many attempts')) return 'Too many tries. Wait a minute and try again.';
+  if (m.includes('invalid code format')) return 'Codes use 3-30 letters, numbers, - or _.';
+  if (m.includes('code exists')) return 'That code already exists.';
+  if (m.includes('invalid uses')) return 'Max uses must be 1 or more.';
+  if (m.includes('invalid code')) return 'That code is not valid.';
   if (m.includes('admins only')) return 'Only the Owoxy account can do this.';
   if (m.includes('friend requests disabled')) return 'This user is not accepting friend requests.';
   if (m.includes('messages disabled')) return 'This user turned off messages.';
