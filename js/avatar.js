@@ -228,7 +228,7 @@ export async function createStage(canvas, { view = 'full', modelUrl = CONFIG.def
       dist = (size.y * FRAMES[v][0]) / fovTan;
     } else {
       target = center.clone();
-      dist = (size.y * 1.12) / fovTan;
+      dist = (size.y * (v === 'mini' ? 1.75 : 1.12)) / fovTan;   // mini: noob pequeno no meio do quadro (miniaturas de roupa)
     }
     camera.position.set(target.x, target.y, target.z + dist);
     camera.lookAt(target);

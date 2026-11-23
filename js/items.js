@@ -103,7 +103,10 @@ export async function lookOfUser(userId) {
 // Miniatura só do item (sem o noob): roupas e rostos mostram a própria imagem; acessórios 3D são renderizados sozinhos.
 export function loadItemThumb(item, img) {
   const done = (url) => { img.src = url; img.classList.add('ready'); };
-  if (item.kind !== 'accessory') { img.classList.add('flat'); done(publicUrl(item.image_path)); return Promise.resolve(); }
+  if (item.kind === 'facedecal') { img.classList.add('face'); done(publicUrl(item.image_path)); return Promise.resolve(); }   // rosto: só a imagem, sem fundo
+  if (item.kind !== 'accessory') {                                                                                       // camisa/calça: noob pequeno vestindo
+    return import('./avatar.js').then((m) => m.renderThumbnail(lookOfItem(item), { view: 'mini', key: String(item.id) })).then(done).catch((err) => console.error('Miniatura falhou:', err));
+  }
   return import('./avatar.js')
     .then((m) => m.renderObjectThumbnail({ meshUrl: publicUrl(item.mesh_path), texUrl: item.image_path ? publicUrl(item.image_path) : null, key: `${item.id}|${item.mesh_path}` }))
     .then(done)
