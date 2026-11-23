@@ -20,6 +20,7 @@ const ADMIN_NAV = [['accounts', 'Created Accounts', 'accounts.html', 'groups'], 
 export function initShell(user, active, { query = '' } = {}) {
   document.getElementById('topbar-slot').innerHTML = `
   <header class="topbar">
+    <button class="menu-btn" id="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false"><i></i><i></i><i></i></button>
     <a class="logo" href="home.html"><i></i>OWOXY</a>
     <nav>
       <a href="home.html">Home</a>
@@ -48,6 +49,15 @@ export function initShell(user, active, { query = '' } = {}) {
     '<div class="section-title">Events</div>';
 
   hydrate();
+
+  // menu lateral escondido: abre pelo botão de três linhas, fecha ao clicar fora, num link ou com Esc
+  const side = document.getElementById('sidebar-slot'), toggle = document.getElementById('menu-toggle');
+  const back = document.createElement('div'); back.className = 'side-backdrop'; document.body.appendChild(back);
+  const setSide = (open) => { side.classList.toggle('open', open); back.classList.toggle('open', open); toggle.setAttribute('aria-expanded', String(open)); };
+  toggle.addEventListener('click', (e) => { e.stopPropagation(); setSide(!side.classList.contains('open')); });
+  back.addEventListener('click', () => setSide(false));
+  side.addEventListener('click', (e) => { if (e.target.closest('a')) setSide(false); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setSide(false); });
 
   document.getElementById('search').value = query;
   document.getElementById('search-form').addEventListener('submit', (e) => {
