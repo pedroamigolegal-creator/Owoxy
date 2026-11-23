@@ -3,8 +3,7 @@ import { mountAvatar } from './avatar.js';
 import { toast } from './common.js';
 import { CONFIG } from './config.js';
 import { equipItem, friendlyError, lookOfEquipped, myInventory, publicUrl, unequipItem } from './items.js';
-import { renderThumbnail } from './avatar.js';
-import { lookOfItem, thumbView } from './items.js';
+import { loadItemThumb } from './items.js';
 import { initShell } from './shell.js';
 
 const user = await requireUser();
@@ -25,7 +24,14 @@ const PARTS = [
 ];
 
 const state = { ...CONFIG.defaultColors, ...(user?.avatar?.colors || {}) };
-let tab = 'Body';
+let tab = 'Wearing';
+let sub = { Clothing: 'all', Accessories: 'all' };
+const SUBS = {
+  Clothing: [['all', 'All'], ['shirt', 'Shirts'], ['pants', 'Pants'], ['facedecal', 'Faces']],
+  Accessories: [['all', 'All'], ['hat', 'Hats'], ['hair', 'Hair'], ['face', 'Face'], ['back', 'Back']],
+};
+const isClothing = (i) => i.kind !== 'accessory';
+const matches = (i, t) => (t === 'Clothing' ? isClothing(i) && (sub.Clothing === 'all' || i.kind === sub.Clothing) : !isClothing(i) && (sub.Accessories === 'all' || i.accessory_type === sub.Accessories));
 let part = 'skin';
 let avatar = null;
 let inventory = [];
@@ -42,7 +48,7 @@ mountAvatar(canvas, { view: 'full', modelUrl: user?.avatar?.model, colors: state
   .then(async (api) => {
     avatar = api;
     await loadInventory();
-    if (tab !== 'Body') render();
+    render();
     let spinning = true;
     toggle.addEventListener('click', () => {
       spinning = !spinning;
@@ -71,36 +77,36 @@ const crumb = document.getElementById('crumb');
 const pills = document.getElementById('pills');
 const grid = document.getElementById('grid');
 
+function itemButtons(list, emptyText) {
+  grid.innerHTML = list.length ? list.map((i) => `<button class="item" data-inv="${i.id}" aria-pressed="${i.equipped}">
+    <span class="thumb"><img alt="" data-thumb="${i.id}">${i.equipped ? '<i class="check">✓</i>' : ''}</span>
+    <span class="name">${i.name.replace(/</g, '&lt;')}</span></button>`).join('')
+    : `<p class="muted empty">${invLoaded ? emptyText : 'Loading...'}</p>`;
+  for (const i of list) { const img = grid.querySelector(`img[data-thumb="${i.id}"]`); if (img) loadItemThumb(i, img); }
+}
+
 function render() {
   tabsEl.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
-  const isBody = tab === 'Body';
-  crumb.innerHTML = isBody ? `Body &rsaquo; <b>${PARTS.find((p) => p.key === part).label}</b>` : `${tab} &rsaquo; All`;
-  pills.innerHTML = isBody
-    ? PARTS.map((p) => `<button class="pill ${p.key === part ? 'on' : ''}" data-part="${p.key}">${p.label}</button>`).join('')
-    : '';
-
-  if (tab === 'Clothing') {
-    const list = inventory;
-    grid.innerHTML = list.length ? list.map((i) => `<button class="item" data-inv="${i.id}" aria-pressed="${i.equipped}">
-      <span class="thumb"><img alt="" data-thumb="${i.id}">${i.equipped ? '<i class="check">✓</i>' : ''}</span>
-      <span class="name">${i.name.replace(/</g, '&lt;')}</span></button>`).join('')
-      : `<p class="muted empty">${invLoaded ? 'No clothes yet. Get some in the <a href="catalog.html"><u>Catalog</u></a> or make your own on the <a href="create.html"><u>Create</u></a> page.' : 'Loading...'}</p>`;
-    for (const i of list) {
-      const img = grid.querySelector(`img[data-thumb="${i.id}"]`);
-      renderThumbnail(lookOfItem(i), { view: thumbView(i), key: i.id }).then((u) => { if (img) { img.src = u; img.classList.add('ready'); } }).catch(() => {});
-    }
+  const shop = '<a href="catalog.html"><u>Catalog</u></a> or make your own on the <a href="create.html"><u>Create</u></a> page.';
+  if (tab === 'Body') {
+    crumb.innerHTML = `Body &rsaquo; <b>${PARTS.find((p) => p.key === part).label}</b>`;
+    pills.innerHTML = PARTS.map((p) => `<button class="pill ${p.key === part ? 'on' : ''}" data-part="${p.key}">${p.label}</button>`).join('');
+    grid.innerHTML = PALETTE.map(([name, hex]) => {
+      const on = state[part].toLowerCase() === hex;
+      return `<button class="item" data-hex="${hex}" aria-pressed="${on}"><span class="thumb" style="background:${hex}">${on ? '<i class="check">✓</i>' : ''}</span><span class="name">${name}</span></button>`;
+    }).join('');
     return;
   }
-  if (!isBody) {
-    grid.innerHTML = `<p class="muted empty">Nothing here yet. ${tab === 'Recent' ? 'Items you use will show up here.' : 'Clothes and accessories are coming with the Owoxy catalog.'}</p>`;
+  if (tab === 'Wearing') {
+    const on = inventory.filter((i) => i.equipped);
+    crumb.innerHTML = `Currently Wearing &rsaquo; <b>${on.length} item${on.length === 1 ? '' : 's'}</b>`;
+    pills.innerHTML = '';
+    itemButtons(on, `You are not wearing anything yet. Get items in the ${shop}`);
     return;
   }
-  grid.innerHTML = PALETTE.map(([name, hex]) => {
-    const on = state[part].toLowerCase() === hex;
-    return `<button class="item" data-hex="${hex}" aria-pressed="${on}">
-      <span class="thumb" style="background:${hex}">${on ? '<i class="check">✓</i>' : ''}</span>
-      <span class="name">${name}</span></button>`;
-  }).join('');
+  crumb.innerHTML = `${tab} &rsaquo; <b>${SUBS[tab].find(([k]) => k === sub[tab])[1]}</b>`;
+  pills.innerHTML = SUBS[tab].map(([k, label]) => `<button class="pill ${k === sub[tab] ? 'on' : ''}" data-sub="${k}">${label}</button>`).join('');
+  itemButtons(inventory.filter((i) => matches(i, tab)), `Nothing here yet. Get some in the ${shop}`);
 }
 
 tabsEl.addEventListener('click', (e) => {
@@ -108,6 +114,8 @@ tabsEl.addEventListener('click', (e) => {
   if (b) { tab = b.dataset.tab; render(); }
 });
 pills.addEventListener('click', (e) => {
+  const s = e.target.closest('button[data-sub]');
+  if (s) { sub[tab] = s.dataset.sub; render(); return; }
   const b = e.target.closest('button[data-part]');
   if (b) { part = b.dataset.part; render(); }
 });

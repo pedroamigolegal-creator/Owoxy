@@ -1,7 +1,6 @@
 // Cartões de item (catálogo, inventário, Create): miniatura 3D do noob vestindo o item, nome, criador e preço.
 import { esc, icon, verifiedBadge } from './common.js';
-import { LIMITED_LABEL, lookOfItem, saleState, thumbView } from './items.js';
-import { renderThumbnail } from './avatar.js';
+import { LIMITED_LABEL, loadItemThumb, saleState } from './items.js';
 
 const coin = (n) => `<span class="price">${icon('coin')}${Number(n).toLocaleString('en-US')}</span>`;
 
@@ -28,13 +27,10 @@ export function itemCard(item, { extra = '', tag = '' } = {}) {
     </a>${extra}</div>`;
 }
 
-// Gera as miniaturas uma de cada vez (todas usam o mesmo canvas 3D)
+// Mostra a imagem de cada item (sem o noob). Acessórios 3D são gerados um de cada vez.
 export function loadThumbs(root, items) {
   for (const item of items) {
     const img = root.querySelector(`img[data-thumb="${item.id}"]`);
-    if (!img) continue;
-    renderThumbnail(lookOfItem(item), { view: thumbView(item), key: `${item.id}|${item.offset_x}|${item.offset_y}|${item.offset_z}` })
-      .then((url) => { img.src = url; img.classList.add('ready'); })
-      .catch((err) => console.error('Miniatura falhou:', err));
+    if (img) loadItemThumb(item, img);
   }
 }

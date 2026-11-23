@@ -358,3 +358,53 @@ export function renderThumbnail(look, { view = 'full', key = null } = {}) {
   if (cacheKey) thumbCache.set(cacheKey, job);
   return job;
 }
+
+// ---------- miniatura só do item (sem o noob) ----------
+// Roupas e rostos: a própria imagem. Acessórios 3D: o modelo sozinho, centralizado, num canvas transparente.
+let objStage = null;
+let objQueue = Promise.resolve();
+const objCache = new Map();
+
+export function renderObjectThumbnail({ meshUrl, texUrl, key = null }) {
+  if (key && objCache.has(key)) return objCache.get(key);
+  const job = objQueue.then(async () => {
+    if (!objStage) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256; canvas.height = 256;
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
+      renderer.setSize(256, 256, false);
+      const scene = new THREE.Scene();
+      scene.add(new THREE.AmbientLight(0xffffff, 1.7));
+      const sun = new THREE.DirectionalLight(0xffffff, 1.6);
+      sun.position.set(3, 5, 6);
+      scene.add(sun);
+      objStage = { renderer, scene, camera: new THREE.PerspectiveCamera(28, 1, 0.01, 1000), loader: new OBJLoader(), canvas };
+    }
+    const { renderer, scene, camera, loader, canvas } = objStage;
+    const [obj, img] = await Promise.all([loader.loadAsync(meshUrl), texUrl ? loadImage(texUrl).catch(() => null) : null]);
+    let map = null;
+    if (img) { map = new THREE.Texture(img); map.colorSpace = THREE.SRGBColorSpace; map.wrapS = map.wrapT = THREE.RepeatWrapping; map.needsUpdate = true; }
+    obj.traverse((o) => { if (o.isMesh) o.material = new THREE.MeshStandardMaterial({ map, color: map ? 0xffffff : 0xcccccc, roughness: 0.7, metalness: 0, side: THREE.DoubleSide }); });
+    const holder = new THREE.Group();
+    holder.add(obj);
+    holder.rotation.set(0.28, -0.6, 0);                        // um pouco de cima e de lado, como nas lojas
+    scene.add(holder);
+    holder.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(holder);
+    const size = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3());
+    const radius = Math.max(size.x, size.y, size.z, 0.0001) * 0.5 * Math.sqrt(3) * 0.78;
+    const dist = radius / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    camera.position.set(center.x, center.y, center.z + dist);
+    camera.lookAt(center);
+    camera.updateProjectionMatrix();
+    renderer.render(scene, camera);
+    const url = canvas.toDataURL('image/png');
+    scene.remove(holder);
+    obj.traverse((o) => { if (o.isMesh) { o.geometry.dispose(); o.material.dispose(); } });
+    map?.dispose();
+    return url;
+  });
+  objQueue = job.catch(() => {});
+  if (key) objCache.set(key, job);
+  return job;
+}

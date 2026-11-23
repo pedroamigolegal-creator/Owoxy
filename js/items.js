@@ -100,6 +100,16 @@ export async function lookOfUser(userId) {
   };
 }
 
+// Miniatura só do item (sem o noob): roupas e rostos mostram a própria imagem; acessórios 3D são renderizados sozinhos.
+export function loadItemThumb(item, img) {
+  const done = (url) => { img.src = url; img.classList.add('ready'); };
+  if (item.kind !== 'accessory') { img.classList.add('flat'); done(publicUrl(item.image_path)); return Promise.resolve(); }
+  return import('./avatar.js')
+    .then((m) => m.renderObjectThumbnail({ meshUrl: publicUrl(item.mesh_path), texUrl: item.image_path ? publicUrl(item.image_path) : null, key: `${item.id}|${item.mesh_path}` }))
+    .then(done)
+    .catch((err) => console.error('Miniatura falhou:', err));
+}
+
 // Miniatura que o catálogo mostra: o noob vestindo o item (cabeça e ombros para chapéus/cabelo/rosto)
 export const thumbView = (item) => (item.kind === 'facedecal' ? 'head' : item.kind === 'accessory' && ['hat', 'hair', 'face'].includes(item.accessory_type) ? 'bust' : 'full');
 
