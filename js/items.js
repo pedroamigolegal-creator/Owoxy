@@ -133,6 +133,12 @@ export function friendlyError(err) {
   if (m.includes('cannot moderate an admin')) return 'You cannot do this to an admin account.';
   if (m.includes('too many reports')) return 'You sent too many reports today. Try again tomorrow.';
   if (m.includes('invalid reason')) return 'Pick a reason for the report.';
+  if (m.includes('community name taken')) return 'A group with that name already exists.';
+  if (m.includes('invalid community name')) return 'Group names use 3-30 letters, numbers, spaces, . _ -';
+  if (m.includes('too many communities')) return 'You reached the groups limit.';
+  if (m.includes('owner cannot leave')) return 'The owner cannot leave. Delete the group instead.';
+  if (m.includes('not the owner')) return 'Only the owner can do that.';
+  if (m.includes('cannot follow yourself')) return 'You cannot follow yourself.';
   if (m.includes('admins only')) return 'Only the Owoxy account can do this.';
   if (m.includes('friend requests disabled')) return 'This user is not accepting friend requests.';
   if (m.includes('messages disabled')) return 'This user turned off messages.';

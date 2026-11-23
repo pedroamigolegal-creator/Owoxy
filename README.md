@@ -97,3 +97,11 @@ Run `supabase/008_moderation_games.sql` after 007. Only the **Owoxy** account ca
 - **Game pages** (`game-page.html?g=ttos|nds`): Play, like/dislike, favorite, visits, live server list with Join; `games.html` has Continue Playing, Favorites and All Games; the home page has Recommended For You.
 
 Note: an access token that was already issued can keep working for up to about an hour after a ban; the site signs banned users out on the next page load.
+
+## Presence, followers and Groups (migration 009)
+
+Run `supabase/009_social_communities.sql` after 008.
+
+- **Online / Playing** status: the site sends a heartbeat every minute (the games send which game you are in). Friends show a green dot (online) or blue dot (in game); profiles show the status line.
+- **Followers / Following**: Follow button on profiles with counts next to Friends.
+- **Groups** (`groups.html`, `community.html?id=`): search, create (100 Owos), join/leave, members list, edit description, delete (owner or Owoxy admin). Profiles list the groups a user is in.

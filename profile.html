@@ -25,7 +25,8 @@
           <div class="avatar-circle sm"><canvas id="head" width="120" height="120"></canvas></div>
           <div class="who">
             <h1><span id="p-name"></span><span id="p-badge"></span></h1>
-            <p class="stats"><b id="p-friends">0</b> Friends</p>
+            <p class="presence" id="p-presence"></p>
+            <p class="stats"><b id="p-friends">0</b> Friends &middot; <b id="p-followers">0</b> Followers &middot; <b id="p-following">0</b> Following</p>
           </div>
           <div class="actions" id="actions"></div>
         </section>
@@ -51,6 +52,11 @@
               <div class="wear-view"><canvas id="full" width="260" height="320"></canvas><button class="toggle-2d" id="toggle-2d" type="button">2D</button></div>
               <div class="wear-grid" id="wear-grid"></div>
             </div>
+          </section>
+
+          <section class="card">
+            <div class="friends-title"><h2>Communities</h2><a href="groups.html">See All &rsaquo;</a></div>
+            <div id="p-comms" class="comm-chips"></div>
           </section>
 
           <section class="card">

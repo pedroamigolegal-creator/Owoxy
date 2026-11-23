@@ -1,10 +1,10 @@
 import { requireUser } from './auth.js';
 import { mountAvatar } from './avatar.js';
-import { hydrateHeads, toast, userTile, verifiedBadge } from './common.js';
+import { esc, hydrateHeads, toast, userTile, verifiedBadge } from './common.js';
 import { CONFIG } from './config.js';
 import { friendlyError, lookOfUser } from './items.js';
 import { initShell } from './shell.js';
-import { friendStatus, getProfile, listFriends, removeFriend, respondFriendRequest, saveAbout, sendFriendRequest, sendMessage } from './social.js';
+import { myCommunities, presenceText, socialCounts, toggleFollow, userPresence, friendStatus, getProfile, listFriends, removeFriend, respondFriendRequest, saveAbout, sendFriendRequest, sendMessage } from './social.js';
 
 const me = await requireUser();
 if (me) {
@@ -73,10 +73,28 @@ if (me) {
     }
     loadFriends();
 
+    // Status (Online / Playing...), seguidores e comunidades
+    async function loadSocial() {
+      try {
+        const c = await socialCounts(p.id);
+        $('p-followers').textContent = c?.followers ?? 0; $('p-following').textContent = c?.following ?? 0;
+        window.__iFollow = Boolean(c?.i_follow);
+      } catch { /* migração 009 ainda não rodou */ }
+    }
+    try {
+      const pr = await userPresence(p.id);
+      const el = $('p-presence'); el.textContent = presenceText(pr);
+      el.className = `presence ${pr?.status || 'offline'}`;
+    } catch { /* sem presença */ }
+    myCommunities(p.id).then((list) => {
+      $('p-comms').innerHTML = list.length ? list.map((c) => `<a class="chip" href="community.html?id=${c.id}">${esc(c.name)}<small>${c.members} members</small></a>`).join('') : '<p class="muted">Not in any communities yet.</p>';
+    }).catch(() => { $('p-comms').innerHTML = '<p class="muted">Not in any communities yet.</p>'; });
+
     // Botões (mudam conforme a relação entre nós)
     const actions = $('actions');
     async function renderActions() {
       if (isSelf) { actions.innerHTML = '<a class="btn-gray" href="avatar.html">Edit Avatar</a>'; return; }
+      await loadSocial();
       let status = 'none';
       try { status = await friendStatus(p.id); } catch (err) { console.error(err); }
       actions.innerHTML = {
@@ -85,12 +103,14 @@ if (me) {
         received: '<button class="btn-green" data-act="accept">Accept</button><button class="btn-gray" data-act="decline">Decline</button>',
         friends: '<button class="btn-dark" data-act="message">Message</button><button class="btn-outline-red" data-act="unfriend">Unfriend</button>',
       }[status] || '';
+      actions.insertAdjacentHTML('beforeend', `<button class="btn-gray" data-act="follow">${window.__iFollow ? 'Unfollow' : 'Follow'}</button>`);
     }
     actions.addEventListener('click', async (e) => {
       const act = e.target.closest('button')?.dataset.act;
       if (!act) return;
       try {
-        if (act === 'add') { await sendFriendRequest(p.id); toast('Friend request sent'); }
+        if (act === 'follow') { await toggleFollow(p.id); toast(window.__iFollow ? 'Unfollowed' : 'Following'); }
+        else if (act === 'add') { await sendFriendRequest(p.id); toast('Friend request sent'); }
         else if (act === 'cancel' || act === 'unfriend') { await removeFriend(p.id); toast(act === 'cancel' ? 'Request cancelled' : 'Removed from friends'); }
         else if (act === 'accept') { await respondFriendRequest(p.id, true); toast('Friend added!'); }
         else if (act === 'decline') { await respondFriendRequest(p.id, false); }
@@ -99,6 +119,7 @@ if (me) {
         loadFriends();
       } catch (err) { console.error(err); toast(friendlyError(err)); }
     });
+    if (isSelf) loadSocial();
     renderActions();
 
     // Enviar mensagem (só para amigos)

@@ -1,7 +1,7 @@
 import { requireUser } from './auth.js';
 import { esc, hydrateHeads, miniNoob, toast, userTile, verifiedBadge } from './common.js';
 import { initShell } from './shell.js';
-import { friendRequests, getProfile, listFriends, respondFriendRequest } from './social.js';
+import { paintPresence, friendRequests, getProfile, listFriends, respondFriendRequest } from './social.js';
 
 const user = await requireUser();
 if (user) {
@@ -18,6 +18,7 @@ if (user) {
       document.getElementById('f-count').textContent = friends.length;
       document.getElementById('friends').innerHTML = friends.length ? friends.map(userTile).join('') : '<p class="muted">No friends yet.</p>';
       hydrateHeads(document.getElementById('friends'));
+      paintPresence(document.getElementById('friends'));
 
       if (isSelf) {
         const reqs = await friendRequests();

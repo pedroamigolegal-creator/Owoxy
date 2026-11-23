@@ -4,6 +4,7 @@ import { requireUser } from '../auth.js';
 import { esc, formDialog, toast, verifiedBadge } from '../common.js';
 import { friendlyError } from '../items.js';
 import { rpc } from '../supabase.js';
+import { touchPresence } from '../social.js';
 import { CONFIG } from '../config.js';
 import { lookOfUser } from '../items.js';
 import { createCharacter, loadTemplate } from './character.js';
@@ -341,6 +342,8 @@ function rowHTML(p, you) {
   const rep = !you && p.uid ? `<button class="rep-btn" type="button" data-uid="${esc(p.uid)}" data-name="${esc(p.name)}" title="Report">Report</button>` : '';
   return `<li><span class="pname">${esc(p.name)}</span>${p.verified ? verifiedBadge() : ''}${you ? '<em>you</em>' : ''}${rep}</li>`;
 }
+touchPresence(GAME).catch(() => {});
+setInterval(() => touchPresence(GAME).catch(() => {}), 60000);
 const REASONS = ['Inappropriate chat', 'Harassment or bullying', 'Scam or phishing', 'Cheating or exploiting', 'Inappropriate username', 'Other'];
 async function reportPlayer(uid, name) {
   const v = await formDialog({ title: `Report ${name}`, message: 'Tell us what happened. Our moderators will review it.', confirmText: 'Submit report', danger: true,

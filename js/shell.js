@@ -2,7 +2,7 @@
 import { logOut } from './auth.js';
 import { formatCompact, hydrate } from './common.js';
 import { CONFIG } from './config.js';
-import { unreadCount } from './social.js';
+import { touchPresence, unreadCount } from './social.js';
 
 const NAV = [
   ['home', 'Home', 'home.html', 'home'],
@@ -12,7 +12,7 @@ const NAV = [
   ['avatar', 'Avatar', 'avatar.html', 'avatar'],
   ['inventory', 'Inventory', 'inventory.html', 'inventory'],
   ['games', 'Games', 'games.html', 'avatar'],
-  ['groups', 'Groups', null, 'groups'],
+  ['groups', 'Groups', 'groups.html', 'groups'],
   ['premium', 'Premium', 'premium.html', 'premium'],
 ];
 const ADMIN_NAV = [['accounts', 'Created Accounts', 'accounts.html', 'groups'], ['reports', 'Reports', 'reports.html', 'groups']];
@@ -64,6 +64,8 @@ export function initShell(user, active, { query = '' } = {}) {
   document.getElementById('logout').addEventListener('click', async () => { await logOut(); location.href = 'login.html'; });
 
   refreshUnread();
+  touchPresence().catch(() => {});
+  setInterval(() => { if (!document.hidden) touchPresence().catch(() => {}); }, 60000);
 }
 
 export async function refreshUnread() {

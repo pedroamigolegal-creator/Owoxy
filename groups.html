@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Owoxy - Groups</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="topbar-slot"></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar-slot"></aside>
+    <main class="main" id="main">
+      <div class="row-between"><h1 class="page-title">Groups</h1><button class="btn-green" id="create" type="button">Create Group (100 Owos)</button></div>
+      <h2 class="game-row-title">My Groups</h2>
+      <div class="comm-list" id="mine"><p class="muted">Loading...</p></div>
+      <h2 class="game-row-title">Discover Groups</h2>
+      <form id="gsearch" class="row-gap"><input id="gq" type="text" maxlength="30" placeholder="Search groups"><button class="btn-green" type="submit">Search</button></form>
+      <div class="comm-list" id="all"></div>
+    </main>
+  </div>
+  <script type="module" src="js/groups.js"></script>
+</body>
+</html>
