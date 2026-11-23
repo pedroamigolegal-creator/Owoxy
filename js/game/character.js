@@ -36,6 +36,10 @@ export async function loadTemplate(modelUrl = CONFIG.defaultAvatar) {
   // amostra de cor do atlas (para achar o desenho preto do rosto original)
   const sampler = makeBodyTexture(mesh.material.clone());
 
+  // braço direito = o de menor z (frente = -X, cima = +Y => direita = -Z)
+  const zOf = (name) => { let s = 0, n = 0; for (let t = 0; t < parts.length; t++) if (parts[t] === name) { for (let k = 0; k < 3; k++) { s += P[index[t * 3 + k] * 3 + 2]; n++; } } return s / (n || 1); };
+  const rightArm = zOf('armA') < zOf('armB') ? 'armA' : 'armB';
+
   const names = ['head', 'torso', 'armA', 'armB', 'legA', 'legB'];
   const geos = {}, joints = {};
   for (const name of names) {
@@ -73,7 +77,9 @@ export async function loadTemplate(modelUrl = CONFIG.defaultAvatar) {
   const region = faceRegion(Array.from({ length: headPos.count }, (_, i) => [headPos.getX(i), headPos.getY(i), headPos.getZ(i)]));
   const decalGeo = buildDecalGeometry({ positions: headPos.array, normals: headNor.array, index: geos.head.index.array }, region);
 
-  return { geos, joints, material: mesh.material, dy, dark, skinUV: [headUV.getX(skin), headUV.getY(skin)], decalGeo, height: max.y - min.y };
+  let armLen = 2;
+  { const ap = geos[rightArm].attributes.position; let lo = 0; for (let i = 0; i < ap.count; i++) lo = Math.min(lo, ap.getY(i)); armLen = -lo; }
+  return { rightArm, armLen, geos, joints, material: mesh.material, dy, dark, skinUV: [headUV.getX(skin), headUV.getY(skin)], decalGeo, height: max.y - min.y };
 }
 
 // ---- texturas do corpo: jogadores com a mesma aparência dividem o mesmo material ----
@@ -110,6 +116,7 @@ export function createCharacter(tpl) {
   let decal = null;
   let ownHeadGeo = null;
   let version = 0;
+  let hasGear = false;
 
   async function setLook(look = {}) {
     const my = ++version;
@@ -146,12 +153,14 @@ export function createCharacter(tpl) {
         holder.add(obj);
         holder.rotation.y = Math.PI / 2;
         const at = ATTACH[a.type] || ATTACH.hat;
-        holder.position.set(at[0], at[1] + tpl.dy, at[2]);
+        if (a.type === 'gear') { const j = tpl.joints[tpl.rightArm]; holder.position.set(j[0] - tpl.armLen, j[1], j[2]); }   // na mão do braço levantado
+        else holder.position.set(at[0], at[1] + tpl.dy, at[2]);
         return holder;
       } catch (err) { console.error('Acessório não carregou:', err); return null; }
     }));
     if (my !== version) return;
     built.filter(Boolean).forEach((g) => { root.add(g); accessories.push(g); });
+    hasGear = (look.accessories || []).some((x) => x.type === 'gear');
   }
 
   // ---- animação R6 ----
@@ -176,6 +185,7 @@ export function createCharacter(tpl) {
       const b = Math.sin(phase) * 0.04;                                                      // parado: respiração leve
       target = { armA: b, armB: -b, legA: 0, legB: 0 };
     }
+    if (hasGear) { target[tpl.rightArm] = -1.5; if (moving) target[tpl.rightArm] = -1.5 + Math.sin(phase) * 0.06; }   // com Gear: braço direito sempre levantado
     for (const k of Object.keys(pose)) { pose[k] = ease(pose[k], target[k], dt); meshes[k].rotation.z = pose[k]; }
     root.position.y += (bob - root.position.y) * (1 - Math.exp(-dt * 14));
   }

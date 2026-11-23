@@ -28,7 +28,7 @@ let tab = 'Wearing';
 let sub = { Clothing: 'all', Accessories: 'all' };
 const SUBS = {
   Clothing: [['all', 'All'], ['shirt', 'Shirts'], ['pants', 'Pants'], ['facedecal', 'Faces']],
-  Accessories: [['all', 'All'], ['hat', 'Hats'], ['hair', 'Hair'], ['face', 'Face'], ['back', 'Back']],
+  Accessories: [['all', 'All'], ['hat', 'Hats'], ['hair', 'Hair'], ['face', 'Face'], ['back', 'Back'], ['gear', 'Gear']],
 };
 const isClothing = (i) => i.kind !== 'accessory';
 const matches = (i, t) => (t === 'Clothing' ? isClothing(i) && (sub.Clothing === 'all' || i.kind === sub.Clothing) : !isClothing(i) && (sub.Accessories === 'all' || i.accessory_type === sub.Accessories));
@@ -44,7 +44,7 @@ async function loadInventory() {
 // --- Avatar 3D ---
 const canvas = document.getElementById('preview');
 const toggle = document.getElementById('toggle-2d');
-mountAvatar(canvas, { view: 'full', modelUrl: user?.avatar?.model, colors: state })
+mountAvatar(canvas, { view: 'full', fit: 1.6, modelUrl: user?.avatar?.model, colors: state })
   .then(async (api) => {
     avatar = api;
     await loadInventory();

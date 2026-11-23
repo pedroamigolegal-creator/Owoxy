@@ -22,7 +22,9 @@ export const ATTACH = {
   hair: [0, 2.99, 0],
   face: [-0.42, 2.39, 0],
   back: [0.5, 0.89, 0],
+  gear: [-1.0, 1.6, -0.6],   // reserva: o encaixe real vem da posição da mão (ver armKit)
 };
+export const GEAR_RAISE = -1.5;   // braço direito levantado, apontando para a frente (rotação em Z, como no rig dos jogos)
 
 // ---------- carregamento com cache ----------
 const imageCache = new Map();
@@ -169,11 +171,55 @@ function buildFaceKit(mesh, body, pivot) {
   };
 }
 
+
+/**
+ * Braço direito levantado (para Gears). O noob é uma malha só; movemos os vértices do braço direito em volta do ombro
+ * (no espaço do pivot: frente = -X, cima = +Y, direita = -Z). raise(false) volta ao normal.
+ */
+function buildArmKit(mesh, pivot) {
+  const geo = mesh.geometry;
+  const parts = classifyParts(geo);
+  if (!parts || !geo.index) return null;
+  pivot.updateMatrixWorld(true); mesh.updateMatrixWorld(true);
+  const toPivot = new THREE.Matrix4().copy(pivot.matrixWorld).invert().multiply(mesh.matrixWorld);
+  const fromPivot = toPivot.clone().invert();
+  const pos = geo.attributes.position, nor = geo.attributes.normal;
+  const v = new THREE.Vector3();
+  const verts = { armA: new Set(), armB: new Set() };
+  for (let t = 0; t < parts.length; t++) if (verts[parts[t]]) for (let k = 0; k < 3; k++) verts[parts[t]].add(geo.index.array[t * 3 + k]);
+  // qual braço é o direito: o de menor z no espaço do pivot
+  const bbox = (set) => { const b = new THREE.Box3(); for (const i of set) b.expandByPoint(v.fromBufferAttribute(pos, i).applyMatrix4(toPivot)); return b; };
+  const bA = bbox(verts.armA), bB = bbox(verts.armB);
+  const right = bA.getCenter(new THREE.Vector3()).z < bB.getCenter(new THREE.Vector3()).z ? 'armA' : 'armB';
+  const box = right === 'armA' ? bA : bB;
+  const shoulder = new THREE.Vector3((box.min.x + box.max.x) / 2, box.max.y, (box.min.z + box.max.z) / 2);
+  const len = box.max.y - box.min.y;
+  const ids = [...verts[right]];
+  const origP = ids.map((i) => [pos.getX(i), pos.getY(i), pos.getZ(i)]);
+  const origN = nor ? ids.map((i) => [nor.getX(i), nor.getY(i), nor.getZ(i)]) : null;
+  const rot = new THREE.Matrix4().makeRotationZ(GEAR_RAISE);
+  const full = new THREE.Matrix4().copy(fromPivot).multiply(new THREE.Matrix4().makeTranslation(shoulder.x, shoulder.y, shoulder.z))
+    .multiply(rot).multiply(new THREE.Matrix4().makeTranslation(-shoulder.x, -shoulder.y, -shoulder.z)).multiply(toPivot);
+  let raised = false;
+  return {
+    hand: [shoulder.x - len, shoulder.y, shoulder.z],
+    raise(on) {
+      if (on === raised) return;
+      raised = on;
+      ids.forEach((i, k) => {
+        v.set(...origP[k]); if (on) v.applyMatrix4(full); pos.setXYZ(i, v.x, v.y, v.z);
+        if (origN) { v.set(...origN[k]); if (on) v.transformDirection(full); nor.setXYZ(i, v.x, v.y, v.z); }
+      });
+      pos.needsUpdate = true; if (nor) nor.needsUpdate = true;
+    },
+  };
+}
+
 /**
  * Cria o palco 3D de um avatar.
  * view: 'head' (foto de perfil), 'bust' (cabeça e ombros, para acessórios) ou 'full' (corpo inteiro)
  */
-export async function createStage(canvas, { view = 'full', modelUrl = CONFIG.defaultAvatar } = {}) {
+export async function createStage(canvas, { view = 'full', modelUrl = CONFIG.defaultAvatar, fit = 1.12 } = {}) {
   const w = canvas.clientWidth || canvas.width || 200;
   const h = canvas.clientHeight || canvas.height || 200;
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
@@ -217,10 +263,12 @@ export async function createStage(canvas, { view = 'full', modelUrl = CONFIG.def
 
   const faceKit = bodyMesh && body ? buildFaceKit(bodyMesh, body, pivot) : null;
 
+  const armKit = bodyMesh ? buildArmKit(bodyMesh, pivot) : null;
+
   const camera = new THREE.PerspectiveCamera(25, w / h, 0.1, 100);
   const fovTan = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   // [altura que cabe no quadro, quanto abaixo do topo fica o centro do quadro]
-  const FRAMES = { head: [0.36, 0.175], bust: [0.5, 0.2] };
+  const FRAMES = { head: [0.56, 0.23], bust: [0.5, 0.2] };   // head = foto de perfil: cabeça e ombros, sem cobrir tudo
   const setView = (v) => {
     let target, dist;
     if (FRAMES[v]) {
@@ -228,7 +276,7 @@ export async function createStage(canvas, { view = 'full', modelUrl = CONFIG.def
       dist = (size.y * FRAMES[v][0]) / fovTan;
     } else {
       target = center.clone();
-      dist = (size.y * (v === 'mini' ? 1.75 : 1.12)) / fovTan;   // mini: noob pequeno no meio do quadro (miniaturas de roupa)
+      dist = (size.y * (v === 'mini' ? 1.75 : fit)) / fovTan;   // mini: noob pequeno no meio do quadro (miniaturas de roupa)
     }
     camera.position.set(target.x, target.y, target.z + dist);
     camera.lookAt(target);
@@ -259,7 +307,7 @@ export async function createStage(canvas, { view = 'full', modelUrl = CONFIG.def
       obj.scale.setScalar(a.scale || 1);                       // tamanho corrigido (auto scale)
       holder.add(obj);
       holder.rotation.y = Math.PI / 2;                       // frente do acessório (-Z) -> frente do modelo (-X)
-      holder.position.set(...(ATTACH[a.type] || ATTACH.hat));
+      holder.position.set(...(a.type === 'gear' && armKit ? armKit.hand : (ATTACH[a.type] || ATTACH.hat)));
       return holder;
     }));
     built.forEach((g) => { pivot.add(g); accessories.push(g); });
@@ -276,6 +324,7 @@ export async function createStage(canvas, { view = 'full', modelUrl = CONFIG.def
       look.face ? loadImage(look.face).catch(() => null) : null,
     ]);
     faceKit?.setFace(face);
+    armKit?.raise((look.accessories || []).some((x) => x.type === 'gear'));
     if (body) {
       body.setColors({ ...CONFIG.defaultColors, ...(look.colors || {}) });
       body.setClothes({ shirt, pants });
@@ -292,8 +341,8 @@ export async function createStage(canvas, { view = 'full', modelUrl = CONFIG.def
  * Mostra o avatar num canvas (com giro automático no corpo inteiro, arrastar para girar).
  * Retorna { setColors, setLook, setSpin, render }
  */
-export async function mountAvatar(canvas, { view = 'head', modelUrl = CONFIG.defaultAvatar, colors = null, look = null, spin = true } = {}) {
-  const stage = await createStage(canvas, { view, modelUrl });
+export async function mountAvatar(canvas, { view = 'head', modelUrl = CONFIG.defaultAvatar, colors = null, look = null, spin = true, fit = 1.12 } = {}) {
+  const stage = await createStage(canvas, { view, modelUrl, fit });
   const { pivot, render } = stage;
   if (colors) stage.setColors(colors);
   if (look) await stage.setLook({ colors, ...look });

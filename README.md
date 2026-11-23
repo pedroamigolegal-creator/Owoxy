@@ -109,3 +109,7 @@ Run `supabase/009_social_communities.sql` after 008.
 ## Sales and Owners (migration 010)
 
 Run `supabase/010_item_stats.sql` after 009. Every catalog item shows **Sales** (store purchases and resales) and **Owners** (people who have a copy) on its page and on its card.
+
+## Gear (migration 011)
+
+Run `supabase/011_gear.sql` after 010. **Gear** is a new UGC accessory type (Create > UGC > type "Gear"). Whoever wears a Gear raises the right arm pointing forward, in the avatar editor and in the games. Model rule: the model's center is placed in the hand (auto-fit does this), front = -Z, size is auto-scaled to about 2.2 studs.

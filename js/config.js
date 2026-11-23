@@ -27,5 +27,5 @@ export const CREATE_RULES = {
     maxTextureSize: 1024,      // textura PNG, no máximo 1024 x 1024
     maxTextureBytes: 5 * 1024 * 1024,
   },
-  accessoryTypes: { hat: 'Hat', hair: 'Hair', face: 'Face', back: 'Back' },
+  accessoryTypes: { hat: 'Hat', hair: 'Hair', face: 'Face', back: 'Back', gear: 'Gear' },
 };
