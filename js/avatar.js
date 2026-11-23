@@ -387,7 +387,7 @@ export function renderObjectThumbnail({ meshUrl, texUrl, key = null }) {
     obj.traverse((o) => { if (o.isMesh) o.material = new THREE.MeshStandardMaterial({ map, color: map ? 0xffffff : 0xcccccc, roughness: 0.7, metalness: 0, side: THREE.DoubleSide }); });
     const holder = new THREE.Group();
     holder.add(obj);
-    holder.rotation.set(0.28, -0.6, 0);                        // um pouco de cima e de lado, como nas lojas
+    holder.rotation.set(0.28, Math.PI - 0.55, 0);   // a frente do acessório é -Z: vira para a câmera e um pouco de lado
     scene.add(holder);
     holder.updateMatrixWorld(true);
     const box = new THREE.Box3().setFromObject(holder);
