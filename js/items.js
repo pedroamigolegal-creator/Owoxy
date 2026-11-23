@@ -100,6 +100,13 @@ export async function lookOfUser(userId) {
   };
 }
 
+// Sales e Owners de vários itens: devolve Map(id -> { sales, owners })
+export async function itemsStats(ids) {
+  if (!ids.length) return new Map();
+  try { return new Map((await rpc('items_stats', { p_ids: ids })).map((r) => [Number(r.id), r])); } catch { return new Map(); }   // migração 010 ainda não rodou
+}
+export const statsText = (s) => `${Number(s?.sales || 0).toLocaleString('en-US')} sales &middot; ${Number(s?.owners || 0).toLocaleString('en-US')} owners`;
+
 // Miniatura só do item (sem o noob): roupas e rostos mostram a própria imagem; acessórios 3D são renderizados sozinhos.
 export function loadItemThumb(item, img) {
   const done = (url) => { img.src = url; img.classList.add('ready'); };

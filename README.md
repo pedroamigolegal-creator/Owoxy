@@ -105,3 +105,7 @@ Run `supabase/009_social_communities.sql` after 008.
 - **Online / Playing** status: the site sends a heartbeat every minute (the games send which game you are in). Friends show a green dot (online) or blue dot (in game); profiles show the status line.
 - **Followers / Following**: Follow button on profiles with counts next to Friends.
 - **Groups** (`groups.html`, `community.html?id=`): search, create (100 Owos), join/leave, members list, edit description, delete (owner or Owoxy admin). Profiles list the groups a user is in.
+
+## Sales and Owners (migration 010)
+
+Run `supabase/010_item_stats.sql` after 009. Every catalog item shows **Sales** (store purchases and resales) and **Owners** (people who have a copy) on its page and on its card.

@@ -396,3 +396,6 @@ html { overflow-x: hidden; }
 .sidebar.open { transform: none; box-shadow: 4px 0 18px #0008; }
 .side-backdrop { position: fixed; inset: 44px 0 0 0; background: #0006; z-index: 25; opacity: 0; pointer-events: none; transition: opacity .18s; }
 .side-backdrop.open { opacity: 1; pointer-events: auto; }
+.cat-stats { font-size: 11px; color: #9aa; margin-top: 2px; }
+.stat-row { display: flex; gap: 28px; margin: 6px 0 10px; }
+.stat-row div { display: flex; flex-direction: column; } .stat-row .label { font-size: 12px; color: #9aa; } .stat-row b { font-size: 18px; }

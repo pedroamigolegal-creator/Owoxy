@@ -4,7 +4,7 @@ import { confirmDialog, esc, promptDialog, toast, verifiedBadge } from './common
 import { priceHTML } from './cards.js';
 import {
   ACCESSORY_LABEL, KIND_LABEL, LIMITED_LABEL, RESALE_FEE, buyItem, buyResale, cancelResale, deleteItem, friendlyError, getItem,
-  itemResales, listResale, lookOfItem, priceLabel, saleState, setAvailability, timeLeft,
+  itemResales, itemsStats, listResale, lookOfItem, priceLabel, saleState, setAvailability, timeLeft,
 } from './items.js';
 import { initShell, setBalance } from './shell.js';
 
@@ -55,6 +55,7 @@ if (user) {
           (item.limited_kind === 'unique' ? ` <span class="muted">${item.sold} of ${item.stock} sold</span>` : '') +
           (item.owned && item.serial ? ` <b>You own #${item.serial}</b>` : '');
       }
+      itemsStats([item.id]).then((m) => { const s = m.get(Number(item.id)); $('i-stats').innerHTML = s ? `<div><span class="label">Sales</span><b>${Number(s.sales).toLocaleString('en-US')}</b></div><div><span class="label">Owners</span><b>${Number(s.owners).toLocaleString('en-US')}</b></div>` : ''; });
       $('i-price').innerHTML = `<span class="label">Price</span> ${priceHTML(item)}`;
 
       // prazo da venda

@@ -1,6 +1,6 @@
 // Cartões de item (catálogo, inventário, Create): miniatura 3D do noob vestindo o item, nome, criador e preço.
 import { esc, icon, verifiedBadge } from './common.js';
-import { LIMITED_LABEL, loadItemThumb, saleState } from './items.js';
+import { itemsStats, LIMITED_LABEL, loadItemThumb, saleState, statsText } from './items.js';
 
 const coin = (n) => `<span class="price">${icon('coin')}${Number(n).toLocaleString('en-US')}</span>`;
 
@@ -24,11 +24,13 @@ export function itemCard(item, { extra = '', tag = '' } = {}) {
       <div class="cat-name">${esc(item.name)}</div>
       <div class="cat-by">By ${esc(item.creator_name)}${item.creator_verified ? verifiedBadge() : ''}</div>
       ${priceHTML(item)}
+      <div class="cat-stats" data-stats="${item.id}"></div>
     </a>${extra}</div>`;
 }
 
 // Mostra a imagem de cada item (sem o noob). Acessórios 3D são gerados um de cada vez.
 export function loadThumbs(root, items) {
+  itemsStats(items.map((i) => i.id)).then((m) => root.querySelectorAll('[data-stats]').forEach((el) => { const s = m.get(Number(el.dataset.stats)); if (s) el.innerHTML = statsText(s); }));
   for (const item of items) {
     const img = root.querySelector(`img[data-thumb="${item.id}"]`);
     if (img) loadItemThumb(item, img);
