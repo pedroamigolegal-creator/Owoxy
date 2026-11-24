@@ -4,17 +4,32 @@ import * as THREE from 'three';
 
 export const DISASTER_NAMES = ['Earthquake', 'Meteor Shower', 'Tornado', 'Flood', 'Volcanic Eruption', 'Blizzard', 'Acid Rain', 'Thunderstorm'];
 export const DISASTER_TIPS = [
-  'The ground is cracking. Stay away from the cracks!',
-  'Meteors are falling. Watch the red circles!',
-  'A tornado is coming. Run away from it!',
-  'The water is rising. Climb to the highest place!',
-  'The volcano erupted. Lava rises and fireballs fly. Go high!',
-  'A blizzard! Stay under a roof to keep warm.',
-  'Acid rain! Stay under a roof.',
-  'A thunderstorm. Lightning will strike the yellow circles!',
+  'The ground is shaking! Stay away from the cracks and keep moving!',
+  'Incoming! Watch the red circles on the ground and run out of them!',
+  'A tornado is tearing across the island. Run the other way!',
+  'The water is rising fast! Get to the highest spot you can find!',
+  'The volcano just blew its top! Lava is rising and fireballs are flying. Go high!',
+  'Whiteout! Get under a roof before you freeze!',
+  'The rain is acid! Find a roof or you will dissolve!',
+  'Thunder is rolling in. Run away from the yellow circles before lightning hits!',
+];
+export const DEATH_LINES = {
+  'fell into a crack': 'The ground swallowed you!', 'fell off the island': 'You took a swim. The island is that way!', 'fell into the sea': 'You took a swim. The island is that way!',
+  'hit by a meteor': 'A meteor found you!', 'hit by a fireball': 'Fireball to the face!', 'struck by lightning': 'Zapped!',
+  'sucked into the tornado': 'The tornado took you for a spin!', 'drowned': 'You ran out of air!', 'burned in the lava': 'Too hot to handle!',
+  'froze to death': 'You turned into an ice cube!', 'dissolved by acid rain': 'The acid rain got you!', 'you reset your character': 'You reset your character.',
+};
+export const SURVIVE_LINES = ['You made it!', 'Phew, that was close!', 'Still standing!', 'Nature could not stop you!', 'Survivor!'];
+export const LOBBY_TIPS = [
+  'Tip: shelters under a roof keep you safe from snow and acid rain.',
+  'Tip: in a flood, climb the tallest building you can find.',
+  'Tip: the volcano is on the far side of the island, so stay high when it erupts.',
+  'Tip: red circles on the ground mean something is about to land there.',
+  'Tip: jump on the steps around the buildings to reach the rooftops.',
+  'Tip: move all the time during an earthquake, cracks open under your feet.',
 ];
 
-const MAP = 80;
+const MAP = 110;
 const basic = (color, extra = {}) => new THREE.MeshBasicMaterial({ color, ...extra });
 
 // ---------- ataques com aviso (meteoros, raios, bolas de lava) ----------
@@ -158,7 +173,7 @@ const factories = [
 
   // 1. Chuva de meteoros
   (api) => {
-    const s = strikes(api, { count: 110, start: 4, gap: 0.5, jit: 0.4, lead: 2.4, fly: 2.4, radius: 7, kind: 'fall', color: 0xff6a1a, tail: 0xffc04d, spread: 72, reason: 'hit by a meteor' });
+    const s = strikes(api, { count: 110, start: 4, gap: 0.5, jit: 0.4, lead: 2.4, fly: 2.4, radius: 7, kind: 'fall', color: 0xff6a1a, tail: 0xffc04d, spread: 108, reason: 'hit by a meteor' });
     return { update: (t) => s.update(t), dispose: () => s.dispose() };
   },
 
@@ -200,7 +215,7 @@ const factories = [
     let air = 1;
     return {
       update(t, dt) {
-        const level = -2.5 + Math.min(t, 58) / 58 * 28;
+        const sea = api.sea(), level = t < 12 ? sea + (t / 12) * (-2.5 - sea) : -2.5 + Math.min(t - 12, 46) / 46 * 28;
         api.setWater(level);
         api.env.waterY = api.alive() ? level : -Infinity;
         if (!api.alive()) return;
@@ -214,7 +229,7 @@ const factories = [
 
   // 4. Vulcão: lava sobe e bolas de fogo voam
   (api) => {
-    const s = strikes(api, { count: 70, start: 7, gap: 0.8, jit: 0.5, lead: 3.2, fly: 3.2, radius: 6.5, kind: 'arc', origin: api.volcano, color: 0xff4a00, tail: 0xffa000, spread: 70, reason: 'hit by a fireball' });
+    const s = strikes(api, { count: 70, start: 7, gap: 0.8, jit: 0.5, lead: 3.2, fly: 3.2, radius: 6.5, kind: 'arc', origin: api.volcano, color: 0xff4a00, tail: 0xffa000, spread: 100, reason: 'hit by a fireball' });
     return {
       update(t, dt) {
         const lava = -10 + Math.min(1, Math.max(0, (t - 6) / 52)) * 24;
@@ -260,7 +275,7 @@ const factories = [
 
   // 7. Tempestade com raios
   (api) => {
-    const s = strikes(api, { count: 100, start: 4, gap: 0.55, jit: 0.4, lead: 1.5, fly: 0, radius: 5, kind: 'bolt', color: 0xffe14a, spread: 72, reason: 'struck by lightning' });
+    const s = strikes(api, { count: 100, start: 4, gap: 0.55, jit: 0.4, lead: 1.5, fly: 0, radius: 5, kind: 'bolt', color: 0xffe14a, spread: 108, reason: 'struck by lightning' });
     const p = precip(api, 'rain'), restore = tint(api, 0x6c7684, 25, 150);
     return { update: (t, dt) => { s.update(t); p.update(t, dt); }, dispose: () => { s.dispose(); p.dispose(); restore(); } };
   },

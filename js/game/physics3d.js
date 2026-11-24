@@ -4,10 +4,12 @@ export const WALK = 16, GRAVITY = 110, JUMP = 38, R = 1.2, HEIGHT = 5.2, STEP = 
 const overlapXZ = (s, b, m = 0) => s.x > b.minX - R + m && s.x < b.maxX + R - m && s.z > b.minZ - R + m && s.z < b.maxZ + R - m;
 const overlapY = (s, b) => s.y < b.maxY - 1e-4 && s.y + HEIGHT > b.minY + 1e-4;
 
+// altura do chão num ponto: ctx.groundAt(x,z) (alturas diferentes, ex. lobby no alto) ou hasGround + groundY
+const groundOf = (ctx, x, z) => (ctx.groundAt ? ctx.groundAt(x, z) : (ctx.hasGround(x, z) ? ctx.groundY : -Infinity));
+
 /** Tem chão sob os pés? (chão da ilha fora dos buracos, ou topo de uma caixa) */
 export function supportAt(s, ctx) {
-  let best = -Infinity;
-  if (ctx.hasGround(s.x, s.z)) best = ctx.groundY;
+  let best = groundOf(ctx, s.x, s.z);
   for (const b of ctx.boxes) if (overlapXZ(s, b, 0.15) && b.maxY <= s.y + 0.05 && b.maxY > best) best = b.maxY;
   return best;
 }
@@ -54,7 +56,8 @@ export function step3d(s, input, dt, ctx) {
 
   let landed = false;
   if (s.vy <= 0) {
-    let top = ctx.hasGround(s.x, s.z) && prevY >= ctx.groundY - 0.02 ? ctx.groundY : -Infinity;
+    const g = groundOf(ctx, s.x, s.z);
+    let top = g > -Infinity && prevY >= g - 0.02 ? g : -Infinity;
     for (const b of ctx.boxes) if (overlapXZ(s, b, 0.15) && prevY >= b.maxY - 0.02 && b.maxY > top) top = b.maxY;
     if (top > -Infinity && s.y <= top) { s.y = top; s.vy = 0; landed = true; }
   } else {

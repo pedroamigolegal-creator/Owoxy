@@ -130,3 +130,9 @@ Run `supabase/014_promocodes.sql` after 013. **Promocodes** (menu, for everyone)
 
 - `js/game/look.js` gives both games a Roblox-like look: smooth plastic materials, studs on floors and sidewalks, real sun shadows that follow the player (High quality only; Low uses the round blob shadow) and shadows from the characters. If anything fails the game keeps the simple look.
 - The Owoxy logo is now the favicon / home-screen icon (`assets/icons`, `favicon.ico`).
+
+## Natural Disaster Survival: mapa 3D, sons e HUD
+- **Mapa**: a ilha e a torre do lobby vêm de um modelo OBJ do mapa enviado pelo dono do projeto. `tools/obj2nds.py` converte o OBJ em `assets/games/nds/map.json` (ilha em 204 caixas, torre em triângulos, tudo deslocado para o topo da ilha ficar em y=0.08). Para regenerar: `python3 tools/obj2nds.py NDS_Complete_Map.obj assets/games/nds/map.json`. As cores dos materiais foram definidas à mão (o OBJ veio sem .mtl). **Aviso de licença/crédito**: o modelo é de terceiros; confirme que você pode usá-lo e credite o autor.
+- A ilha não tem parede: quem cai da borda cai no mar e morre. O lobby fica no alto da torre, com parede de vidro redonda.
+- **Sons** (`js/game/sound.js`): passos em loop enquanto anda no chão e som de pulo (`assets/sounds/walk.mp3`, `jump.mp3`, enviados pelo dono; mesma observação de licença). O áudio só liga no primeiro toque/tecla (regra dos navegadores). Menu Esc > Settings tem "Sound effects" e "Volume".
+- **HUD**: fonte sem serifa e botões cinza translúcidos arredondados (CSS próprio em `css/game.css`), botão de pulo com seta. Textos de desastres, mortes e dicas do lobby mais variados.

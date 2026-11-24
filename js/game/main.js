@@ -9,6 +9,7 @@ import { CONFIG } from '../config.js';
 import { lookOfUser } from '../items.js';
 import { createCharacter, loadTemplate } from './character.js';
 import { setupLook } from './look.js';
+import { createSound } from './sound.js';
 import { joinServer, MAX_PLAYERS } from './net.js';
 import { headingFor, lerpAngle, stepPlayer, GROUND_Y } from './physics.js';
 
@@ -24,7 +25,7 @@ const user = await requireUser();
 if (!user) throw new Error('not logged in');
 
 const SETTINGS_KEY = 'owoxy.ttos.settings';
-const settings = { sens: 1, bubbles: true, names: true, quality: 'auto', ...(() => { try { return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; } catch { return {}; } })() };
+const settings = { sens: 1, bubbles: true, names: true, quality: 'auto', volume: 0.6, sound: true, ...(() => { try { return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; } catch { return {}; } })() };
 const saveSettings = () => { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { /* sem armazenamento */ } };
 
 let device = 'pc';
@@ -91,12 +92,13 @@ function applyQuality() {
 function resize() { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
 addEventListener('resize', resize);
 
+const sound = createSound(settings.volume);
 let tpl, world, look = null;
 try {
   progress(15, 'Loading character');
   tpl = await loadTemplate(user.avatar?.model || CONFIG.defaultAvatar);
   progress(40, 'Loading map');
-  world = (await import(GAME === 'nds' ? './nds.js' : './world.js')).buildWorld();
+  world = await (await import(GAME === 'nds' ? './nds.js' : './world.js')).buildWorld();
   scene.add(world.group);
 } catch (e) { fail(e); }
 try { look = setupLook({ renderer, scene, world, quality: (settings.quality === 'auto' ? (device === 'mobile' ? 'low' : 'high') : settings.quality) }); } catch (e) { console.error('Visual extra desligado:', e); }
@@ -137,7 +139,7 @@ progress(55, 'Loading character');
 const me = { state: { x: 0, y: GROUND_Y, z: 0, vy: 0 }, heading: 0, emote: 0, ...makeActor(null) };
 function respawn() {
   const p = world.spawnPoint();
-  Object.assign(me.state, { x: p.x, y: GROUND_Y, z: p.z, vy: 0 });
+  Object.assign(me.state, { x: p.x, y: p.y ?? GROUND_Y, z: p.z, vy: 0 });
   me.heading = headingFor(-p.x, -p.z);   // olha para o centro
   camTheta = Math.atan2(p.x, p.z);        // câmera atrás do personagem
 }
@@ -391,6 +393,11 @@ document.querySelectorAll('.menu-tabs button').forEach((b) => b.addEventListener
 // configurações
 const sens = $('set-sens'), bub = $('set-bubbles'), nm = $('set-names'), qual = $('set-quality');
 sens.value = settings.sens; bub.checked = settings.bubbles; nm.checked = settings.names; qual.value = settings.quality;
+const vol = $('set-volume'), snd = $('set-sound');
+vol.value = settings.volume; snd.checked = settings.sound;
+sound.setVolume(settings.volume); sound.setMuted(!settings.sound);
+vol.addEventListener('input', () => { settings.volume = Number(vol.value); sound.setVolume(settings.volume); saveSettings(); });
+snd.addEventListener('change', () => { settings.sound = snd.checked; sound.setMuted(!settings.sound); saveSettings(); });
 sens.addEventListener('input', () => { settings.sens = Number(sens.value); saveSettings(); });
 bub.addEventListener('change', () => { settings.bubbles = bub.checked; saveSettings(); });
 nm.addEventListener('change', () => { settings.names = nm.checked; saveSettings(); });
@@ -431,6 +438,7 @@ function tick(now) {
   const fx = -Math.sin(camTheta), fz = -Math.cos(camTheta), rx = Math.cos(camTheta), rz = -Math.sin(camTheta);
   const mx = rx * h + fx * v, mz = rz * h + fz * v;
   const res = world.step ? world.step(me.state, { mx, mz, jump }, dt) : stepPlayer(me.state, { mx, mz, jump }, dt, colliders, world.bounds);
+  sound.frame(res, me.state);
   if (me.state.y < -40) { if (world.onFall) world.onFall(); else respawn(); }
   if (res.moving) me.heading = lerpAngle(me.heading, headingFor(mx, mz), 1 - Math.exp(-dt * 14));
   me.holder.position.set(me.state.x, me.state.y, me.state.z);
@@ -438,7 +446,7 @@ function tick(now) {
   if (res.moving || res.airborne) me.emote = 0;           // andar ou pular para a animação
   me.c.update(dt, { moving: res.moving, airborne: res.airborne, emote: me.emote });
   const sh = me.holder.getObjectByName('shadow');
-  if (sh) { const k = Math.max(0.4, 1 - (me.state.y - GROUND_Y) / 14); sh.scale.set(k, k, k); sh.position.y = 0.12 - (me.state.y - GROUND_Y); }
+  if (sh) { const gy = world.groundBelow ? world.groundBelow(me.state.x, me.state.y, me.state.z) : GROUND_Y; const k = Math.max(0.4, 1 - (me.state.y - gy) / 14); sh.scale.set(k, k, k); sh.position.y = 0.12 - (me.state.y - gy); }
 
   // posição enviada ~5x por segundo (e a cada 1 s mesmo parado)
   if (now - sendAt > 200) {
@@ -463,7 +471,7 @@ function tick(now) {
     const moving = Math.hypot(r.tx - g.position.x, r.tz - g.position.z) > 0.15 || r.moving;
     r.actor.c.update(dt, { moving, airborne: r.air, emote: moving ? 0 : r.emote });
     const s = g.getObjectByName('shadow');
-    if (s) { const k = Math.max(0.4, 1 - (g.position.y - GROUND_Y) / 14); s.scale.set(k, k, k); s.position.y = 0.12 - (g.position.y - GROUND_Y); }
+    if (s) { const gy = world.groundBelow ? world.groundBelow(g.position.x, g.position.y, g.position.z) : GROUND_Y; const k = Math.max(0.4, 1 - (g.position.y - gy) / 14); s.scale.set(k, k, k); s.position.y = 0.12 - (g.position.y - gy); }
   }
 
   // câmera
