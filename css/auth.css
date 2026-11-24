@@ -29,3 +29,8 @@ html[data-theme="light"] .login-card input, html[data-theme="light"] .login-card
 html[data-theme="light"] .login-card .outline-btn[data-soon] { background: #e4e4e4; color: #111; }
 html[data-theme="light"] .login-card { box-shadow: 0 10px 30px rgba(0,0,0,.15), 0 0 0 1px rgba(0,0,0,.06); }
 .site-footer { padding-top: 60px; } .site-footer nav a { color: var(--muted); font-weight: 600; } .site-footer nav a:hover { color: var(--text); }
+
+/* fundo do cadastro: imagem abstrata escura enviada pelo dono do projeto */
+.signup-page { background: #050505 url('../assets/signup-bg-dark.jpg') center / cover no-repeat; }
+.signup-page::after { background: radial-gradient(ellipse at center, rgba(0,0,0,.15), rgba(0,0,0,.55)); }
+.wall { display: none; }
