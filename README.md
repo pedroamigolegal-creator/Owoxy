@@ -136,3 +136,6 @@ Run `supabase/014_promocodes.sql` after 013. **Promocodes** (menu, for everyone)
 - A ilha não tem parede: quem cai da borda cai no mar e morre. O lobby fica no alto da torre, com parede de vidro redonda.
 - **Sons** (`js/game/sound.js`): passos em loop enquanto anda no chão e som de pulo (`assets/sounds/walk.mp3`, `jump.mp3`, enviados pelo dono; mesma observação de licença). O áudio só liga no primeiro toque/tecla (regra dos navegadores). Menu Esc > Settings tem "Sound effects" e "Volume".
 - **HUD**: fonte sem serifa e botões cinza translúcidos arredondados (CSS próprio em `css/game.css`), botão de pulo com seta. Textos de desastres, mortes e dicas do lobby mais variados.
+
+## Telas no layout do Roblox (código próprio)
+`css/rb.css` + Catalog (tema claro, categorias com "+", filtros de Creator/Price/Unavailable Items, ordenar, busca com seletor), Create (abas, lista lateral, Games com "Create New Game" ainda como "coming soon") e amigos em círculos grandes na Home/Profile. Tudo escrito do zero a partir de prints de referência; nenhum código ou imagem da Roblox foi copiado.

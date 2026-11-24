@@ -3,7 +3,7 @@ import { mountAvatar } from './avatar.js';
 import { hydrateHeads, toast, verifiedBadge, userTile } from './common.js';
 import { lookOfUser } from './items.js';
 import { initShell, setBalance } from './shell.js';
-import { listFriends } from './social.js';
+import { listFriends, paintPresence } from './social.js';
 import { cardHTML, GAME_LIST, recentGames, GAMES } from './game-data.js';
 
 const user = await requireUser();
@@ -35,6 +35,7 @@ if (user) {
       ? friends.map(userTile).join('')
       : '<p class="muted pad">No friends yet. Use the search bar to find people and add them!</p>';
     hydrateHeads(row);
+    paintPresence(row);
   } catch (err) {
     console.error(err);
     row.innerHTML = '<p class="muted pad">Could not load friends. Did you run supabase/003_social.sql?</p>';

@@ -8,6 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Owoxy - Catalog</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/rb.css">
   <script type="importmap">
     {
       "imports": {
@@ -21,34 +22,45 @@
   <div id="topbar-slot"></div>
   <div class="layout">
     <aside class="sidebar" id="sidebar-slot"></aside>
-    <main class="main wide" id="main">
-      <div class="catalog-head">
-        <h1 class="page-title">Catalog</h1>
-        <form class="cat-search" id="cat-search"><input id="cat-q" placeholder="Search Catalog" maxlength="50" autocomplete="off"><button class="btn-gray" type="submit">Search</button></form>
+    <main class="main wide rb" id="main">
+      <div class="rb-head">
+        <h1 class="rb-title">Catalog</h1>
+        <form class="rb-search" id="cat-search">
+          <input id="cat-q" placeholder="Search" maxlength="50" autocomplete="off">
+          <select id="cat-scope" aria-label="Category"></select>
+          <button type="submit" aria-label="Search"><svg viewBox="0 0 24 24" width="18" height="18"><circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15 15l6 6" stroke="currentColor" stroke-width="2"/></svg></button>
+        </form>
       </div>
-      <div class="catalog">
-        <nav class="cat-filters" id="filters" aria-label="Categories">
+      <div class="rb-cols">
+        <nav class="rb-side" id="filters" aria-label="Categories">
           <h3>Category</h3>
-          <a data-k="" href="catalog.html">All Items</a>
-          <h4>Clothing</h4>
-          <a data-k="shirt" href="catalog.html?k=shirt">Shirts</a>
-          <a data-k="pants" href="catalog.html?k=pants">Pants</a>
-          <a data-k="facedecal" href="catalog.html?k=facedecal">Faces</a>
-          <h4>Accessories</h4>
-          <a data-k="accessory" href="catalog.html?k=accessory">All Accessories</a>
-          <a data-k="hat" href="catalog.html?k=hat">Hats</a>
-          <a data-k="hair" href="catalog.html?k=hair">Hair</a>
-          <a data-k="face" href="catalog.html?k=face">Face</a>
-          <a data-k="back" href="catalog.html?k=back">Back</a>
-          <a data-k="neck" href="catalog.html?k=neck">Neck</a>
+          <a data-k="" href="catalog.html">View All Items</a>
+          <div class="grp" data-grp="clothing"><button type="button" class="grp-h">Clothing <i>+</i></button>
+            <div class="grp-b"><a data-k="shirt" href="catalog.html?k=shirt">Shirts</a><a data-k="pants" href="catalog.html?k=pants">Pants</a><a data-k="facedecal" href="catalog.html?k=facedecal">Faces</a></div></div>
+          <div class="grp" data-grp="acc"><button type="button" class="grp-h">Accessories <i>+</i></button>
+            <div class="grp-b"><a data-k="accessory" href="catalog.html?k=accessory">All Accessories</a><a data-k="hat" href="catalog.html?k=hat">Hats</a><a data-k="hair" href="catalog.html?k=hair">Hair</a><a data-k="face" href="catalog.html?k=face">Face</a><a data-k="back" href="catalog.html?k=back">Back</a><a data-k="neck" href="catalog.html?k=neck">Neck</a></div></div>
           <a data-k="gear" href="catalog.html?k=gear">Gear</a>
-          <h4>Offsale items</h4>
-          <div class="off-toggle" id="off-toggle"><button type="button" data-v="1">Show</button><button type="button" data-v="0" class="on">Don't show</button></div>
+          <hr>
+          <h3>Filters</h3>
+          <h4>Creator</h4>
+          <label class="rad"><input type="radio" name="cr" value="all" checked> All Creators</label>
+          <label class="rad"><input type="radio" name="cr" value="user"> <input type="text" id="f-creator" placeholder="Username" maxlength="30" autocomplete="off"></label>
+          <h4>Price</h4>
+          <label class="rad"><input type="radio" name="pr" value="any" checked> Any Price</label>
+          <label class="rad"><input type="radio" name="pr" value="range"> <span class="mm"><input type="number" id="f-min" placeholder="Min" min="0"><input type="number" id="f-max" placeholder="Max" min="0"></span></label>
+          <label class="rad"><input type="radio" name="pr" value="free"> Free</label>
+          <h4>Unavailable Items</h4>
+          <div id="off-toggle">
+            <label class="rad"><input type="radio" name="off" value="0" checked> Hide</label>
+            <label class="rad"><input type="radio" name="off" value="1"> Show</label>
+          </div>
         </nav>
-        <section class="cat-main">
-          <p class="muted" id="cat-title"></p>
-          <div class="cat-grid" id="grid"></div>
-          <div class="row-center"><button class="btn-gray" id="more" hidden>Load more</button></div>
+        <section class="rb-main">
+          <div class="rb-bar"><span class="rb-crumb" id="cat-title"></span>
+            <select id="cat-sort" aria-label="Sort"><option value="rel">Relevance</option><option value="plh">Price (Low to High)</option><option value="phl">Price (High to Low)</option><option value="az">Name (A to Z)</option></select></div>
+          <p class="rb-muted" id="cat-empty" hidden></p>
+          <div class="cat-grid rb-grid" id="grid"></div>
+          <div class="row-center"><button class="rb-btn" id="more" hidden>Load more</button></div>
         </section>
       </div>
     </main>

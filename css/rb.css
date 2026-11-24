@@ -1,0 +1,85 @@
+/* Telas Catalog, Create, Home e Profile no layout do Roblox (CSS e HTML escritos do zero para o Owoxy). */
+.main.rb { background: #e3e3e3; color: #191919; padding: 18px 22px 40px; }
+.rb a { color: inherit; }
+.rb-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.rb-title { margin: 0; font-size: 34px; font-weight: 800; color: #111; letter-spacing: -.3px; }
+.rb-title.sm { font-size: 26px; margin: 14px 0 8px; font-weight: 600; }
+.rb-search { display: flex; align-items: stretch; }
+.rb-search input, .rb-search select, .rb-search button, .rb-bar select, .rb-side input[type=text], .rb-side input[type=number] { font: inherit; font-size: 14px; color: #222; background: #fff; border: 1px solid #b8b8b8; padding: 8px 10px; outline: none; }
+.rb-search input { width: min(280px, 34vw); border-radius: 4px 0 0 4px; border-right: 0; }
+.rb-search select { max-width: 170px; border-radius: 0; border-right: 0; }
+.rb-search button { border-radius: 0 4px 4px 0; cursor: pointer; display: grid; place-items: center; width: 40px; padding: 0; }
+.rb-search button:hover { background: #f1f1f1; }
+.rb-cols { display: flex; gap: 22px; align-items: flex-start; }
+.rb-side { width: 200px; flex: none; font-size: 15px; background: transparent; border-right: 1px solid #c4c4c4; padding-right: 14px; min-height: 360px; }
+.rb-side h3 { margin: 0 0 8px; font-size: 22px; font-weight: 800; color: #111; }
+.rb-side h4 { margin: 14px 0 6px; font-size: 15px; font-weight: 700; color: #111; }
+.rb-side hr { border: 0; border-top: 1px solid #c4c4c4; margin: 14px 0; }
+.rb-side a, .rb-side .grp-h { display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; padding: 5px 0; color: #606162; background: none; border: 0; font: inherit; cursor: pointer; text-align: left; }
+.rb-side a:hover, .rb-side .grp-h:hover { color: #111; background: none; }
+.rb-side a.on { color: #0074bd; font-weight: 700; background: none; box-shadow: none; }
+.rb-side .grp-h i { font-style: normal; font-size: 18px; color: #606162; }
+.rb-side .grp-b { display: none; padding-left: 12px; }
+.rb-side .grp.open .grp-b { display: block; }
+.rb-side .rad { display: flex; align-items: center; gap: 6px; padding: 3px 0; color: #333; font-size: 14px; }
+.rb-side .rad input[type=text] { width: 100%; min-width: 0; padding: 5px 7px; }
+.rb-side .mm { display: flex; gap: 4px; } .rb-side .mm input { width: 60px; min-width: 0; padding: 5px 6px; }
+.rb-side input[type=radio] { accent-color: #0074bd; }
+.rb-main { flex: 1; min-width: 0; }
+.rb-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; }
+.rb-crumb { color: #0074bd; font-size: 17px; }
+.rb-bar select { border-radius: 4px; min-width: 180px; }
+.rb-muted { color: #666; }
+.rb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.rb .cat-item[hidden] { display: none; }
+.rb .cat-item { background: #fff; border: 1px solid #fff; transition: border-color .12s; font-size: 14px; }
+.rb .cat-item:hover { border-color: #c9c9c9; box-shadow: 0 1px 5px rgba(0,0,0,.18); }
+.rb .cat-link { color: #111; }
+.rb .cat-thumb { background: #fff; border-radius: 0; margin: 0; aspect-ratio: 1 / 1; outline: 0 !important; }
+.rb .cat-name { font-size: 15px; font-weight: 500; color: #111; padding: 10px 8px 6px; border-top: 1px solid #e6e6e6; white-space: normal; max-height: 3em; line-height: 1.3; }
+.rb .cat-by { color: #606162; padding: 0 8px; font-size: 12px; }
+.rb .cat-by::first-line { color: inherit; }
+.rb .price { padding: 4px 8px 0; color: #02b757; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 4px; }
+.rb .price.off { color: #9a9a9a; } .rb .price.free { color: #02b757; }
+.rb .cat-stats { padding: 2px 8px 8px; color: #777; font-size: 11px; }
+.rb .owned-badge { background: #393b3d; color: #fff; }
+.rb .rb-btn, .rb-btn { background: #fff; color: #222; border: 1px solid #b0b0b0; border-radius: 4px; padding: 7px 14px; font: inherit; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; }
+.rb .rb-btn:hover { background: #f1f1f1; }
+.rb-green { background: #2eaa45; color: #fff; border: 1px solid #1f8a34; border-radius: 3px; padding: 9px 18px; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
+.rb-green:hover { background: #38bd50; }
+.row-center { text-align: center; margin: 16px 0; }
+
+/* Create */
+.rb-tabs { display: flex; gap: 2px; margin: -18px -22px 16px; padding: 10px 22px 0; background: #e3e3e3; border-bottom: 1px solid #bbb; flex-wrap: wrap; }
+.rb-tabs a, .rb-tabs span { padding: 7px 14px; background: #d4d4d4; border: 1px solid #b4b4b4; border-bottom: 0; border-radius: 4px 4px 0 0; color: #333; font-size: 14px; cursor: pointer; text-decoration: none; }
+.rb-tabs a.on { background: #fff; position: relative; top: 1px; font-weight: 600; }
+.rb.main .create-nav { width: 190px; padding: 0; border-right: 1px solid #c4c4c4; background: transparent; }
+.rb .create-nav a { color: #222; padding: 7px 10px; border-radius: 0; font-size: 15px; display: block; border-bottom: 1px solid transparent; }
+.rb .create-nav a:hover { background: #f0f0f0; }
+.rb .create-nav a.on { background: #d9d9d9; color: #111; font-weight: 600; box-shadow: none; }
+.rb .create-nav a[data-soon] { color: #777; }
+.rb .create-main { flex: 1; min-width: 0; }
+.rb .create-main .page-title, .rb .create-main .sub-title { color: #111; }
+.rb .create-main .muted, .rb .create-main .small { color: #666; }
+.rb .create-main .card { background: #fff; border: 1px solid #cfcfcf; border-radius: 4px; color: #222; box-shadow: none; }
+.rb .create-main .card h2 { color: #111; }
+.rb .create-main label.lbl, .rb .create-main label { color: #222; }
+.rb .create input:not([type=file]):not([type=checkbox]), .rb .create select { background: #fff; color: #222; border: 1px solid #b8b8b8; }
+.rb .admin-box { background: #fff7f5; border: 1px dashed #d9a79f; } .rb .admin-box h4 { color: #b3261e; }
+.rb .btn-gray { background: #fff; color: #222; border: 1px solid #b0b0b0; }
+.rb .upload-preview .preview-card { background: linear-gradient(#e9ebee, #b9bec5); }
+.rb-check { display: inline-flex; align-items: center; gap: 6px; margin-left: 12px; color: #444; font-size: 13px; }
+.rb-rows { margin-top: 14px; }
+.rb-row { display: flex; align-items: center; gap: 14px; padding: 12px 6px; border-bottom: 1px solid #d2d2d2; }
+.rb-row img { width: 64px; height: 64px; object-fit: cover; background: #999; }
+.rb-row-main { flex: 1; display: flex; flex-direction: column; gap: 2px; } .rb-row-main b { color: #0055b3; font-size: 15px; font-weight: 600; } .rb-row-main small { color: #777; } .rb-pub { color: #02b757; font-size: 13px; }
+
+/* Home / Profile: amigos em círculos grandes, com o que estão jogando */
+.friends-row { background: transparent; padding: 4px 0 10px; gap: 14px; min-height: 0; overflow-x: auto; }
+.friends-row .friend { width: 104px; }
+.friends-row .friend-pic { width: 96px; height: 96px; margin-bottom: 6px; }
+.friends-row .friend-name { font-size: 13px; font-weight: 600; max-width: 100px; }
+.friends-row .friend-sub { font-size: 11px; color: #9aa0a6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; margin: 1px auto 0; }
+.friends-row .friend-pic .dot { position: absolute; right: 2px; bottom: 2px; width: 18px; height: 18px; border-radius: 50%; border: 3px solid #232527; }
+.friends-title h2 { font-size: 22px; font-weight: 700; }
+@media (max-width: 760px) { .rb-cols { flex-direction: column; } .rb-side, .rb.main .create-nav { width: 100%; border-right: 0; min-height: 0; } .rb-tabs { margin: -18px -12px 12px; padding: 8px 12px 0; } .main.rb { padding: 14px 12px 30px; } }

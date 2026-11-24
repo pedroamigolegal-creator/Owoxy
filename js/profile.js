@@ -4,7 +4,7 @@ import { esc, hydrateHeads, toast, userTile, verifiedBadge } from './common.js';
 import { CONFIG } from './config.js';
 import { friendlyError, lookOfUser } from './items.js';
 import { initShell } from './shell.js';
-import { myCommunities, presenceText, socialCounts, toggleFollow, userPresence, friendStatus, getProfile, listFriends, removeFriend, respondFriendRequest, saveAbout, sendFriendRequest, sendMessage } from './social.js';
+import { paintPresence, myCommunities, presenceText, socialCounts, toggleFollow, userPresence, friendStatus, getProfile, listFriends, removeFriend, respondFriendRequest, saveAbout, sendFriendRequest, sendMessage } from './social.js';
 
 const me = await requireUser();
 if (me) {
@@ -69,6 +69,7 @@ if (me) {
         $('friends-count').textContent = friends.length;
         $('friends-row').innerHTML = friends.length ? friends.map(userTile).join('') : '<p class="muted pad">No friends yet.</p>';
         hydrateHeads($('friends-row'));
+        paintPresence($('friends-row'));
       } catch (err) { console.error(err); }
     }
     loadFriends();
