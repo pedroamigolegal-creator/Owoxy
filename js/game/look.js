@@ -42,7 +42,7 @@ export function setupLook({ renderer, scene, world, quality = 'high' }) {
   };
 
   let sun = null;
-  const shadowOn = quality === 'high';
+  const shadowOn = quality !== 'low';
   world.group.traverse((o) => {
     if (o.isDirectionalLight && !sun) sun = o;
     if (!o.isMesh) return;
@@ -61,9 +61,9 @@ export function setupLook({ renderer, scene, world, quality = 'high' }) {
 
   if (sun) {
     sun.castShadow = shadowOn;
-    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.mapSize.set(quality === 'mobile' ? 2048 : 4096, quality === 'mobile' ? 2048 : 4096);
     const cam = sun.shadow.camera;
-    cam.left = -70; cam.right = 70; cam.top = 70; cam.bottom = -70; cam.near = 10; cam.far = 400; cam.updateProjectionMatrix();
+    cam.left = -80; cam.right = 80; cam.top = 80; cam.bottom = -80; cam.near = 10; cam.far = 400; cam.updateProjectionMatrix();
     sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.05;
     scene.add(sun.target);
   }
@@ -80,14 +80,15 @@ export function setupLook({ renderer, scene, world, quality = 'high' }) {
     update(pos, dt = 0.016) {
       if (sun && renderer.shadowMap.enabled) {   // a sombra acompanha o jogador, em passos para não tremer
         const sx = Math.round(pos.x / 4) * 4, sz = Math.round(pos.z / 4) * 4;
-        sun.target.position.set(sx, 0, sz);
-        sun.position.set(sx + offset.x, offset.y, sz + offset.z);
+        const sy = Math.round(pos.y / 4) * 4;
+        sun.target.position.set(sx, sy, sz);
+        sun.position.set(sx + offset.x, sy + offset.y, sz + offset.z);
         sun.target.updateMatrixWorld();
       }
       acc += dt; if (acc > 1.2) { acc = 0; markActors(); }   // acessórios chegam depois: marca de novo
     },
     setQuality(q) {
-      const on = q === 'high';
+      const on = q !== 'low';
       if (renderer.shadowMap.enabled === on) return;
       renderer.shadowMap.enabled = on;
       if (sun) sun.castShadow = on;

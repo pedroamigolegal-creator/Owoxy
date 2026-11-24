@@ -144,3 +144,6 @@ Run `supabase/014_promocodes.sql` after 013. **Promocodes** (menu, for everyone)
 - Settings > Appearance: tema Escuro (padrão, texto branco) ou Claro (texto preto), salvo no navegador (`owoxy.theme`). `css/theme.css` + `js/theme-init.js`.
 - Login e cadastro escuros, botão de cadastro verde; o fundo do cadastro é uma parede de "capas" desenhada em CSS (`js/signup-wall.js`), sem arte de terceiros.
 - Sombras suaves nos itens, cartões e painéis para dar profundidade.
+
+## Qualidade dos jogos
+Settings (Esc) > Graphics: Auto (1080p no PC, 720p no celular), 1080p, 720p ou Low. A imagem é desenhada nessa altura e depois ajustada à tela. Sombras do sol ficam ligadas em todas menos Low, com antialiasing sempre ligado.

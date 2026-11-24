@@ -7,7 +7,7 @@ import { createRound } from './round.js';
 
 const MAP = 110;                                  // meia largura da área da cidade (a ilha do mapa tem ~130 de raio)
 const VOLCANO = [0, 0, -92];
-let LOBBY = { x: -266.5, z: 340.5, y: 132.2, R: 58 };   // torre do lobby (centro do piso e altura), sobrescrito pelos dados do mapa
+let LOBBY = { x: -266.5, z: 340.5, y: 132.2, R: 62 };   // torre do lobby (centro do piso e altura), sobrescrito pelos dados do mapa
 let SEA = -44.3;                                  // altura do mar em volta da ilha
 let PLATEAU = [];                                 // caixas de grama do topo da ilha (onde dá para andar)
 
@@ -24,7 +24,7 @@ const MAP_URL = new URL('../../assets/games/nds/map.json', import.meta.url);
 /** Mapa do Natural Disaster Survival (ilha + torre do lobby), convertido de OBJ por tools/obj2nds.py. */
 export async function buildWorld() {
   const MD = await (await fetch(MAP_URL)).json();
-  LOBBY = { x: MD.lobby.x, z: MD.lobby.z, y: MD.lobby.y, R: 58 };
+  LOBBY = { x: MD.lobby.x, z: MD.lobby.z, y: MD.lobby.y, R: 62 };
   SEA = MD.seaY;
   const plat = (x, z, m = 0) => PLATEAU.some((b) => x >= b.x0 + m && x <= b.x1 - m && z >= b.z0 + m && z <= b.z1 - m);
   const rand = mulberry(777);
@@ -46,7 +46,7 @@ export async function buildWorld() {
     const x = c.getContext('2d'); x.fillStyle = base; x.fillRect(0, 0, size, size);
     for (let k = 0; k < count; k++) { x.fillStyle = rand() > 0.5 ? a : b; x.fillRect(rand() * size, rand() * size, dot, dot * (1 + rand() * 2)); }
     if (lines) for (let k = 0; k < lines; k++) { x.fillStyle = 'rgba(0,0,0,0.10)'; x.fillRect(0, rand() * size, size, 2); }
-    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
   }
   const grassTex = noiseTex('#4f9a3e', '#5bab47', '#448a37', 256, 1800, 2);
   const rockTex = noiseTex('#7c5c46', '#8a684f', '#6c4f3b', 256, 900, 3, 7);
@@ -145,7 +145,10 @@ export async function buildWorld() {
   // ---- vulcão (enfeite sempre visível; a lava só aparece no desastre) ----
   const volcano = new THREE.Mesh(new THREE.ConeGeometry(20, 44, 20), lambert(0x5b4a40));
   volcano.position.set(VOLCANO[0], 22, VOLCANO[2] - 4); group.add(volcano);
-  box(VOLCANO[0], VOLCANO[2] - 4, 22, 22, 0, 14, 0x5b4a40, true, lambert(0x5b4a40)).visible = false;
+  for (const [y0, y1] of [[0, 11], [11, 22], [22, 33]]) {                       // o cone tem 20 de raio na base e 44 de altura
+    const r = 20 * (1 - y1 / 44) * 0.92;                                       // lado do degrau: rente ao cone na altura de cima
+    boxes.push({ minX: VOLCANO[0] - r, maxX: VOLCANO[0] + r, minY: y0, maxY: y1, minZ: VOLCANO[2] - 4 - r, maxZ: VOLCANO[2] - 4 + r });
+  }
   const crater = new THREE.Mesh(new THREE.CylinderGeometry(4, 5, 1, 12), new THREE.MeshBasicMaterial({ color: 0xff5a14 })); crater.position.set(VOLCANO[0], 43.5, VOLCANO[2] - 4); group.add(crater);
   const SUMMIT = [VOLCANO[0], 44, VOLCANO[2] - 4];
 

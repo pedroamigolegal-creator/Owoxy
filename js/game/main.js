@@ -76,21 +76,24 @@ progress(5, 'Joining server');
 const canvas = $('stage');
 let renderer;
 try {
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: device !== 'mobile', powerPreference: 'high-performance' });
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
 } catch (e) { fail(new Error('Your browser could not start 3D graphics (WebGL).')); }
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x9ccdf7);
 scene.fog = new THREE.Fog(0xcfe8ff, 120, 330);
 const camera = new THREE.PerspectiveCamera(65, 1, 0.5, 900);
 
+// Qualidade: a imagem é desenhada numa altura fixa (720p ou 1080p), não importa o tamanho da tela. 'high' antigo = 1080p.
 function applyQuality() {
-  const q = settings.quality === 'auto' ? (device === 'mobile' ? 'low' : 'high') : settings.quality;
-  renderer.setPixelRatio(q === 'low' ? 1 : Math.min(window.devicePixelRatio || 1, 2));
-  look?.setQuality(q);
+  const pick = settings.quality === 'high' ? 'fhd' : settings.quality;
+  const q = pick === 'auto' ? (device === 'mobile' ? 'hd' : 'fhd') : pick;
+  const target = q === 'low' ? 0 : q === 'hd' ? 720 : 1080;
+  renderer.setPixelRatio(target ? Math.max(1, Math.min(3, target / Math.max(1, innerHeight))) : 1);
+  look?.setQuality(q === 'low' ? 'low' : 'high');
   resize();
 }
 function resize() { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
-addEventListener('resize', resize);
+addEventListener('resize', () => applyQuality());
 
 const sound = createSound(settings.volume);
 let tpl, world, look = null;
@@ -101,7 +104,7 @@ try {
   world = await (await import(GAME === 'nds' ? './nds.js' : './world.js')).buildWorld();
   scene.add(world.group);
 } catch (e) { fail(e); }
-try { look = setupLook({ renderer, scene, world, quality: (settings.quality === 'auto' ? (device === 'mobile' ? 'low' : 'high') : settings.quality) }); } catch (e) { console.error('Visual extra desligado:', e); }
+try { look = setupLook({ renderer, scene, world, quality: settings.quality === 'low' ? 'low' : (device === 'mobile' ? 'mobile' : 'high') }); } catch (e) { console.error('Visual extra desligado:', e); }
 applyQuality();
 
 // personagem: normaliza a altura para ~5.2 studs
@@ -392,7 +395,7 @@ document.querySelectorAll('.menu-tabs button').forEach((b) => b.addEventListener
 }));
 // configurações
 const sens = $('set-sens'), bub = $('set-bubbles'), nm = $('set-names'), qual = $('set-quality');
-sens.value = settings.sens; bub.checked = settings.bubbles; nm.checked = settings.names; qual.value = settings.quality;
+sens.value = settings.sens; bub.checked = settings.bubbles; nm.checked = settings.names; qual.value = settings.quality === 'high' ? 'fhd' : settings.quality;
 const vol = $('set-volume'), snd = $('set-sound');
 vol.value = settings.volume; snd.checked = settings.sound;
 sound.setVolume(settings.volume); sound.setMuted(!settings.sound);
