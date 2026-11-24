@@ -125,3 +125,8 @@ Run `supabase/013_owos_adds.sql` after 012. Only the Owoxy account sees **Owos A
 ## Promo Codes, welcome Owos and Premium daily (migration 014)
 
 Run `supabase/014_promocodes.sql` after 013. **Promocodes** (menu, for everyone): type a code and redeem it, once per account (codes can have a max number of uses and an expiry). The Owoxy account creates and turns codes on/off on the same page. New accounts start with **100 Owos**. The daily Owos button left the home page: the daily claim is now only for **Premium** members (100 Owos every 24 h, on the Premium page).
+
+## Look of the games and site icon
+
+- `js/game/look.js` gives both games a Roblox-like look: smooth plastic materials, studs on floors and sidewalks, real sun shadows that follow the player (High quality only; Low uses the round blob shadow) and shadows from the characters. If anything fails the game keeps the simple look.
+- The Owoxy logo is now the favicon / home-screen icon (`assets/icons`, `favicon.ico`).

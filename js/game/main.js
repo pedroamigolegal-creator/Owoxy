@@ -8,6 +8,7 @@ import { touchPresence } from '../social.js';
 import { CONFIG } from '../config.js';
 import { lookOfUser } from '../items.js';
 import { createCharacter, loadTemplate } from './character.js';
+import { setupLook } from './look.js';
 import { joinServer, MAX_PLAYERS } from './net.js';
 import { headingFor, lerpAngle, stepPlayer, GROUND_Y } from './physics.js';
 
@@ -84,12 +85,13 @@ const camera = new THREE.PerspectiveCamera(65, 1, 0.5, 900);
 function applyQuality() {
   const q = settings.quality === 'auto' ? (device === 'mobile' ? 'low' : 'high') : settings.quality;
   renderer.setPixelRatio(q === 'low' ? 1 : Math.min(window.devicePixelRatio || 1, 2));
+  look?.setQuality(q);
   resize();
 }
 function resize() { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
 addEventListener('resize', resize);
 
-let tpl, world;
+let tpl, world, look = null;
 try {
   progress(15, 'Loading character');
   tpl = await loadTemplate(user.avatar?.model || CONFIG.defaultAvatar);
@@ -97,19 +99,21 @@ try {
   world = (await import(GAME === 'nds' ? './nds.js' : './world.js')).buildWorld();
   scene.add(world.group);
 } catch (e) { fail(e); }
+try { look = setupLook({ renderer, scene, world, quality: (settings.quality === 'auto' ? (device === 'mobile' ? 'low' : 'high') : settings.quality) }); } catch (e) { console.error('Visual extra desligado:', e); }
 applyQuality();
 
 // personagem: normaliza a altura para ~5.2 studs
 const H = 5.2;
 const NORM = H / (tpl.height || H);
-function makeActor(look) {
+function makeActor(l) {
   const c = createCharacter(tpl);
   c.root.scale.setScalar(NORM);
   const holder = new THREE.Group();
   holder.add(c.root);
   holder.add(blobShadow());
   scene.add(holder);
-  c.setLook(look || {}).catch((err) => console.error('Look failed', err));
+  look?.track(holder);
+  c.setLook(l || {}).catch((err) => console.error('Look failed', err));
   return { c, holder };
 }
 let shadowMat;
@@ -172,6 +176,7 @@ function addRemote(p) {
 function removeRemote(key) {
   const r = remotes.get(key); if (!r) return;
   scene.remove(r.actor.holder);
+  look?.untrack(r.actor.holder);
   r.actor.c.dispose();
   r.tag?.remove(); r.bubble?.remove();
   remotes.delete(key);
@@ -469,6 +474,7 @@ function tick(now) {
   camera.lookAt(camTarget);
   world.tick?.(dt);
   world.update?.(dt, now);
+  look?.update(me.state, dt);
   renderer.render(scene, camera);
 
   // textos sobre as cabeças: balões (todos) e nomes (os 30 mais perto)
