@@ -8,8 +8,15 @@ if (user) {
   initShell(user, 'settings');
   const $ = (id) => document.getElementById(id);
   let t = new URLSearchParams(location.search).get('t');
-  if (!['account', 'security', 'privacy'].includes(t)) t = 'account';
+  if (!['account', 'security', 'privacy', 'appearance'].includes(t)) t = 'account';
   document.querySelectorAll('#set-nav a').forEach((a) => a.classList.toggle('on', a.dataset.t === t));
+  const paintTheme = () => document.querySelectorAll('[data-theme-set]').forEach((b) => b.classList.toggle('on', b.dataset.themeSet === document.documentElement.dataset.theme));
+  document.querySelectorAll('[data-theme-set]').forEach((b) => b.addEventListener('click', () => {
+    document.documentElement.dataset.theme = b.dataset.themeSet;
+    try { localStorage.setItem('owoxy.theme', b.dataset.themeSet); } catch { /* sem armazenamento */ }
+    paintTheme();
+  }));
+  paintTheme();
   document.querySelectorAll('[data-pane]').forEach((p) => { p.hidden = p.dataset.pane !== t; });
 
   // ---- Account Info ----

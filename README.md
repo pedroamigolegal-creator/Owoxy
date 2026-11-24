@@ -139,3 +139,8 @@ Run `supabase/014_promocodes.sql` after 013. **Promocodes** (menu, for everyone)
 
 ## Telas no layout do Roblox (código próprio)
 `css/rb.css` + Catalog (tema claro, categorias com "+", filtros de Creator/Price/Unavailable Items, ordenar, busca com seletor), Create (abas, lista lateral, Games com "Create New Game" ainda como "coming soon") e amigos em círculos grandes na Home/Profile. Tudo escrito do zero a partir de prints de referência; nenhum código ou imagem da Roblox foi copiado.
+
+## Temas, login e cadastro
+- Settings > Appearance: tema Escuro (padrão, texto branco) ou Claro (texto preto), salvo no navegador (`owoxy.theme`). `css/theme.css` + `js/theme-init.js`.
+- Login e cadastro escuros, botão de cadastro verde; o fundo do cadastro é uma parede de "capas" desenhada em CSS (`js/signup-wall.js`), sem arte de terceiros.
+- Sombras suaves nos itens, cartões e painéis para dar profundidade.

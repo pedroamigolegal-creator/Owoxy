@@ -1,0 +1,78 @@
+/* Temas do site (Settings > Appearance) e profundidade visual. Escuro = texto branco (padrão). Claro = texto preto. */
+:root { --rb-bg: #232527; --rb-text: #fff; --shadow-1: 0 1px 2px rgba(0,0,0,.35), 0 4px 10px rgba(0,0,0,.28); --shadow-2: 0 2px 4px rgba(0,0,0,.4), 0 10px 24px rgba(0,0,0,.35); }
+html[data-theme="light"] { --bg: #e3e3e3; --bar: #fff; --panel: #fff; --panel-hover: #ededed; --text: #111; --muted: #5d5f61; --input: #fff; --rb-bg: #e3e3e3; --rb-text: #111; --shadow-1: 0 1px 2px rgba(0,0,0,.12), 0 3px 8px rgba(0,0,0,.10); --shadow-2: 0 2px 4px rgba(0,0,0,.14), 0 8px 20px rgba(0,0,0,.16); }
+
+/* ---------- profundidade (vale nos dois temas) ---------- */
+.topbar { box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+.card, .inbox-list, .inbox-view, .login-card, .cat-filters, .create-nav { box-shadow: var(--shadow-1); }
+.cat-item .cat-thumb img, .item .thumb img, .item-view img, .wear-view img { filter: drop-shadow(0 7px 7px rgba(0,0,0,.38)); }
+.cat-item, .game-card .game-thumb, .friend-pic, .avatar-circle { transition: transform .16s ease, box-shadow .16s ease; }
+.cat-item:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); }
+.avatar-circle { box-shadow: var(--shadow-2); }
+.friend:hover .friend-pic { box-shadow: var(--shadow-2); }
+.btn-green { box-shadow: 0 2px 0 rgba(0,0,0,.28); } .btn-green:active { transform: translateY(1px); box-shadow: none; }
+.sidebar a { box-shadow: 0 1px 2px rgba(0,0,0,.18); }
+
+/* ---------- tema claro ---------- */
+html[data-theme="light"] body { background: var(--bg); color: var(--text); }
+html[data-theme="light"] .topbar { box-shadow: 0 1px 0 #cfcfcf, 0 2px 8px rgba(0,0,0,.12); }
+html[data-theme="light"] .topbar .search input { background: #ececec; color: #111; }
+html[data-theme="light"] .topbar .search input::placeholder { color: #777; }
+html[data-theme="light"] .gear-menu { box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+html[data-theme="light"] .sidebar a { background: #fff; color: #111; }
+html[data-theme="light"] .sidebar a:hover, html[data-theme="light"] .sidebar a.active { background: #ececec; }
+html[data-theme="light"] .sidebar .blog-list p { color: #333; }
+html[data-theme="light"] .card, html[data-theme="light"] .inbox-list, html[data-theme="light"] .inbox-view, html[data-theme="light"] .cat-filters, html[data-theme="light"] .create-nav, html[data-theme="light"] dialog, html[data-theme="light"] .login-card, html[data-theme="light"] .comm-row, html[data-theme="light"] .chip { background: #fff; color: #111; border-color: #cfcfcf; }
+html[data-theme="light"] .cat-filters a:hover, html[data-theme="light"] .create-nav a:hover, html[data-theme="light"] .msg-row:hover { background: #ededed; }
+html[data-theme="light"] .cat-filters a.on, html[data-theme="light"] .create-nav a.on { background: #dcdcdc; box-shadow: inset 3px 0 #111; }
+html[data-theme="light"] .tabs, html[data-theme="light"] .pill { background: #fff; color: #111; border-color: #c9c9c9; }
+html[data-theme="light"] .tabs button, html[data-theme="light"] .tabs2 button, html[data-theme="light"] .tabs2 button.on, html[data-theme="light"] .item, html[data-theme="light"] .friend, html[data-theme="light"] .crumb b { color: #111; }
+html[data-theme="light"] .tabs button.on, html[data-theme="light"] .tabs button:hover { background: #ececec; box-shadow: inset 0 -3px 0 #111; }
+html[data-theme="light"] .pill.on { background: #111; color: #fff; border-color: #111; }
+html[data-theme="light"] .item .thumb { background: linear-gradient(#e9ebee, #b9bec5); }
+html[data-theme="light"] textarea, html[data-theme="light"] #msg-subject, html[data-theme="light"] .settings input, html[data-theme="light"] .settings select, html[data-theme="light"] .admin-box input, html[data-theme="light"] .admin-box select, html[data-theme="light"] .prompt-input, html[data-theme="light"] .create input:not([type=file]):not([type=checkbox]), html[data-theme="light"] .create select { background: #fff; color: #111; border-color: #b8b8b8; }
+html[data-theme="light"] .btn-gray { background: #fff; color: #111; border: 1px solid #b4b4b4; }
+html[data-theme="light"] .btn-gray:hover { background: #ededed; }
+html[data-theme="light"] .btn-white { background: #111; color: #fff; }
+html[data-theme="light"] .outline-btn { color: #111; border-color: #777; } html[data-theme="light"] .outline-btn:hover:not(:disabled) { background: #00000010; }
+html[data-theme="light"] .login-card input { border-color: #b8b8b8; } html[data-theme="light"] .login-card input[name=password] { background: #fff; color: #111; } html[data-theme="light"] .login-card hr { border-color: #d0d0d0; }
+html[data-theme="light"] .site-footer p { border-top-color: #cfcfcf; color: #666; }
+html[data-theme="light"] .msg-row { border-bottom-color: #dedede; color: #444; } html[data-theme="light"] .msg-row.unread { color: #111; } html[data-theme="light"] .msg-head, html[data-theme="light"] .set-row, html[data-theme="light"] .set-hr, html[data-theme="light"] .resell td, html[data-theme="light"] .acc-table th, html[data-theme="light"] .acc-table td { border-color: #dcdcdc; }
+html[data-theme="light"] .friend-sub, html[data-theme="light"] .presence, html[data-theme="light"] .cat-stats, html[data-theme="light"] .chip small, html[data-theme="light"] .comm-row p, html[data-theme="light"] .stat-row .label { color: #666; }
+html[data-theme="light"] .friends-row .friend-pic .dot, html[data-theme="light"] .dot { border-color: #e3e3e3; }
+html[data-theme="light"] .link-btn, html[data-theme="light"] .small a, html[data-theme="light"] .item-by a { color: #0a5cc9; }
+html[data-theme="light"] dialog::backdrop { background: #0006; }
+html[data-theme="light"] .acc-actions button { background: #5a5f66; }
+html[data-theme="light"] .price.free, html[data-theme="light"] .owned-tag, html[data-theme="light"] .checks .ok { color: #078a45; }
+
+/* ---------- catálogo/Create (.rb) no tema escuro ---------- */
+html[data-theme="dark"] .rb-title, html[data-theme="dark"] .rb-side h3, html[data-theme="dark"] .rb-side h4, html[data-theme="dark"] .rb .create-main .page-title, html[data-theme="dark"] .rb .create-main .sub-title, html[data-theme="dark"] .rb .create-main .card h2 { color: #fff; }
+html[data-theme="dark"] .rb-side, html[data-theme="dark"] .rb.main .create-nav { border-right-color: #3a3d40; }
+html[data-theme="dark"] .rb-side a, html[data-theme="dark"] .rb-side .grp-h, html[data-theme="dark"] .rb-side .grp-h i, html[data-theme="dark"] .rb .create-nav a { color: #bdbebe; }
+html[data-theme="dark"] .rb-side a:hover, html[data-theme="dark"] .rb-side .grp-h:hover, html[data-theme="dark"] .rb .create-nav a:hover { color: #fff; background: #2e3032; }
+html[data-theme="dark"] .rb-side a.on { color: #6ea8ff; } html[data-theme="dark"] .rb .create-nav a.on { background: #3a3d40; color: #fff; }
+html[data-theme="dark"] .rb .create-nav a[data-soon] { color: #77797c; }
+html[data-theme="dark"] .rb-side hr { border-color: #3a3d40; } html[data-theme="dark"] .rb-side .rad { color: #ddd; }
+html[data-theme="dark"] .rb-search input, html[data-theme="dark"] .rb-search select, html[data-theme="dark"] .rb-search button, html[data-theme="dark"] .rb-bar select, html[data-theme="dark"] .rb-side input[type=text], html[data-theme="dark"] .rb-side input[type=number] { background: #191a1c; color: #fff; border-color: #484b4e; }
+html[data-theme="dark"] .rb-search button:hover { background: #2a2c2f; }
+html[data-theme="dark"] .rb-crumb { color: #6ea8ff; } html[data-theme="dark"] .rb-muted { color: #a9acb0; }
+html[data-theme="dark"] .rb .cat-item { background: #2e3032; border-color: #2e3032; } html[data-theme="dark"] .rb .cat-item:hover { border-color: #4a4d50; }
+html[data-theme="dark"] .rb .cat-link, html[data-theme="dark"] .rb .cat-name { color: #fff; } html[data-theme="dark"] .rb .cat-name { border-top-color: #3c3f42; }
+html[data-theme="dark"] .rb .cat-thumb { background: linear-gradient(#cfd3d8, #8f949b); }
+html[data-theme="dark"] .rb .cat-by { color: #a9acb0; } html[data-theme="dark"] .rb .price { color: #3ddc97; } html[data-theme="dark"] .rb .price.off { color: #8b8e91; } html[data-theme="dark"] .rb .cat-stats { color: #8b8e91; }
+html[data-theme="dark"] .rb .rb-btn, html[data-theme="dark"] .rb-btn { background: #4a4d50; color: #fff; border-color: #4a4d50; } html[data-theme="dark"] .rb .rb-btn:hover { background: #5a5d60; }
+html[data-theme="dark"] .rb-tabs { background: #232527; border-bottom-color: #3a3d40; }
+html[data-theme="dark"] .rb-tabs a, html[data-theme="dark"] .rb-tabs span { background: #2e3032; border-color: #3a3d40; color: #bdbebe; } html[data-theme="dark"] .rb-tabs a.on { background: #3a3d40; color: #fff; }
+html[data-theme="dark"] .rb .create-main .card { background: #2e3032; border-color: #3a3d40; color: #fff; }
+html[data-theme="dark"] .rb .create-main .muted, html[data-theme="dark"] .rb .create-main .small { color: #a9acb0; } html[data-theme="dark"] .rb .create-main label { color: #e6e6e6; }
+html[data-theme="dark"] .rb .create input:not([type=file]):not([type=checkbox]), html[data-theme="dark"] .rb .create select { background: #191a1c; color: #fff; border-color: #484b4e; }
+html[data-theme="dark"] .rb .admin-box { background: #2a2224; border-color: #6b3b36; } html[data-theme="dark"] .rb .btn-gray { background: #4a4d50; color: #fff; border: 0; }
+html[data-theme="dark"] .rb-row { border-bottom-color: #3a3d40; } html[data-theme="dark"] .rb-row-main b { color: #6ea8ff; } html[data-theme="dark"] .rb-check { color: #bdbebe; }
+html[data-theme="dark"] .rb .rb-btn { color: #fff; }
+
+/* seletor de tema (Settings) */
+.theme-pick { display: flex; gap: 14px; margin-top: 12px; }
+.theme-pick button { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 18px; background: var(--panel); color: var(--text); border: 2px solid transparent; border-radius: 8px; font-weight: 700; box-shadow: var(--shadow-1); }
+.theme-pick button.on { border-color: #2eaa45; }
+.theme-pick .sw { width: 90px; height: 56px; border-radius: 6px; border: 1px solid #8884; }
+.theme-pick .sw.dark { background: linear-gradient(90deg, #191a1c 0 28%, #232527 28%); } .theme-pick .sw.light { background: linear-gradient(90deg, #fff 0 28%, #e3e3e3 28%); }

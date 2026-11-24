@@ -7,7 +7,9 @@
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Owoxy - Settings</title>
+  <script src="js/theme-init.js"></script>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/theme.css">
   <script type="importmap">
     {
       "imports": {
@@ -28,6 +30,7 @@
           <a href="settings.html?t=account" data-t="account">Account Info</a>
           <a href="settings.html?t=security" data-t="security">Security</a>
           <a href="settings.html?t=privacy" data-t="privacy">Privacy</a>
+          <a href="settings.html?t=appearance" data-t="appearance">Appearance</a>
         </nav>
         <section class="create-main">
           <div class="card" data-pane="account" hidden>
@@ -71,6 +74,14 @@
             <select id="s-req"><option value="everyone">Everyone</option><option value="nobody">No one</option></select>
             <p class="muted small">Your inventory and Owos balance are always private.</p>
             <div class="row-end"><button class="btn-green" id="save-privacy" type="button">Save</button></div>
+          </div>
+          <div class="card" data-pane="appearance" hidden>
+            <h2>Appearance</h2>
+            <p class="muted small">Pick the theme color of the site. Dark has white text, Light has black text.</p>
+            <div class="theme-pick" id="theme-pick">
+              <button type="button" data-theme-set="dark"><span class="sw dark"></span>Dark</button>
+              <button type="button" data-theme-set="light"><span class="sw light"></span>Light</button>
+            </div>
           </div>
         </section>
       </div>

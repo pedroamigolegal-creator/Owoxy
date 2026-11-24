@@ -1,5 +1,5 @@
 /* Telas Catalog, Create, Home e Profile no layout do Roblox (CSS e HTML escritos do zero para o Owoxy). */
-.main.rb { background: #e3e3e3; color: #191919; padding: 18px 22px 40px; }
+.main.rb { background: var(--rb-bg); color: var(--rb-text); padding: 18px 22px 40px; }
 .rb a { color: inherit; }
 .rb-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
 .rb-title { margin: 0; font-size: 34px; font-weight: 800; color: #111; letter-spacing: -.3px; }
