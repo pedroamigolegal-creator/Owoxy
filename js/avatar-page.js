@@ -135,5 +135,6 @@ grid.addEventListener('click', async (e) => {
   render();
   scheduleSave();
 });
+document.getElementById('redraw').addEventListener('click', async () => { await loadInventory(); refreshLook(); render(); toast('Avatar redrawn'); });
 document.getElementById('get-more').addEventListener('click', () => { location.href = 'catalog.html'; });
 render();

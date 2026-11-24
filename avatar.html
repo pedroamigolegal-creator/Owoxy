@@ -9,6 +9,7 @@
   <title>Owoxy - Avatar Editor</title>
   <script src="js/theme-init.js"></script>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/rb.css">
   <link rel="stylesheet" href="css/theme.css">
   <script type="importmap">
     {
@@ -23,17 +24,24 @@
   <div id="topbar-slot"></div>
   <div class="layout">
     <aside class="sidebar" id="sidebar-slot"></aside>
-    <main class="main wide" id="main">
+    <main class="main wide rb" id="main">
       <div class="editor-head">
-        <h1>Avatar Editor</h1>
+        <h1 class="rb-title">Avatar Editor</h1>
         <div class="get-more"><span>Explore the catalog to find more clothes!</span><button class="btn-white" id="get-more" type="button">Get More</button></div>
       </div>
 
       <div class="editor">
+        <div class="editor-left">
         <section class="preview-card">
           <canvas id="preview" width="300" height="400"></canvas>
           <button class="toggle-2d" id="toggle-2d" type="button">2D</button>
         </section>
+        <div class="editor-notes">
+          <p>Change your skin, shirt and pants colors in the <b>Body</b> tab.</p>
+          <p>Items you wear show a check mark. Click an item again to take it off.</p>
+          <p>Avatar isn't loading correctly? <button class="link-btn" id="redraw" type="button">Redraw</button></p>
+        </div>
+        </div>
 
         <section class="picker">
           <div class="tabs" id="tabs">
